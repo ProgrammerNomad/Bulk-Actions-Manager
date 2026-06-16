@@ -1,205 +1,57 @@
-/* Bulk Actions Manager — Admin Styles */
+/* Bulk Actions Manager — minimal admin overrides (20% custom UI) */
 
-.bam-wrap {
-	max-width: 1200px;
+.wrap .subsubsub {
+	margin-bottom: 8px;
 }
 
-.bam-wrap .form-table th {
-	width: 220px;
-}
-
-.bam-wrap .subsubsub {
-	margin-bottom: 12px;
-}
-
-.bam-wrap .widefat th,
-.bam-wrap .widefat td {
+.wrap .widefat th,
+.wrap .widefat td {
 	vertical-align: middle;
 }
 
-.bam-panel {
-	background: #fff;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	margin: 20px 0;
-	padding: 0;
-	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
-}
-
-.bam-panel h2 {
-	margin: 0;
-	padding: 12px 16px;
-	border-bottom: 1px solid #c3c4c7;
-	font-size: 14px;
-	background: #f6f7f7;
-}
-
-.bam-panel__body {
-	padding: 16px;
-}
-
-.bam-panel--hidden {
+.bam-hidden {
 	display: none;
 }
 
-.bam-field {
-	margin-bottom: 12px;
+/* Job progress (no native WP component). */
+.bam-job-progress progress {
+	width: 100%;
+	max-width: 480px;
+	height: 22px;
 }
 
-.bam-field label {
-	display: block;
-	margin-bottom: 4px;
-	font-weight: 600;
-}
-
-.bam-widgets--grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-	gap: 16px;
-	margin-top: 16px;
-}
-
-.bam-widget {
-	background: #fff;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	padding: 16px;
-}
-
-.bam-widget h2 {
-	margin-top: 0;
-	font-size: 14px;
-}
-
-.bam-progress {
-	background: #f0f0f1;
-	border-radius: 4px;
-	height: 24px;
-	overflow: hidden;
-}
-
-.bam-progress__bar {
-	background: #2271b1;
-	height: 100%;
-	transition: width 0.3s ease;
-}
-
-.bam-badge {
+/* Status badges — admin neutrals + theme accent only. */
+.bam-status-badge {
 	display: inline-block;
 	padding: 2px 8px;
 	border-radius: 3px;
 	font-size: 12px;
-	margin-left: 8px;
+	line-height: 1.4;
+	background: #f0f0f1;
+	color: #1d2327;
 }
 
-.bam-badge--safe {
-	background: #d4edda;
-	color: #155724;
+.bam-status-badge--running,
+.bam-status-badge--queued {
+	background: #dbeafe;
 }
 
-.bam-badge--recoverable {
-	background: #fff3cd;
-	color: #856404;
+.bam-status-badge--completed {
+	background: #d1e7dd;
 }
 
-.bam-badge--destructive {
+.bam-status-badge--failed,
+.bam-status-badge--cancelled {
 	background: #f8d7da;
-	color: #721c24;
 }
 
-.bam-tools-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-	gap: 16px;
-	margin-bottom: 24px;
+.bam-status-badge--paused {
+	background: #fff3cd;
 }
 
-.bam-tool-card {
-	background: #fff;
-	border: 1px solid #c3c4c7;
-	border-radius: 4px;
-	padding: 16px;
-}
-
-.bam-tool-card h3 {
-	margin-top: 0;
-}
-
-.bam-condition-group {
-	margin: 12px 0;
-	padding: 12px;
-	border: 1px dashed #c3c4c7;
-	border-radius: 4px;
-	background: #fafafa;
-}
-
-.bam-condition-group__header {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 10px;
-}
-
-.bam-group-conditions .bam-condition {
-	background: #fff;
-}
-
-.bam-condition-value--multi {
-	min-width: 180px;
-	min-height: 80px;
-}
-
-.bam-no-value {
-	color: #646970;
-	font-style: italic;
-}
-
-.bam-condition-value-container {
-	display: inline-flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	align-items: center;
-}
-
-.bam-condition {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 8px;
-	padding: 8px;
-	background: #f6f7f7;
-	border-radius: 4px;
-}
-
-.bam-condition select,
-.bam-condition input {
-	max-width: 200px;
-}
-
-.bam-preview-toolbar {
-	display: flex;
-	gap: 12px;
-	align-items: center;
-	margin-bottom: 12px;
-}
-
-.bam-loading {
-	color: #646970;
-	font-style: italic;
-}
-
-.bam-stat-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 8px;
-}
-
-.bam-stat-grid dt {
-	font-weight: 600;
-}
-
-.bam-stat-grid dd {
-	margin: 0 0 8px;
+#bam-action-safety-wrap .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	vertical-align: text-bottom;
 }

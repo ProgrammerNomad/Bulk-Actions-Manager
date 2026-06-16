@@ -11,9 +11,24 @@
 		}
 	}
 
+	function safetyHint(level) {
+		var map = {
+			safe: { icon: 'dashicons-yes-alt', text: 'Undo supported' },
+			recoverable: { icon: 'dashicons-backup', text: 'Recoverable' },
+			destructive: { icon: 'dashicons-warning', text: 'Cannot be undone' }
+		};
+		var item = map[level];
+		if (!item) return '';
+		return '<p class="description"><span class="dashicons ' + item.icon + '" aria-hidden="true"></span> ' + item.text + '</p>';
+	}
+
+	function fieldRow(label, html) {
+		return '<tr><th scope="row">' + label + '</th><td>' + html + '</td></tr>';
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		var actionSelect = document.getElementById('bam-action-type');
-		var safetyBadge = document.getElementById('bam-action-safety');
+		var safetyWrap = document.getElementById('bam-action-safety-wrap');
 		var actionFields = document.getElementById('bam-action-fields');
 
 		if (actionSelect) {
@@ -22,32 +37,36 @@
 		}
 
 		function updateActionUI() {
-			if (!actionSelect || !safetyBadge) return;
+			if (!actionSelect) return;
 			var opt = actionSelect.selectedOptions[0];
 			if (!opt) return;
-			var safety = opt.dataset.safety;
-			var labels = { safe: '✓ Undo Supported', recoverable: '↺ Recoverable', destructive: '⚠ Cannot Be Undone' };
-			safetyBadge.textContent = labels[safety] || '';
-			safetyBadge.className = 'bam-badge bam-badge--' + safety;
+			if (safetyWrap) {
+				safetyWrap.innerHTML = safetyHint(opt.dataset.safety);
+			}
 
 			if (!actionFields) return;
 			actionFields.innerHTML = '';
 			var id = actionSelect.value;
 
 			if (id === 'author.change') {
-				actionFields.innerHTML = '<div class="bam-field"><label>Author ID</label><input type="number" id="bam-payload-author" class="small-text" /></div>';
+				actionFields.innerHTML = fieldRow('Author ID', '<input type="number" id="bam-payload-author" class="small-text" />');
 			} else if (id.indexOf('category.') === 0 || id.indexOf('tag.') === 0) {
-				actionFields.innerHTML = '<div class="bam-field"><label>Term IDs (comma-separated)</label><input type="text" id="bam-payload-terms" class="regular-text" /></div>';
+				actionFields.innerHTML = fieldRow('Term IDs', '<input type="text" id="bam-payload-terms" class="regular-text" placeholder="1, 2, 3" />');
 			} else if (id.indexOf('meta.') === 0) {
-				actionFields.innerHTML = '<div class="bam-field"><label>Meta Key</label><input type="text" id="bam-payload-meta-key" class="regular-text" /></div>' +
-					(id !== 'meta.remove' ? '<div class="bam-field"><label>Meta Value</label><input type="text" id="bam-payload-meta-value" class="regular-text" /></div>' : '');
+				var html = fieldRow('Meta Key', '<input type="text" id="bam-payload-meta-key" class="regular-text" />');
+				if (id !== 'meta.remove') {
+					html += fieldRow('Meta Value', '<input type="text" id="bam-payload-meta-value" class="regular-text" />');
+				}
+				actionFields.innerHTML = html;
 			} else if (id === 'content.find_replace') {
-				actionFields.innerHTML = '<div class="bam-field"><label>Field</label><select id="bam-payload-field"><option value="content">Content</option><option value="title">Title</option><option value="excerpt">Excerpt</option></select></div>' +
-					'<div class="bam-field"><label>Find</label><input type="text" id="bam-payload-find" class="regular-text" /></div>' +
-					'<div class="bam-field"><label>Replace</label><input type="text" id="bam-payload-replace" class="regular-text" /></div>';
+				actionFields.innerHTML =
+					fieldRow('Field', '<select id="bam-payload-field"><option value="content">Content</option><option value="title">Title</option><option value="excerpt">Excerpt</option></select>') +
+					fieldRow('Find', '<input type="text" id="bam-payload-find" class="regular-text" />') +
+					fieldRow('Replace', '<input type="text" id="bam-payload-replace" class="regular-text" />');
 			} else if (id === 'content.append' || id === 'content.prepend') {
-				actionFields.innerHTML = '<div class="bam-field"><label>Field</label><select id="bam-payload-field"><option value="content">Content</option><option value="title">Title</option></select></div>' +
-					'<div class="bam-field"><label>Text</label><textarea id="bam-payload-text" class="large-text" rows="3"></textarea></div>';
+				actionFields.innerHTML =
+					fieldRow('Field', '<select id="bam-payload-field"><option value="content">Content</option><option value="title">Title</option></select>') +
+					fieldRow('Text', '<textarea id="bam-payload-text" class="large-text" rows="3"></textarea>');
 			}
 		}
 
@@ -78,7 +97,8 @@
 						return;
 					}
 					if (typeof bamJobRunner !== 'undefined') {
-						document.getElementById('bam-job-progress').classList.remove('bam-panel--hidden');
+						var progressBox = document.getElementById('bam-job-progress');
+						if (progressBox) progressBox.classList.remove('bam-hidden');
 						bamJobRunner.start(result.job_id);
 					}
 					startBtn.disabled = false;

@@ -33,7 +33,13 @@
 			var text = document.getElementById('bam-progress-text');
 			var stats = document.getElementById('bam-progress-stats');
 
-			if ( bar ) bar.style.width = (data.percent || 0) + '%';
+			if ( bar ) {
+				if ( bar.tagName === 'PROGRESS' ) {
+					bar.value = data.percent || 0;
+				} else {
+					bar.style.width = (data.percent || 0) + '%';
+				}
+			}
 			if ( text ) text.textContent = (data.percent || 0) + '% — ' + (data.status || '');
 			if ( stats ) {
 				stats.textContent = 'Processed: ' + (data.processed || 0) + ' / ' + (data.total || 0) +

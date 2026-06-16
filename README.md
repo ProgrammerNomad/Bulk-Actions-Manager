@@ -498,6 +498,20 @@ Jobs themselves process in configurable batch sizes (Settings → default batch 
 
 ---
 
+## Version 1.2.0 — Native Admin UI
+
+The admin interface now follows standard WordPress screen patterns:
+
+- **Dashboard** — server-rendered postboxes (Recent Jobs, Running, Undoable, System Status); no AJAX loading
+- **New Job** — four-step wizard with on-demand preview (`preview=1` in the URL)
+- **Settings** — WordPress Settings API (`options.php`, `form-table`, postbox wrapper)
+- **Tools** — `widefat striped` tables inside postboxes
+- **Custom CSS** — limited to status badges, progress bars, and `.bam-hidden`
+
+Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to deploy.
+
+---
+
 ## Version 1.0 Scope
 
 Included in v1.0:

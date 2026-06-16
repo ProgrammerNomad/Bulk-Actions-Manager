@@ -8,6 +8,7 @@
 namespace BAM\Admin\Pages;
 
 use BAM\Actions\Action_Registry;
+use BAM\Admin\Admin_UI;
 use BAM\Admin\List_Tables\Jobs_List_Table;
 use BAM\Cron\Schedule_Runner;
 use BAM\Database\Repositories\Job_Repository;
@@ -243,15 +244,16 @@ class Page_Jobs extends Page_Base {
 				$post_status = $filter['conditions'][0]['value'][0];
 			}
 		}
+		Admin_UI::postbox_open(
+			'bam-schedule-form',
+			$schedule ? __( 'Edit Schedule', 'bulk-actions-manager' ) : __( 'Add Schedule', 'bulk-actions-manager' )
+		);
 		?>
-		<section class="bam-panel">
-			<h2><?php echo $schedule ? esc_html__( 'Edit Schedule', 'bulk-actions-manager' ) : esc_html__( 'Add Schedule', 'bulk-actions-manager' ); ?></h2>
-			<div class="bam-panel__body">
 				<form method="post">
 					<?php wp_nonce_field( 'bam_save_schedule' ); ?>
 					<input type="hidden" name="bam_save_schedule" value="1" />
 					<input type="hidden" name="schedule_id" value="<?php echo $schedule ? (int) $schedule->id : 0; ?>" />
-					<table class="form-table">
+					<table class="form-table" role="presentation">
 						<tr>
 							<th scope="row"><label for="schedule_name"><?php esc_html_e( 'Name', 'bulk-actions-manager' ); ?></label></th>
 							<td><input type="text" name="schedule_name" id="schedule_name" class="regular-text" value="<?php echo $schedule ? esc_attr( $schedule->name ) : ''; ?>" required /></td>
@@ -319,13 +321,12 @@ class Page_Jobs extends Page_Base {
 						</tr>
 					</table>
 					<p>
-						<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Schedule', 'bulk-actions-manager' ); ?></button>
+						<?php submit_button( __( 'Save Schedule', 'bulk-actions-manager' ), 'primary', 'submit', false ); ?>
 						<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=bam-jobs&type=schedule' ) ); ?>"><?php esc_html_e( 'Cancel', 'bulk-actions-manager' ); ?></a>
 					</p>
 				</form>
-			</div>
-		</section>
 		<?php
+		Admin_UI::postbox_close();
 	}
 
 	/**
@@ -362,7 +363,7 @@ class Page_Jobs extends Page_Base {
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Status', 'bulk-actions-manager' ); ?></th>
-					<td><?php echo esc_html( $job->status ); ?></td>
+					<td><?php echo Admin_UI::status_badge( $job->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></th>
@@ -387,17 +388,14 @@ class Page_Jobs extends Page_Base {
 
 		<?php if ( in_array( $job->status, array( 'running', 'queued', 'paused' ), true ) ) : ?>
 		<div id="bam-job-detail" data-job-id="<?php echo esc_attr( (string) $job_id ); ?>">
-			<div class="bam-panel">
-				<h2><?php esc_html_e( 'Job Progress', 'bulk-actions-manager' ); ?></h2>
-				<div class="bam-panel__body">
-					<div class="bam-progress">
-						<div class="bam-progress__bar" id="bam-progress-bar" style="width:<?php echo esc_attr( (string) $formatted['percent'] ); ?>%"></div>
-					</div>
-					<p id="bam-progress-text"><?php echo esc_html( (string) $formatted['percent'] . '% — ' . $job->status ); ?></p>
-					<p id="bam-progress-stats"></p>
-					<div id="bam-job-errors"></div>
-				</div>
+			<?php Admin_UI::postbox_open( 'bam-job-progress-detail', __( 'Job Progress', 'bulk-actions-manager' ) ); ?>
+			<div class="bam-job-progress">
+				<progress id="bam-progress-bar" max="100" value="<?php echo esc_attr( (string) $formatted['percent'] ); ?>"></progress>
+				<p id="bam-progress-text" class="description"><?php echo esc_html( (string) $formatted['percent'] . '% — ' . $job->status ); ?></p>
+				<p id="bam-progress-stats" class="description"></p>
+				<div id="bam-job-errors"></div>
 			</div>
+			<?php Admin_UI::postbox_close(); ?>
 		</div>
 		<?php endif; ?>
 		<?php

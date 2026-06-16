@@ -20,7 +20,7 @@ abstract class Page_Base {
 	 * @param string $title Page title.
 	 */
 	protected static function header( $title ) {
-		echo '<div class="wrap bam-wrap">';
+		echo '<div class="wrap">';
 		echo '<h1>' . esc_html( $title ) . '</h1>';
 	}
 

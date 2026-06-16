@@ -233,4 +233,49 @@ class Job_Repository {
 
 		return $counts;
 	}
+
+	/**
+	 * List jobs matching any of the given statuses.
+	 *
+	 * @param array<int, string> $statuses Status slugs.
+	 * @param int                $limit    Max rows.
+	 * @return array<int, object>
+	 */
+	public static function list_by_statuses( array $statuses, $limit = 10 ) {
+		global $wpdb;
+
+		$statuses = array_values( array_filter( array_map( 'sanitize_key', $statuses ) ) );
+		if ( empty( $statuses ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $statuses ), '%s' ) );
+		$params       = array_merge( $statuses, array( (int) $limit ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM ' . self::table() . " WHERE status IN ({$placeholders}) ORDER BY created_at DESC LIMIT %d",
+				...$params
+			)
+		);
+	}
+
+	/**
+	 * List completed jobs with undo still available.
+	 *
+	 * @param int $limit Max rows.
+	 * @return array<int, object>
+	 */
+	public static function list_undoable( $limit = 10 ) {
+		global $wpdb;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM ' . self::table() . ' WHERE undo_available = 1 AND status = %s ORDER BY finished_at DESC LIMIT %d',
+				'completed',
+				(int) $limit
+			)
+		);
+	}
 }

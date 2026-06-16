@@ -69,14 +69,15 @@ class Admin_Assets {
 			)
 		);
 
-		if ( 'bam-new-job' === $page ) {
-			wp_enqueue_style(
-				'bam-admin-new-job',
-				BAM_PLUGIN_URL . 'assets/css/admin-new-job.css',
-				array( 'bam-admin' ),
-				BAM_VERSION
+		if ( in_array( $page, array( 'bam-dashboard', 'bam-new-job', 'bam-jobs', 'bam-tools' ), true ) ) {
+			wp_enqueue_script( 'postbox' );
+			wp_add_inline_script(
+				'postbox',
+				'jQuery(function($){if(typeof postboxes!=="undefined"){postboxes.add_postbox_toggles(' . wp_json_encode( $hook ) . ');}});'
 			);
+		}
 
+		if ( 'bam-new-job' === $page ) {
 			wp_enqueue_script( 'common' );
 			wp_enqueue_script( 'list' );
 

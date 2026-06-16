@@ -10,6 +10,7 @@ namespace BAM;
 use BAM\Admin\Admin_Menu;
 use BAM\Admin\Admin_Assets;
 use BAM\Admin\Export_Download;
+use BAM\Admin\Settings_Register;
 use BAM\REST\REST_Bootstrap;
 use BAM\Cron\Cron_Scheduler;
 
@@ -71,6 +72,7 @@ final class Plugin {
 		add_filter( 'cron_schedules', array( Cron_Scheduler::class, 'add_intervals' ) );
 
 		if ( is_admin() ) {
+			Settings_Register::init();
 			new Admin_Menu();
 			new Admin_Assets();
 			new Export_Download();
