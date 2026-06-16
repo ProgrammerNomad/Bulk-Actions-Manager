@@ -36,14 +36,16 @@ class Admin_Assets {
 		wp_enqueue_style(
 			'bam-admin',
 			BAM_PLUGIN_URL . 'assets/css/admin.css',
-			array(),
+			array( 'wp-jquery-ui-dialog' ),
 			BAM_VERSION
 		);
+
+		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 
 		wp_enqueue_script(
 			'bam-admin-common',
 			BAM_PLUGIN_URL . 'assets/js/admin-common.js',
-			array( 'wp-api-fetch' ),
+			array( 'wp-api-fetch', 'jquery', 'jquery-ui-dialog', 'wpdialogs' ),
 			BAM_VERSION,
 			true
 		);
@@ -57,7 +59,19 @@ class Admin_Assets {
 				'nonce'     => wp_create_nonce( 'wp_rest' ),
 				'pluginUrl' => BAM_PLUGIN_URL,
 				'i18n'      => array(
-					'confirm'        => __( 'Are you sure?', 'bulk-actions-manager' ),
+					'confirm'              => __( 'Are you sure?', 'bulk-actions-manager' ),
+					'confirmTitle'         => __( 'Please confirm', 'bulk-actions-manager' ),
+					'confirmOk'            => __( 'Continue', 'bulk-actions-manager' ),
+					'confirmCancel'        => __( 'Cancel', 'bulk-actions-manager' ),
+					'confirmDeleteTitle'   => __( 'Permanently delete items?', 'bulk-actions-manager' ),
+					'confirmDeleteMessage' => __( 'This will permanently delete the matching items. This action cannot be undone.', 'bulk-actions-manager' ),
+					'confirmDeleteOk'      => __( 'Delete permanently', 'bulk-actions-manager' ),
+					'confirmCancelJob'   => __( 'Cancel this job?', 'bulk-actions-manager' ),
+					'confirmCancelJobMessage' => __( 'Processing will stop and the job will be marked as cancelled.', 'bulk-actions-manager' ),
+					'confirmRunTool'       => __( 'Run this tool?', 'bulk-actions-manager' ),
+					'confirmRunToolMessage' => __( 'This maintenance tool may change or remove data on your site.', 'bulk-actions-manager' ),
+					'noticeTitle'          => __( 'Notice', 'bulk-actions-manager' ),
+					'errorTitle'           => __( 'Error', 'bulk-actions-manager' ),
 					'processing'     => __( 'Processing...', 'bulk-actions-manager' ),
 					'error'          => __( 'An error occurred.', 'bulk-actions-manager' ),
 					'completed'      => __( 'Completed', 'bulk-actions-manager' ),

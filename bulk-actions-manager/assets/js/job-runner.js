@@ -24,7 +24,7 @@
 				}
 			}).catch(function () {
 				running = false;
-				alert(bamAdmin.i18n.error);
+				bamAlert({ title: bamAdmin.i18n.errorTitle, message: bamAdmin.i18n.error });
 			});
 		},
 
@@ -91,9 +91,15 @@
 		});
 
 		if ( cancelBtn ) cancelBtn.addEventListener('click', function () {
-			if ( !currentJobId || !confirm(bamAdmin.i18n.confirm) ) return;
-			running = false;
-			bamApi.post('jobs/' + currentJobId + '/cancel', {});
+			if ( !currentJobId ) return;
+			bamConfirm({
+				title: bamAdmin.i18n.confirmCancelJob,
+				message: bamAdmin.i18n.confirmCancelJobMessage
+			}).then(function (confirmed) {
+				if ( !confirmed ) return;
+				running = false;
+				bamApi.post('jobs/' + currentJobId + '/cancel', {});
+			});
 		});
 
 		var detailEl = document.getElementById('bam-job-detail');

@@ -174,3 +174,21 @@
 .bam-action-description__text {
 	margin: 0;
 }
+
+/* WordPress-style confirmation dialog (jQuery UI + wp-jquery-ui-dialog). */
+.bam-confirm-dialog .bam-confirm-dialog__message {
+	margin: 0 0 8px;
+	font-size: 13px;
+}
+
+.bam-confirm-dialog .bam-confirm-dialog__detail {
+	margin: 0;
+}
+
+.bam-confirm-dialog--destructive .ui-dialog-titlebar {
+	border-bottom-color: #d63638;
+}
+
+.bam-confirm-dialog .ui-dialog-buttonset .button-link-delete {
+	float: right;
+}

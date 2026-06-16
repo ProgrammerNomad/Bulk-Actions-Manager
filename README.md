@@ -1,114 +1,51 @@
 # Bulk Actions Manager
 
+Filter, preview, modify, export, schedule, and manage large amounts of WordPress content safely using batch processing.
+
+**Version:** 1.2.2 · **Requires:** WordPress 6.0+, PHP 7.4+  
 **Repository:** [github.com/ProgrammerNomad/Bulk-Actions-Manager](https://github.com/ProgrammerNomad/Bulk-Actions-Manager)  
 **Author:** [NomadProgrammer](https://github.com/ProgrammerNomad)
-
-A free, open-source WordPress plugin for filtering, previewing, modifying, exporting, scheduling, and managing large amounts of content safely using batch processing.
-
-Unlike traditional bulk delete plugins, Bulk Actions Manager is built around a simple workflow:
 
 ```text
 Filter → Preview → Action → Process → Log → Undo
 ```
 
-**Focus areas:** safety, performance, recoverability, transparency, and large-scale content management.
-
 ---
 
-## Table of Contents
+## Quick start
 
-- [Core Principles](#core-principles)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Main Navigation](#main-navigation)
-- [Features](#features)
-- [Undo System](#undo-system)
-- [Database Tables](#database-tables)
-- [Settings & Permissions](#settings--permissions)
-- [Background Processing & Cron](#background-processing--cron)
-- [Uninstall & Data Removal](#uninstall--data-removal)
-- [Scale Limits](#scale-limits)
-- [Version 1.0 Scope](#version-10-scope)
-- [Mission](#mission)
-- [Author](#author)
-- [License](#license)
+1. Copy the `bulk-actions-manager` folder to `wp-content/plugins/bulk-actions-manager/`.
+2. Activate **Bulk Actions Manager** on the **Plugins** screen.
+3. Open **Bulk Actions Manager → New Job**, set filters, preview results, choose an action, then run or dry-run the job.
 
----
+The main plugin file must live at:
 
-## Core Principles
-
-### Safe by Default
-
-Every action provides:
-
-- Preview
-- Dry run
-- Confirmation
-- Logging
-- Undo (when technically possible)
-
-### Scalable
-
-Works on shared hosting, VPS, dedicated servers, and large websites. Operations never process thousands of records in a single request.
-
-All actions use:
-
-- AJAX batch processing
-- Background processing
-- Scheduled processing
-
-### Lightweight
-
-No frontend frameworks.
-
-| Layer    | Stack |
-|----------|-------|
-| Backend  | PHP, WordPress APIs, `WP_Query`, REST API, WP Cron |
-| Frontend | Vanilla JavaScript, native WordPress components, minimal CSS |
-
-**Avoided:** React build systems, Vue, Bootstrap, jQuery dependencies, and large UI libraries.
+```text
+wp-content/plugins/bulk-actions-manager/bulk-actions-manager.php
+```
 
 ---
 
 ## Requirements
 
-- WordPress 6.0 or higher (tested through 6.9)
-- PHP 7.4 or higher
-- MySQL 5.7+ or MariaDB 10.3+
-- `manage_bulk_actions_manager` capability (granted to administrators on activation)
+| Requirement | Minimum |
+|-------------|---------|
+| WordPress | 6.0 (tested through 6.9) |
+| PHP | 7.4 |
+| Database | MySQL 5.7+ or MariaDB 10.3+ |
+| Capability | `manage_bulk_actions_manager` (granted to administrators on activation) |
 
-**Optional integrations:** Yoast SEO or Rank Math for SEO-based filters on the New Job page.
-
----
-
-## Installation
-
-1. Copy the **`bulk-actions-manager`** folder from this repository into your WordPress plugins directory:
-   ```text
-   wp-content/plugins/bulk-actions-manager/
-   ```
-   The main plugin file must be at:
-   ```text
-   wp-content/plugins/bulk-actions-manager/bulk-actions-manager.php
-   ```
-   Or clone the repository and copy only the inner `bulk-actions-manager` folder:
-   ```bash
-   git clone https://github.com/ProgrammerNomad/Bulk-Actions-Manager.git
-   xcopy /E /I Bulk-Actions-Manager\bulk-actions-manager C:\path\to\wordpress\wp-content\plugins\bulk-actions-manager
-   ```
-   Or download the [latest release](https://github.com/ProgrammerNomad/Bulk-Actions-Manager/releases) and copy the `bulk-actions-manager` folder to `wp-content/plugins/bulk-actions-manager/`.
-2. Activate **Bulk Actions Manager** from the WordPress **Plugins** screen.
-3. Open **Bulk Actions Manager** in the admin menu to configure settings and create your first job.
+Optional: **Yoast SEO** or **Rank Math** for SEO filters on the New Job screen.
 
 ---
 
-## Main Navigation
+## Admin menu
 
 ```text
 Bulk Actions Manager
 ├── Dashboard
 ├── New Job
-├── Jobs (Runs + Scheduled via type view)
+├── Jobs        (runs + scheduled)
 ├── Logs
 ├── Tools
 └── Settings
@@ -116,444 +53,36 @@ Bulk Actions Manager
 
 ---
 
-## Features
-
-### Dashboard
-
-Quick overview of plugin activity.
-
-| Widget | Displays |
-|--------|----------|
-| **Statistics** | Total, completed, running, failed, and scheduled jobs |
-| **Recent Jobs** | Job name, action, status, date |
-| **System Health** | PHP version, WordPress version, memory limit, max execution time, cron status, queue status |
-| **Undo Summary** | Undo-available jobs, snapshot storage usage, snapshot retention |
-
-### New Job
-
-Main workspace with four sections:
-
-```text
-+----------------------------------+
-| Filter Builder                   |
-+----------------------------------+
-| Results Preview                  |
-+----------------------------------+
-| Action Selection                 |
-+----------------------------------+
-| Execution Settings               |
-+----------------------------------+
-```
-
-#### Filter Builder
-
-**Content type:** Posts, pages, attachments, custom post types.
-
-**Status filters:** Publish, draft, pending, future, private, trash.
-
-**Taxonomy filters:**
-
-| Taxonomy | Operators |
-|----------|-----------|
-| Categories | Equals, not equals |
-| Tags | Contains, does not contain |
-| Custom taxonomies | Supported automatically |
-
-**Author filters:** Single author, multiple authors.
-
-**Date filters:**
-
-| Field | Operators |
-|-------|-----------|
-| Created date | Before, after, between |
-| Modified date | Before, after, between |
-
-**Media filters:** Has featured image, missing featured image.
-
-**SEO filters:**
-
-| Plugin | Conditions |
-|--------|------------|
-| Yoast | Empty focus keyword, missing SEO title, missing meta description |
-| Rank Math | Missing focus keyword, missing meta description |
-
-**Content filters:**
-
-| Field | Operators |
-|-------|-----------|
-| Title | Contains, does not contain |
-| Content | Contains, does not contain |
-
-**Content length:**
-
-| Metric | Operators |
-|--------|-----------|
-| Character count | Less than, greater than |
-| Word count | Less than, greater than |
-
-**Metadata filters:**
-
-| Field | Operators |
-|-------|-----------|
-| Meta key | Exists, missing |
-| Meta value | Equals, not equals, contains, empty |
-
-**Advanced query builder:** Supports `AND` / `OR` with nested conditions.
-
-Example:
-
-```text
-Status = Publish
-AND Category = News
-AND Focus Keyword = Empty
-```
-
-#### Results Preview
-
-Shown before any action executes.
-
-- Total matching records
-- First 20 results (columns: ID, title, type, status, author, date)
-- Refresh preview, export preview, dry run simulation
-
-#### Action Selection
-
-Actions are grouped by type.
-
-| Group | Actions |
-|-------|---------|
-| **Status** | Publish, draft, pending review, private |
-| **Delete (safe)** | Move to trash |
-| **Delete (destructive)** | Permanently delete |
-| **Media** | Remove featured image, delete featured image file, delete attached media |
-| **Author** | Change author |
-| **Category** | Add, remove, replace category |
-| **Tag** | Add, remove, replace tag |
-| **Metadata** | Add, update, remove meta |
-| **Content** | Find & replace (title, content, excerpt), append content, prepend content |
-| **Export** | Export IDs, CSV, JSON |
-
-#### Execution Settings
-
-| Setting | Options / Default |
-|---------|-------------------|
-| **Dry run** | No changes made; shows e.g. *This action would affect 2,341 records.* |
-| **Batch size** | 10, 25 (default), 50, 100 |
-| **Processing mode** | AJAX (recommended), background queue (recommended for very large sites) |
-
-### Job Processing
-
-Each action creates a job.
-
-**Job states:** Queued, running, paused, completed, failed, cancelled.
-
-**Progress UI:** Progress bar, processed/remaining records, estimated time, errors.
-
-**Controls:** Pause, resume, cancel.
-
-### Jobs Page
-
-Lists all jobs with columns: job ID, name, action, status, records, created, finished.
-
-**Filters:** Running, queued, completed, failed, scheduled.
-
-**Job details:** Summary (action, filters, duration, results), progress, undo information (availability and expiration).
-
-### Logs Page
-
-Primary audit and recovery center.
-
-**Columns:** Log ID, job ID, user, action, affected records, date, undo status.
-
-**Log details:** Filters used, action executed, results, errors, snapshot information, undo availability.
-
-When an action supports undo, an **Undo Job** button appears on the log details screen.
-
-**Undo flow:**
-
-1. Snapshot validation
-2. Reverse operation creation
-3. Undo job execution
-4. New log entry created
-
-Example:
-
-```text
-Job #120
-Action: Publish → Draft
-Undo Available: Yes
-[Undo Job]
-```
-
-Creates:
-
-```text
-Job #121
-Action: Undo Job #120
-```
-
-### Jobs
-
-Single admin page for job runs and recurring schedules.
-
-**Runs view** (default) - one-time and undo job executions with status filters (Running, Queued, Completed, etc.) and a **Type** column (`One-time`, `Undo`).
-
-**Scheduled view** - `?page=bam-jobs&type=schedule` - recurring automation configs with Add/Edit/Run Now. Each scheduled run creates a job visible under Runs; **Last Run** links to that job.
-
-### Scheduled Jobs (automation)
-
-Use the **Scheduled** tab on the Jobs page to automate recurring bulk operations.
-
-Examples:
-
-- **Daily** - Move old content to draft
-- **Weekly** - Remove empty SEO content
-- **Monthly** - Clean orphaned media
-
-### Tools
-
-| Category | Tools |
-|----------|-------|
-| **Cleanup** | Remove revisions, remove auto drafts, empty trash |
-| **Orphan cleanup** | Orphan attachments, orphan metadata |
-| **Export** | Export jobs, export logs |
+## Highlights
+
+- Edit.php-style filters with live preview and dry run
+- Batch processing via AJAX or background queue (WP Cron)
+- Jobs with pause, resume, and cancel
+- Audit logs with snapshot-based undo (when supported)
+- Scheduled recurring jobs
+- Export jobs, logs, and filtered content
+- Native WordPress admin UI (no React/Vue build step)
 
 ---
 
-## Undo System
+## Documentation
 
-Core feature for recoverability after bulk changes.
-
-### Undoable Actions
-
-| Category | Restores |
+| Document | Contents |
 |----------|----------|
-| Status changes | Publish, draft, pending, private |
-| Author changes | Previous author |
-| Category actions | Original categories |
-| Tag actions | Original tags |
-| Metadata changes | Original values |
-| Featured image removal | Previous attachment |
-| Find & replace | Original content |
-| Move to trash | Post via `wp_untrash_post()` |
+| [Features](docs/FEATURES.md) | Filters, actions, jobs, logs, undo, tools |
+| [Configuration](docs/CONFIGURATION.md) | Settings, permissions, cron, scale limits, uninstall |
+| [Changelog](docs/CHANGELOG.md) | Version history and upgrade notes |
 
-### Non-Undoable Actions
-
-- Permanent delete
-- Delete featured image file
-- Delete media files
-
-### Safety Levels
-
-| Level | Badge | Meaning |
-|-------|-------|---------|
-| **Safe** | ✓ Undo Supported | Full undo via snapshots |
-| **Recoverable** | ↺ Recoverable | WordPress native recovery |
-| **Destructive** | ⚠ Cannot Be Undone | No recovery possible |
-
-### Snapshot System
-
-Undo is powered by snapshots stored in `wp_bam_snapshots`.
-
-Only required data is stored per action, for example:
-
-**Status change:**
-
-```json
-{
-  "post_status": "publish"
-}
-```
-
-**Author change:**
-
-```json
-{
-  "post_author": 4
-}
-```
-
-**Featured image:**
-
-```json
-{
-  "thumbnail_id": 123
-}
-```
-
-**Snapshot fields:** ID, job ID, object type, object ID, action type, snapshot data, created at, expires at.
+WordPress.org plugin readme: [`bulk-actions-manager/readme.txt`](bulk-actions-manager/readme.txt)
 
 ---
 
-## Database Tables
+## Contributing
 
-```text
-wp_bam_jobs
-wp_bam_job_items
-wp_bam_logs
-wp_bam_snapshots
-wp_bam_schedules
-```
-
----
-
-## Settings & Permissions
-
-### General
-
-- Default batch size
-- Default processing mode
-
-### Undo
-
-| Setting | Options | Default |
-|---------|---------|---------|
-| Snapshot retention | 7 days, 30 days, 90 days, forever | 30 days |
-| Enable undo | On / off | - |
-
-### Logging
-
-- Enable logs
-- Retention period
-
-### Permissions
-
-Required capability (default):
-
-```text
-manage_bulk_actions_manager
-```
-
-Granted to the **Administrator** role on plugin activation. To use a different capability:
-
-```php
-add_filter( 'bam_capability', function () {
-	return 'edit_others_posts';
-} );
-```
-
-All admin pages, REST endpoints, and export downloads check this capability.
-
----
-
-## Background Processing & Cron
-
-Bulk Actions Manager uses two processing modes:
-
-| Mode | Behavior |
-|------|----------|
-| **AJAX** | Browser-driven batches while an admin keeps the job page open |
-| **Background** | WP Cron queue (`bam_process_queue`) processes jobs in the background |
-
-**Cron reliability:** On low-traffic sites, WP Cron only runs when someone visits the site. For predictable background processing, configure a system cron job to call `wp-cron.php` on a fixed interval, or use a cron management plugin.
-
-**Concurrency safeguards (v1.1.2+):**
-
-- Queue mutex prevents overlapping queue processors
-- Per-job transient locks prevent duplicate batch processing
-- Job items are atomically claimed (`pending` → `processing`) before execution
-- Stale `processing` items reset to `pending` after 30 minutes via scheduled cleanup
-
-Scheduled hooks:
-
-```text
-bam_process_queue
-bam_run_schedules
-bam_cleanup_snapshots
-bam_cleanup_logs
-bam_cleanup_stale_jobs
-```
-
----
-
-## Uninstall & Data Removal
-
-By default, uninstalling (deleting) the plugin **retains** database tables and settings.
-
-To remove all plugin data on uninstall, enable **Drop all plugin data on uninstall** under **Bulk Actions Manager → Settings → General**. When enabled, `uninstall.php` drops:
-
-```text
-wp_bam_jobs
-wp_bam_job_items
-wp_bam_logs
-wp_bam_snapshots
-wp_bam_schedules
-```
-
-and removes related options and scheduled cron events.
-
----
-
-## Scale Limits
-
-Filter resolution loads matching post IDs in pages of 500. By default, at most **100,000** IDs are returned per filter. Adjust with:
-
-```php
-add_filter( 'bam_max_filter_results', function () {
-	return 50000;
-} );
-```
-
-Jobs themselves process in configurable batch sizes (Settings → default batch size). Very large jobs may take significant time on shared hosting; use background mode and reliable cron for best results.
-
----
-
-## Version 1.2.1 - Guided New Job Workflow
-
-- **Always-on preview** on page load (count + first 20 rows; no `?preview=1` click)
-- **Performance-safe queries** - uses `found_posts` + paginated IDs, not full ID resolution on load
-- **Results Summary** card (status + top categories) above preview table
-- **4-step postboxes**: Filter → Preview → Action → Execute
-- **Action description panel** with undo/destructive trust messaging
-- **Advanced Filters** via native `<details>` accordion
-- **Jobs** status badges; **Logs** inline Undo column
-
-Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to deploy.
-
----
-
-## Version 1.2.0 - Native Admin UI
-
-The admin interface now follows standard WordPress screen patterns:
-
-- **Dashboard** - server-rendered postboxes (Recent Jobs, Running, Undoable, System Status); no AJAX loading
-- **New Job** - four-step wizard with on-demand preview (`preview=1` in the URL)
-- **Settings** - WordPress Settings API (`options.php`, `form-table`, postbox wrapper)
-- **Tools** - `widefat striped` tables inside postboxes
-- **Custom CSS** - limited to status badges, progress bars, and `.bam-hidden`
-
-Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to deploy.
-
----
-
-## Version 1.0 Scope
-
-Included in v1.0:
-
-- Filter builder, preview system, dry run
-- Batch processing with AJAX and background modes
-- Status, category, tag, author, metadata, and featured image actions
-- Find & replace and export actions
-- Jobs system, logs system, undo system, snapshot storage
-- Scheduled jobs, progress tracking, pause / resume
-- WordPress native admin UI
-
----
-
-## Mission
-
-Bulk Actions Manager provides a safe, scalable, and fully auditable way to perform bulk content operations with preview, logging, scheduling, and undo capabilities-while remaining free, open source, lightweight, and developer-friendly.
-
----
-
-## Author
-
-**NomadProgrammer** - [github.com/ProgrammerNomad](https://github.com/ProgrammerNomad)
-
-Contributions, issues, and feature requests are welcome on the [GitHub repository](https://github.com/ProgrammerNomad/Bulk-Actions-Manager).
+Issues and pull requests are welcome on [GitHub](https://github.com/ProgrammerNomad/Bulk-Actions-Manager).
 
 ---
 
 ## License
 
-This plugin is free and open source. See [LICENSE](LICENSE) for details.
+GPL-2.0-or-later. See [LICENSE](LICENSE).

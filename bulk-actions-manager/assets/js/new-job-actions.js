@@ -140,14 +140,7 @@
 			return {};
 		}
 
-		function submitJob(isDryRun, button) {
-			if (!actionSelect || !actionSelect.value) return;
-
-			var actionId = actionSelect.value;
-			if (!isDryRun && actionId.indexOf('delete.permanent') === 0 && !confirm(bamAdmin.i18n.confirm)) {
-				return;
-			}
-
+		function runSubmitJob(actionId, isDryRun, button) {
 			var data = {
 				name: document.getElementById('bam-job-name').value,
 				filter: getFilterPayload(),
@@ -166,7 +159,7 @@
 						var p = dryRunNotice.querySelector('p');
 						if (p) p.textContent = result.message || bamAdmin.i18n.completed;
 					} else {
-						alert(result.message || bamAdmin.i18n.completed);
+						bamAlert({ message: result.message || bamAdmin.i18n.completed });
 					}
 					button.disabled = false;
 					return;
@@ -178,9 +171,33 @@
 				}
 				button.disabled = false;
 			}).catch(function () {
-				alert(bamAdmin.i18n.error);
+				bamAlert({ title: bamAdmin.i18n.errorTitle, message: bamAdmin.i18n.error });
 				button.disabled = false;
 			});
+		}
+
+		function submitJob(isDryRun, button) {
+			if (!actionSelect || !actionSelect.value) return;
+
+			var actionId = actionSelect.value;
+			var opt = actionSelect.selectedOptions[0];
+
+			if (!isDryRun && actionId.indexOf('delete.permanent') === 0) {
+				bamConfirm({
+					title: bamAdmin.i18n.confirmDeleteTitle,
+					message: bamAdmin.i18n.confirmDeleteMessage,
+					detail: opt && opt.dataset.description ? opt.dataset.description : '',
+					okText: bamAdmin.i18n.confirmDeleteOk,
+					destructive: true
+				}).then(function (confirmed) {
+					if (confirmed) {
+						runSubmitJob(actionId, isDryRun, button);
+					}
+				});
+				return;
+			}
+
+			runSubmitJob(actionId, isDryRun, button);
 		}
 
 		if (startBtn && actionSelect) {

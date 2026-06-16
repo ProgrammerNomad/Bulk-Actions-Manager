@@ -111,16 +111,21 @@ class Page_Tools extends Page_Base {
 		document.addEventListener('DOMContentLoaded', function() {
 			document.querySelectorAll('.bam-run-tool').forEach(function(btn) {
 				btn.addEventListener('click', function() {
-					if ( !confirm(bamAdmin.i18n.confirm) ) return;
-					var tool = btn.dataset.tool;
-					var resultEl = document.getElementById('bam-tool-result-' + tool);
-					btn.disabled = true;
-					bamApi.post('tools/' + tool, {}).then(function(res) {
-						if ( resultEl ) resultEl.textContent = res.message || bamAdmin.i18n.completed;
-					}).catch(function() {
-						if ( resultEl ) resultEl.textContent = bamAdmin.i18n.error;
-					}).finally(function() {
-						btn.disabled = false;
+					bamConfirm({
+						title: bamAdmin.i18n.confirmRunTool,
+						message: bamAdmin.i18n.confirmRunToolMessage
+					}).then(function(confirmed) {
+						if ( !confirmed ) return;
+						var tool = btn.dataset.tool;
+						var resultEl = document.getElementById('bam-tool-result-' + tool);
+						btn.disabled = true;
+						bamApi.post('tools/' + tool, {}).then(function(res) {
+							if ( resultEl ) resultEl.textContent = res.message || bamAdmin.i18n.completed;
+						}).catch(function() {
+							if ( resultEl ) resultEl.textContent = bamAdmin.i18n.error;
+						}).finally(function() {
+							btn.disabled = false;
+						});
 					});
 				});
 			});
