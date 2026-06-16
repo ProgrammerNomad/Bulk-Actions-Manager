@@ -28,6 +28,39 @@ class Admin_Menu {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menus' ) );
 		add_action( 'admin_init', array( $this, 'redirect_legacy_scheduled_page' ) );
+		add_action( 'admin_init', array( $this, 'redirect_conflicting_query_args' ), 1 );
+	}
+
+	/**
+	 * Strip post_type from BAM admin URLs.
+	 *
+	 * WordPress treats ?post_type= as a post list screen parent (admin.php?post_type=post),
+	 * which breaks plugin page hook resolution and shows "Cannot load bam-new-job".
+	 */
+	public function redirect_conflicting_query_args() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['page'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = sanitize_key( wp_unslash( $_GET['page'] ) );
+		if ( 0 !== strpos( $page, 'bam-' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( empty( $_GET['post_type'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$args = wp_unslash( $_GET );
+		$args['bam_post_type']          = sanitize_key( (string) $args['post_type'] );
+		unset( $args['post_type'] );
+
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	/**

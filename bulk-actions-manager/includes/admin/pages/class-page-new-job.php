@@ -43,7 +43,7 @@ class Page_New_Job extends Page_Base {
 		?>
 		<div id="bam-new-job" class="metabox-holder">
 			<?php Admin_UI::postbox_open( 'bam-step-filter', __( 'Step 1: Filter Content', 'bulk-actions-manager' ) ); ?>
-			<form method="get" id="posts-filter">
+			<form method="get" id="posts-filter" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>">
 				<input type="hidden" name="page" value="bam-new-job" />
 				<?php if ( ! empty( $request['post_status'] ) ) : ?>
 					<input type="hidden" name="post_status" value="<?php echo esc_attr( sanitize_key( $request['post_status'] ) ); ?>" />

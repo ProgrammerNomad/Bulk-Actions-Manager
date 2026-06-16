@@ -40,6 +40,22 @@ class Filter_Bar {
 	}
 
 	/**
+	 * Resolve content type from a BAM admin request (avoids core post_type query var).
+	 *
+	 * @param array<string, mixed> $request Request args.
+	 * @return string
+	 */
+	public static function get_request_post_type( array $request ) {
+		if ( ! empty( $request['bam_post_type'] ) ) {
+			return \sanitize_key( (string) $request['bam_post_type'] );
+		}
+		if ( ! empty( $request['post_type'] ) ) {
+			return \sanitize_key( (string) $request['post_type'] );
+		}
+		return 'post';
+	}
+
+	/**
 	 * Render filter controls.
 	 *
 	 * @param array<string, mixed> $request Current GET args.
@@ -47,7 +63,7 @@ class Filter_Bar {
 	public static function render( array $request ) {
 		self::load_admin_deps();
 
-		$post_type       = ! empty( $request['post_type'] ) ? \sanitize_key( $request['post_type'] ) : 'post';
+		$post_type       = self::get_request_post_type( $request );
 		$post_status     = ! empty( $request['post_status'] ) ? \sanitize_key( $request['post_status'] ) : 'all';
 		$selected_m      = ! empty( $request['m'] ) ? \sanitize_text_field( (string) $request['m'] ) : 0;
 		$selected_cat    = ! empty( $request['cat'] ) ? \absint( $request['cat'] ) : 0;
@@ -118,7 +134,7 @@ class Filter_Bar {
 					</select>
 				<?php endif; ?>
 
-				<input type="submit" name="filter_action" id="post-query-submit" class="button" value="<?php \esc_attr_e( 'Refresh Results', 'bulk-actions-manager' ); ?>" />
+				<input type="submit" name="bam_refresh" id="post-query-submit" class="button" value="<?php \esc_attr_e( 'Refresh Results', 'bulk-actions-manager' ); ?>" />
 			</div>
 		</div>
 
@@ -198,12 +214,12 @@ class Filter_Bar {
 	private static function render_post_type_dropdown( $selected ) {
 		$post_types = Filter_Registry::get_post_types();
 		if ( \count( $post_types ) <= 1 ) {
-			echo '<input type="hidden" name="post_type" value="' . \esc_attr( $selected ) . '" />';
+			echo '<input type="hidden" name="bam_post_type" value="' . \esc_attr( $selected ) . '" />';
 			return;
 		}
 		?>
 		<label for="filter-post-type" class="screen-reader-text"><?php \esc_html_e( 'Content type', 'bulk-actions-manager' ); ?></label>
-		<select name="post_type" id="filter-post-type">
+		<select name="bam_post_type" id="filter-post-type">
 			<?php foreach ( $post_types as $slug => $label ) : ?>
 				<option value="<?php echo \esc_attr( $slug ); ?>"<?php \selected( $selected, $slug ); ?>><?php echo \esc_html( $label ); ?></option>
 			<?php endforeach; ?>
@@ -220,8 +236,8 @@ class Filter_Bar {
 	 */
 	private static function render_status_views( $post_type, $post_status, array $request ) {
 		$base_args = array(
-			'page'      => 'bam-new-job',
-			'post_type' => $post_type,
+			'page'          => 'bam-new-job',
+			'bam_post_type' => $post_type,
 		);
 
 		$counts = \wp_count_posts( $post_type );
@@ -274,6 +290,7 @@ class Filter_Bar {
 	 */
 	private static function preserve_filters( array $request, array $exclude = array() ) {
 		$keys = array(
+			'bam_post_type',
 			'm',
 			'cat',
 			'author',

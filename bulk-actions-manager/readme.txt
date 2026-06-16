@@ -4,7 +4,7 @@ Tags: bulk edit, bulk actions, content management, batch processing, undo
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,9 @@ No. Permanent deletes and file deletions cannot be undone. Supported changes sto
 3. Log detail with undo option
 
 == Changelog ==
+
+= 1.2.2 =
+* Fix: New Job filter refresh no longer shows "Cannot load bam-new-job" (avoid core `post_type` query var on plugin admin URLs)
 
 = 1.2.1 =
 * New Job guided workflow: 4-step postboxes with always-on preview on page load

@@ -678,7 +678,12 @@ class Filter_Compiler {
 	 * @return array<string, mixed>
 	 */
 	public static function from_admin_request( array $request ) {
-		$post_type = ! empty( $request['post_type'] ) ? sanitize_key( $request['post_type'] ) : 'post';
+		$post_type = 'post';
+		if ( ! empty( $request['bam_post_type'] ) ) {
+			$post_type = sanitize_key( (string) $request['bam_post_type'] );
+		} elseif ( ! empty( $request['post_type'] ) ) {
+			$post_type = sanitize_key( (string) $request['post_type'] );
+		}
 		$conditions = array();
 
 		$post_status = ! empty( $request['post_status'] ) ? sanitize_key( $request['post_status'] ) : 'all';
