@@ -1,5 +1,8 @@
 # Bulk Actions Manager
 
+**Repository:** [github.com/ProgrammerNomad/Bulk-Actions-Manager](https://github.com/ProgrammerNomad/Bulk-Actions-Manager)  
+**Author:** [NomadProgrammer](https://github.com/ProgrammerNomad)
+
 A free, open-source WordPress plugin for filtering, previewing, modifying, exporting, scheduling, and managing large amounts of content safely using batch processing.
 
 Unlike traditional bulk delete plugins, Bulk Actions Manager is built around a simple workflow:
@@ -24,6 +27,7 @@ Filter → Preview → Action → Process → Log → Undo
 - [Settings & Permissions](#settings--permissions)
 - [Version 1.0 Scope](#version-10-scope)
 - [Mission](#mission)
+- [Author](#author)
 - [License](#license)
 
 ---
@@ -73,7 +77,11 @@ No frontend frameworks.
 
 ## Installation
 
-1. Download or clone this repository into `wp-content/plugins/bulk-actions-manager/`.
+1. Clone or download the repository:
+   ```bash
+   git clone https://github.com/ProgrammerNomad/Bulk-Actions-Manager.git wp-content/plugins/bulk-actions-manager
+   ```
+   Or download the [latest release](https://github.com/ProgrammerNomad/Bulk-Actions-Manager/releases) and extract it to `wp-content/plugins/bulk-actions-manager/`.
 2. Activate **Bulk Actions Manager** from the WordPress **Plugins** screen.
 3. Open **Bulk Actions Manager** in the admin menu to configure settings and create your first job.
 
@@ -276,9 +284,9 @@ Automate recurring bulk operations.
 
 Examples:
 
-- **Daily** — Move old content to draft
-- **Weekly** — Remove empty SEO content
-- **Monthly** — Clean orphaned media
+- **Daily** - Move old content to draft
+- **Weekly** - Remove empty SEO content
+- **Monthly** - Clean orphaned media
 
 ### Tools
 
@@ -379,7 +387,7 @@ wp_bam_schedules
 | Setting | Options | Default |
 |---------|---------|---------|
 | Snapshot retention | 7 days, 30 days, 90 days, forever | 30 days |
-| Enable undo | On / off | — |
+| Enable undo | On / off | - |
 
 ### Logging
 
@@ -412,7 +420,15 @@ Included in v1.0:
 
 ## Mission
 
-Bulk Actions Manager provides a safe, scalable, and fully auditable way to perform bulk content operations with preview, logging, scheduling, and undo capabilities—while remaining free, open source, lightweight, and developer-friendly.
+Bulk Actions Manager provides a safe, scalable, and fully auditable way to perform bulk content operations with preview, logging, scheduling, and undo capabilities-while remaining free, open source, lightweight, and developer-friendly.
+
+---
+
+## Author
+
+**NomadProgrammer** - [github.com/ProgrammerNomad](https://github.com/ProgrammerNomad)
+
+Contributions, issues, and feature requests are welcome on the [GitHub repository](https://github.com/ProgrammerNomad/Bulk-Actions-Manager).
 
 ---
 
