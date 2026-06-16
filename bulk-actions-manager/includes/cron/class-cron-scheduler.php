@@ -7,6 +7,7 @@
 
 namespace BAM\Cron;
 
+use BAM\Database\Repositories\Job_Item_Repository;
 use BAM\Jobs\Job_Queue;
 use BAM\Logging\Logger;
 use BAM\Undo\Snapshot_Cleanup;
@@ -86,6 +87,9 @@ class Cron_Scheduler {
 	 */
 	public static function cleanup_stale_jobs() {
 		global $wpdb;
+
+		Job_Item_Repository::reset_stale_processing( 30 );
+
 		$table = $wpdb->prefix . 'bam_jobs';
 		$wpdb->query(
 			$wpdb->prepare(

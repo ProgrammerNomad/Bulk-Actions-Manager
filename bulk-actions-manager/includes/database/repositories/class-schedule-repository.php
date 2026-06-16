@@ -100,6 +100,88 @@ class Schedule_Repository {
 	}
 
 	/**
+	 * Delete schedule.
+	 *
+	 * @param int $id Schedule ID.
+	 * @return bool
+	 */
+	public static function delete( $id ) {
+		global $wpdb;
+		return false !== $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) );
+	}
+
+	/**
+	 * Build WHERE clause.
+	 *
+	 * @param array<string, mixed> $args Args.
+	 * @return array{where: string, params: array<int, mixed>}
+	 */
+	private static function build_where( array $args ) {
+		$where  = '1=1';
+		$params = array();
+
+		if ( '' !== $args['is_active'] && null !== $args['is_active'] ) {
+			$where   .= ' AND is_active = %d';
+			$params[] = (int) $args['is_active'];
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			global $wpdb;
+			$like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where   .= ' AND (name LIKE %s OR action_type LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+		}
+
+		return array(
+			'where'  => $where,
+			'params' => $params,
+		);
+	}
+
+	/**
+	 * Count schedules.
+	 *
+	 * @param array<string, mixed> $args Args.
+	 * @return int
+	 */
+	public static function count( array $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'is_active' => '',
+			'search'    => '',
+		);
+		$args  = wp_parse_args( $args, $defaults );
+		$built = self::build_where( $args );
+		$sql   = 'SELECT COUNT(*) FROM ' . self::table() . ' WHERE ' . $built['where'];
+
+		if ( empty( $built['params'] ) ) {
+			return (int) $wpdb->get_var( $sql );
+		}
+
+		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $built['params'] ) );
+	}
+
+	/**
+	 * Count by active state.
+	 *
+	 * @return array<string, int>
+	 */
+	public static function count_by_active() {
+		global $wpdb;
+
+		$active   = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . ' WHERE is_active = %d', 1 ) );
+		$inactive = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . self::table() . ' WHERE is_active = %d', 0 ) );
+
+		return array(
+			'total'    => $active + $inactive,
+			'active'   => $active,
+			'inactive' => $inactive,
+		);
+	}
+
+	/**
 	 * Get due schedules.
 	 *
 	 * @return array<int, object>
@@ -116,13 +198,46 @@ class Schedule_Repository {
 	}
 
 	/**
-	 * List all schedules.
+	 * List schedules.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 * @return array<int, object>
+	 */
+	public static function list( array $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'is_active' => '',
+			'search'    => '',
+			'limit'     => 20,
+			'offset'    => 0,
+			'orderby'   => 'created_at',
+			'order'     => 'DESC',
+		);
+		$args  = wp_parse_args( $args, $defaults );
+		$built = self::build_where( $args );
+
+		$allowed_orderby = array( 'created_at', 'id', 'name', 'next_run_at', 'last_run_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = 'ASC' === strtoupper( $args['order'] ) ? 'ASC' : 'DESC';
+
+		$params   = $built['params'];
+		$params[] = (int) $args['limit'];
+		$params[] = (int) $args['offset'];
+
+		$sql = 'SELECT * FROM ' . self::table() . ' WHERE ' . $built['where'] . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
+	}
+
+	/**
+	 * List all schedules (legacy helper).
 	 *
 	 * @return array<int, object>
 	 */
 	public static function list_all() {
-		global $wpdb;
-		return $wpdb->get_results( 'SELECT * FROM ' . self::table() . ' ORDER BY created_at DESC' );
+		return self::list( array( 'limit' => 9999, 'offset' => 0 ) );
 	}
 
 	/**
@@ -131,12 +246,6 @@ class Schedule_Repository {
 	 * @return int
 	 */
 	public static function count_active() {
-		global $wpdb;
-		return (int) $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT COUNT(*) FROM ' . self::table() . ' WHERE is_active = %d',
-				1
-			)
-		);
+		return self::count( array( 'is_active' => 1 ) );
 	}
 }

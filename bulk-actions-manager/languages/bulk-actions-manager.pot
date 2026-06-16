@@ -1,0 +1,1081 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Bulk Actions Manager 1.1.2\n"
+"Report-Msgid-Bugs-To: https://github.com/ProgrammerNomad/Bulk-Actions-Manager/issues\n"
+"POT-Creation-Date: 2026-06-16 07:04+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Bulk Actions Manager POT builder\n"
+"X-Domain: bulk-actions-manager\n"
+
+#: includes/jobs/class-job-manager.php
+msgid "%1$s (%2$d records)"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+#: includes/filters/class-filter-compiler.php
+msgid "(no title)"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "1. Filter posts below (optional) → 2. Choose an action → 3. Click Start Job"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "30 Days"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "7 Days"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "90 Days"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "AJAX"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "AJAX (Recommended)"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+#: includes/admin/pages/class-page-logs.php
+#: includes/admin/pages/class-page-new-job.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Action"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Action Selection"
+msgstr ""
+
+#: includes/rest/class-schedules-controller.php
+msgid "Action type is required."
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Active"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Add Category"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Add Meta"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Add Schedule"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Add Tag"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "Affected"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Affected Records"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "All"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "All Authors"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "All Categories"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "All Rank Math"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "All SEO Scores"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "All dates"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+msgid "An error occurred."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Append Content"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+msgid "Are you sure?"
+msgstr ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+#: includes/filters/class-filter-registry.php
+msgid "Author"
+msgstr ""
+
+#: includes/actions/types/class-author-action.php
+msgid "Author ID is required."
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Back to Jobs"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Back to Logs"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+#: includes/admin/pages/class-page-settings.php
+msgid "Background Queue"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Batch Size"
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "Batch already in progress."
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+msgid "Bulk Actions Manager"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Bulk Actions Manager - Dashboard"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/pages/class-page-new-job.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Cancel"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Cancelled"
+msgstr ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+msgid "Categories"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Category"
+msgstr ""
+
+#: includes/actions/types/class-category-action.php
+msgid "Category IDs are required."
+msgstr ""
+
+#: includes/actions/types/class-author-action.php
+msgid "Change Author"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Character Count"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Cleanup Tools"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Completed"
+msgstr ""
+
+#: includes/filters/class-filter-validator.php
+msgid "Conditions must be an array."
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Content"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Content Type"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Content type"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Created"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Created Date"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+msgid "Dashboard"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+#: includes/admin/pages/class-page-logs.php
+msgid "Date"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Default Batch Size"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Default Processing Mode"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Delete"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Delete Attached Media"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Delete Featured Image File"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Delete auto-draft posts."
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Delete post revisions to free database space."
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+#: includes/admin/pages/class-page-jobs.php
+msgid "Download Export"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Download all jobs as JSON."
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Download all logs as JSON."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Draft"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Dry Run (no changes will be made)"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Edit"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Edit Schedule"
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Emptied trash (%d posts)."
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Empty Trash"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Enable Logs"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Enable Undo"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Enable snapshot-based undo"
+msgstr ""
+
+#: includes/cron/class-cron-scheduler.php
+msgid "Every 15 Minutes (BAM)"
+msgstr ""
+
+#: includes/cron/class-cron-scheduler.php
+msgid "Every Minute (BAM)"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Execution Settings"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "Expired"
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Export"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Export CSV"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Export IDs"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Export JSON"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Export Jobs"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Export Logs"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Export Tools"
+msgstr ""
+
+#: includes/admin/class-export-download.php
+msgid "Export file not found."
+msgstr ""
+
+#: includes/admin/class-export-download.php
+msgid "Export not found."
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Failed"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Failed Records"
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "Failed to create job."
+msgstr ""
+
+#: includes/rest/class-schedules-controller.php
+msgid "Failed to create schedule."
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Failed to create undo job."
+msgstr ""
+
+#: includes/actions/types/class-permanent-delete-action.php
+msgid "Failed to delete post."
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Failed to load."
+msgstr ""
+
+#: includes/actions/types/class-trash-action.php
+msgid "Failed to trash post."
+msgstr ""
+
+#: includes/actions/types/class-trash-action.php
+msgid "Failed to untrash post."
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Featured Image"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Filter"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Filter Posts"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Filter by date"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Find & Replace"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Find and remove attachments not attached to any post."
+msgstr ""
+
+#: includes/actions/types/class-content-action.php
+msgid "Find and replace values are required."
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Finished"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Forever"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Frequency"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "General"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "ID"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Inactive"
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "Invalid action type."
+msgstr ""
+
+#: includes/admin/class-export-download.php
+msgid "Invalid export path."
+msgstr ""
+
+#: includes/filters/class-filter-validator.php
+msgid "Invalid post type: %s"
+msgstr ""
+
+#: includes/actions/types/class-author-action.php
+#: includes/actions/types/class-category-action.php
+#: includes/actions/types/class-content-action.php
+#: includes/actions/types/class-meta-action.php
+#: includes/actions/types/class-status-action.php
+#: includes/actions/types/class-tag-action.php
+msgid "Invalid snapshot."
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Job #%d"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/pages/class-page-logs.php
+msgid "Job ID"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Job Name (optional)"
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Job Not Found"
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+#: includes/admin/pages/class-page-new-job.php
+msgid "Job Progress"
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "Job cannot be cancelled."
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "Job cannot be paused."
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "Job cannot be resumed."
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "Job is not running."
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+#: includes/jobs/class-job-processor.php
+#: includes/rest/class-jobs-controller.php
+msgid "Job not found."
+msgstr ""
+
+#: includes/cron/class-cron-scheduler.php
+msgid "Job timed out."
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-jobs.php
+msgid "Jobs"
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Jobs exported."
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Last Run"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Loading..."
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Log #%d"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "Log ID"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Log Not Found"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Log Retention (days)"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+#: includes/rest/class-logs-controller.php
+#: includes/undo/class-undo-manager.php
+msgid "Log not found."
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Logging"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-logs.php
+msgid "Logs"
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Logs exported."
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Max Errors Before Pause"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Meta Key"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Meta Value"
+msgstr ""
+
+#: includes/actions/types/class-meta-action.php
+msgid "Meta key is required."
+msgstr ""
+
+#: includes/actions/types/class-meta-action.php
+msgid "Meta value is required."
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Modified Date"
+msgstr ""
+
+#: includes/actions/types/class-trash-action.php
+msgid "Move To Trash"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Name"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-new-job.php
+msgid "New Job"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Next Run"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+msgid "No"
+msgstr ""
+
+#: includes/admin/list-tables/class-list-table-base.php
+msgid "No items found."
+msgstr ""
+
+#: includes/jobs/class-job-manager.php
+msgid "No matching records found."
+msgstr ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+msgid "No posts found matching your filters."
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "No snapshot."
+msgstr ""
+
+#: includes/undo/class-snapshot-service.php
+msgid "No snapshots available for undo."
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+msgid "No value needed"
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Original job not found."
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Orphan Attachments"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Orphan Cleanup"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Orphan Metadata"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Pause"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Paused"
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "Paused due to too many errors."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Pending Review"
+msgstr ""
+
+#: includes/actions/types/class-permanent-delete-action.php
+msgid "Permanently Delete"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Permanently delete all trashed posts."
+msgstr ""
+
+#: includes/admin/class-export-download.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Permission denied."
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Post Status"
+msgstr ""
+
+#: includes/actions/types/class-author-action.php
+#: includes/actions/types/class-category-action.php
+#: includes/actions/types/class-content-action.php
+#: includes/actions/types/class-export-action.php
+#: includes/actions/types/class-featured-image-action.php
+#: includes/actions/types/class-meta-action.php
+#: includes/actions/types/class-permanent-delete-action.php
+#: includes/actions/types/class-status-action.php
+#: includes/actions/types/class-tag-action.php
+#: includes/actions/types/class-trash-action.php
+msgid "Post not found."
+msgstr ""
+
+#: includes/filters/class-filter-validator.php
+msgid "Post type is required."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Prepend Content"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Private"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Processing Mode"
+msgstr ""
+
+#: includes/admin/class-admin-assets.php
+msgid "Processing..."
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Progress"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Publish"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Queued"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Rank Math SEO"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Rank Math filter"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Recent Jobs"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Record audit logs for all jobs"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Records"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Remove Auto Drafts"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Remove Category"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Remove Featured Image"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Remove Meta"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Remove Revisions"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Remove Tag"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Remove post meta for deleted posts."
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Removed %d auto-drafts."
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Removed %d orphan attachments."
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Removed %d orphan meta rows."
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Removed %d revisions."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Replace Category"
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Replace Tag"
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Resume"
+msgstr ""
+
+#: includes/admin/pages/class-page-tools.php
+msgid "Run"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+msgid "Run Now"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Run this schedule automatically"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+msgid "Running"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Save Schedule"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Save Settings"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Schedule deleted."
+msgstr ""
+
+#: includes/rest/class-schedules-controller.php
+msgid "Schedule not found."
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Schedule saved."
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Schedule triggered."
+msgstr ""
+
+#: includes/rest/class-schedules-controller.php
+msgid "Scheduled Job"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Scheduled Jobs"
+msgstr ""
+
+#: includes/admin/pages/class-page-jobs.php
+msgid "Search Jobs"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Search Logs"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Search Posts"
+msgstr ""
+
+#: includes/admin/pages/class-page-scheduled.php
+msgid "Search Schedules"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-settings.php
+msgid "Settings"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Settings saved."
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Snapshot Retention"
+msgstr ""
+
+#: includes/undo/class-snapshot-service.php
+msgid "Snapshots have expired. Undo is no longer available."
+msgstr ""
+
+#: includes/admin/pages/class-page-new-job.php
+msgid "Start Job"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Statistics"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+#: includes/filters/class-filter-registry.php
+msgid "Status"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "System Health"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Tag"
+msgstr ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+msgid "Tags"
+msgstr ""
+
+#: includes/actions/types/class-tag-action.php
+msgid "Tags are required."
+msgstr ""
+
+#: includes/actions/types/class-content-action.php
+msgid "Text is required."
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "This action cannot be undone."
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "This action would affect %d records."
+msgstr ""
+
+#: includes/admin/list-tables/class-posts-preview-list-table.php
+#: includes/filters/class-filter-registry.php
+msgid "Title"
+msgstr ""
+
+#: includes/admin/class-admin-menu.php
+#: includes/admin/pages/class-page-tools.php
+msgid "Tools"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "Undo"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+msgid "Undo Available"
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Undo Job"
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Undo Job #%d"
+msgstr ""
+
+#: includes/admin/pages/class-page-settings.php
+msgid "Undo Settings"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/pages/class-page-logs.php
+msgid "Undo Status"
+msgstr ""
+
+#: includes/admin/pages/class-page-dashboard.php
+msgid "Undo Summary"
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Undo is disabled in settings."
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Undo is not available for this log."
+msgstr ""
+
+#: includes/undo/class-undo-manager.php
+msgid "Undo job #%d created."
+msgstr ""
+
+#: includes/admin/pages/class-page-logs.php
+msgid "Undo job started."
+msgstr ""
+
+#: includes/actions/abstract-action.php
+msgid "Undo not supported for this action."
+msgstr ""
+
+#: includes/jobs/class-job-processor.php
+msgid "Unknown action."
+msgstr ""
+
+#: includes/actions/types/class-content-action.php
+msgid "Unknown content mode."
+msgstr ""
+
+#: includes/rest/class-tools-controller.php
+msgid "Unknown tool."
+msgstr ""
+
+#: includes/actions/class-action-registry.php
+msgid "Update Meta"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "Used"
+msgstr ""
+
+#: includes/admin/list-tables/class-logs-list-table.php
+#: includes/admin/pages/class-page-logs.php
+msgid "User"
+msgstr ""
+
+#: includes/admin/list-tables/class-jobs-list-table.php
+#: includes/admin/list-tables/class-logs-list-table.php
+msgid "View"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Without SEO title"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Without focus keyword"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Without meta description"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Word Count"
+msgstr ""
+
+#: includes/admin/list-tables/class-schedules-list-table.php
+#: includes/admin/pages/class-page-jobs.php
+msgid "Yes"
+msgstr ""
+
+#: includes/filters/class-filter-registry.php
+msgid "Yoast SEO"
+msgstr ""
+
+#: includes/admin/list-tables/class-filter-bar.php
+msgid "Yoast SEO filter"
+msgstr ""
+

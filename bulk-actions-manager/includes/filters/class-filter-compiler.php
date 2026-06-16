@@ -360,45 +360,251 @@ class Filter_Compiler {
 	 * @return array{total: int, ids: array<int, int>}
 	 */
 	public static function query( array $payload, $limit = 0 ) {
-		$args = self::compile( $payload );
+		$all_ids = self::resolve_ids( $payload );
+		$total   = count( $all_ids );
 
 		if ( $limit > 0 ) {
-			$count_args = $args;
-			$count_args['posts_per_page'] = 1;
-			$count_query = new \WP_Query( $count_args );
-			$total = (int) $count_query->found_posts;
-			self::cleanup_clause_filters();
-
-			$preview_args = $args;
-			$preview_args['posts_per_page'] = $limit;
-			$preview_args['fields'] = 'ids';
-			$preview_query = new \WP_Query( $preview_args );
-			$ids = array_map( 'intval', $preview_query->posts );
-			self::cleanup_clause_filters();
-
 			return array(
 				'total' => $total,
-				'ids'   => $ids,
+				'ids'   => array_slice( $all_ids, 0, $limit ),
 			);
 		}
 
+		return array(
+			'total' => $total,
+			'ids'   => $all_ids,
+		);
+	}
+
+	/**
+	 * Resolve matching post IDs including nested condition groups.
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @return array<int, int>
+	 */
+	public static function resolve_ids( array $payload ) {
+		$post_types = isset( $payload['post_type'] ) ? array_map( 'sanitize_key', (array) $payload['post_type'] ) : array( 'post' );
+		$conditions = isset( $payload['conditions'] ) ? (array) $payload['conditions'] : array();
+		$logic      = isset( $payload['logic'] ) && 'OR' === strtoupper( $payload['logic'] ) ? 'OR' : 'AND';
+
+		if ( empty( $conditions ) ) {
+			return self::query_flat_ids(
+				array(
+					'post_type'  => $post_types,
+					'conditions' => array(),
+				)
+			);
+		}
+
+		$sets = array();
+		foreach ( $conditions as $condition ) {
+			if ( ! is_array( $condition ) ) {
+				continue;
+			}
+
+			if ( isset( $condition['type'] ) && 'group' === $condition['type'] ) {
+				$sets[] = self::resolve_ids(
+					array(
+						'post_type'  => $post_types,
+						'logic'      => $condition['logic'] ?? 'AND',
+						'conditions' => $condition['conditions'] ?? array(),
+					)
+				);
+				continue;
+			}
+
+			$sets[] = self::query_flat_ids(
+				array(
+					'post_type'  => $post_types,
+					'conditions' => array( $condition ),
+				)
+			);
+		}
+
+		if ( empty( $sets ) ) {
+			return array();
+		}
+
+		if ( 'OR' === $logic ) {
+			$result = array_values( array_unique( array_merge( ...$sets ) ) );
+		} else {
+			$result = array_shift( $sets );
+			foreach ( $sets as $set ) {
+				$result = array_values( array_intersect( $result, $set ) );
+			}
+		}
+
+		/**
+		 * Maximum number of post IDs returned by filter resolution.
+		 *
+		 * @param int $max Maximum IDs (default 100000).
+		 */
+		$max = (int) apply_filters( 'bam_max_filter_results', 100000 );
+		if ( $max > 0 && count( $result ) > $max ) {
+			$result = array_slice( $result, 0, $max );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Query IDs for a flat (non-grouped) filter payload.
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @return array<int, int>
+	 */
+	private static function query_flat_ids( array $payload ) {
+		$args = self::compile( $payload );
 		$all_ids = array();
 		$paged   = 1;
 		$args['posts_per_page'] = 500;
-		$args['fields'] = 'ids';
+		$args['fields']         = 'ids';
+
+		/**
+		 * Maximum number of post IDs returned by filter resolution.
+		 *
+		 * @param int $max Maximum IDs (default 100000).
+		 */
+		$max = (int) apply_filters( 'bam_max_filter_results', 100000 );
 
 		do {
 			$args['paged'] = $paged;
 			$query = new \WP_Query( $args );
 			$all_ids = array_merge( $all_ids, array_map( 'intval', $query->posts ) );
+			if ( $max > 0 && count( $all_ids ) >= $max ) {
+				$all_ids = array_slice( $all_ids, 0, $max );
+				break;
+			}
 			$paged++;
 		} while ( $paged <= $query->max_num_pages );
 
 		self::cleanup_clause_filters();
 
+		return $all_ids;
+	}
+
+	/**
+	 * Whether Yoast SEO is active.
+	 *
+	 * @return bool
+	 */
+	private static function is_yoast_active() {
+		return defined( 'WPSEO_VERSION' ) || class_exists( 'WPSEO_Options', false );
+	}
+
+	/**
+	 * Whether Rank Math is active.
+	 *
+	 * @return bool
+	 */
+	private static function is_rankmath_active() {
+		return defined( 'RANK_MATH_VERSION' ) || class_exists( 'RankMath\\Helper', false );
+	}
+
+	/**
+	 * Build filter payload from edit.php-style admin request args.
+	 *
+	 * @param array<string, mixed> $request GET request parameters.
+	 * @return array<string, mixed>
+	 */
+	public static function from_admin_request( array $request ) {
+		$post_type = ! empty( $request['post_type'] ) ? sanitize_key( $request['post_type'] ) : 'post';
+		$conditions = array();
+
+		$post_status = ! empty( $request['post_status'] ) ? sanitize_key( $request['post_status'] ) : 'all';
+		if ( $post_status && 'all' !== $post_status ) {
+			$conditions[] = array(
+				'type'     => 'status',
+				'operator' => 'in',
+				'value'    => array( $post_status ),
+			);
+		}
+
+		if ( ! empty( $request['cat'] ) ) {
+			$conditions[] = array(
+				'type'     => 'taxonomy',
+				'taxonomy' => 'category',
+				'operator' => 'in',
+				'value'    => array( absint( $request['cat'] ) ),
+			);
+		}
+
+		if ( ! empty( $request['tag_id'] ) ) {
+			$conditions[] = array(
+				'type'     => 'taxonomy',
+				'taxonomy' => 'post_tag',
+				'operator' => 'in',
+				'value'    => array( absint( $request['tag_id'] ) ),
+			);
+		}
+
+		if ( ! empty( $request['author'] ) ) {
+			$conditions[] = array(
+				'type'     => 'author',
+				'operator' => 'in',
+				'value'    => array( absint( $request['author'] ) ),
+			);
+		}
+
+		if ( ! empty( $request['m'] ) ) {
+			$m = sanitize_text_field( (string) $request['m'] );
+			if ( preg_match( '/^\d{6}$/', $m ) ) {
+				$year  = substr( $m, 0, 4 );
+				$month = substr( $m, 4, 2 );
+				$start = $year . '-' . $month . '-01 00:00:00';
+				$end   = gmdate( 'Y-m-t 23:59:59', strtotime( $start ) );
+				$conditions[] = array(
+					'type'     => 'date',
+					'field'    => 'post_date',
+					'operator' => 'between',
+					'value'    => array( $start, $end ),
+				);
+			}
+		}
+
+		if ( ! empty( $request['s'] ) ) {
+			$conditions[] = array(
+				'type'     => 'content',
+				'field'    => 'title',
+				'operator' => 'contains',
+				'value'    => sanitize_text_field( (string) $request['s'] ),
+			);
+		}
+
+		if ( ! empty( $request['seo-filter'] ) && self::is_yoast_active() ) {
+			$yoast_map = array(
+				'empty-fk'          => 'empty_focus',
+				'no-focuskw'        => 'empty_focus',
+				'missing-seo-title' => 'missing_title',
+				'missing-metadesc'  => 'missing_description',
+			);
+			$seo_key = sanitize_key( (string) $request['seo-filter'] );
+			if ( isset( $yoast_map[ $seo_key ] ) ) {
+				$conditions[] = array(
+					'type'     => 'seo_yoast',
+					'operator' => $yoast_map[ $seo_key ],
+				);
+			}
+		}
+
+		if ( ! empty( $request['rankmath-filter'] ) && self::is_rankmath_active() ) {
+			$rm_map = array(
+				'missing-focus-keyword' => 'missing_focus',
+				'missing-description'   => 'missing_description',
+			);
+			$rm_key = sanitize_key( (string) $request['rankmath-filter'] );
+			if ( isset( $rm_map[ $rm_key ] ) ) {
+				$conditions[] = array(
+					'type'     => 'seo_rankmath',
+					'operator' => $rm_map[ $rm_key ],
+				);
+			}
+		}
+
 		return array(
-			'total' => count( $all_ids ),
-			'ids'   => $all_ids,
+			'post_type'  => array( $post_type ),
+			'logic'      => 'AND',
+			'conditions' => $conditions,
 		);
 	}
 

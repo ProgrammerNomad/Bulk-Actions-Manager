@@ -14,6 +14,7 @@ use BAM\Filters\Filter_Compiler;
 use BAM\Filters\Filter_Validator;
 use BAM\Logging\Logger;
 use BAM\Settings;
+use BAM\Admin\Export_Download;
 use BAM\Utils\Sanitizer;
 
 defined( 'ABSPATH' ) || exit;
@@ -216,7 +217,8 @@ class Job_Manager {
 			'finished_at'      => $job->finished_at,
 			'filter_payload'   => Sanitizer::json_decode( $job->filter_payload ),
 			'action_payload'   => Sanitizer::json_decode( $job->action_payload ),
-			'error_message'    => $job->error_message,
+			'error_message'        => $job->error_message,
+			'export_download_url'  => Export_Download::get_url( (int) $job->id ),
 		);
 	}
 }

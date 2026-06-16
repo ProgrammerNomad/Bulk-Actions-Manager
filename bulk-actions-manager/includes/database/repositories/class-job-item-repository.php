@@ -29,9 +29,9 @@ class Job_Item_Repository {
 	/**
 	 * Bulk insert job items.
 	 *
-	 * @param int                  $job_id Job ID.
-	 * @param array<int, int>      $object_ids Object IDs.
-	 * @param string               $object_type Object type.
+	 * @param int             $job_id      Job ID.
+	 * @param array<int, int> $object_ids  Object IDs.
+	 * @param string          $object_type Object type.
 	 * @return int Number inserted.
 	 */
 	public static function bulk_insert( $job_id, array $object_ids, $object_type = 'post' ) {
@@ -41,7 +41,7 @@ class Job_Item_Repository {
 		$chunks   = array_chunk( $object_ids, 100 );
 
 		foreach ( $chunks as $chunk ) {
-			$values = array();
+			$values       = array();
 			$placeholders = array();
 
 			foreach ( $chunk as $object_id ) {
@@ -69,7 +69,7 @@ class Job_Item_Repository {
 	}
 
 	/**
-	 * Get next pending batch for a job.
+	 * Get next pending batch for a job (read-only).
 	 *
 	 * @param int $job_id Job ID.
 	 * @param int $limit  Batch size.
@@ -84,6 +84,69 @@ class Job_Item_Repository {
 				$job_id,
 				'pending',
 				$limit
+			)
+		);
+	}
+
+	/**
+	 * Atomically claim a pending batch for processing.
+	 *
+	 * @param int $job_id Job ID.
+	 * @param int $limit  Batch size.
+	 * @return array<int, object>
+	 */
+	public static function claim_pending_batch( $job_id, $limit ) {
+		global $wpdb;
+
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT id FROM ' . self::table() . ' WHERE job_id = %d AND status = %s ORDER BY id ASC LIMIT %d',
+				$job_id,
+				'pending',
+				$limit
+			)
+		);
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$ids          = array_map( 'absint', $ids );
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+		$now          = current_time( 'mysql' );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE " . self::table() . " SET status = 'processing', processed_at = %s WHERE status = 'pending' AND id IN ({$placeholders})",
+				...array_merge( array( $now ), $ids )
+			)
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM " . self::table() . " WHERE status = 'processing' AND id IN ({$placeholders}) ORDER BY id ASC",
+				...$ids
+			)
+		);
+	}
+
+	/**
+	 * Reset items stuck in processing state back to pending.
+	 *
+	 * @param int $minutes Age threshold in minutes.
+	 * @return int Rows affected.
+	 */
+	public static function reset_stale_processing( $minutes = 30 ) {
+		global $wpdb;
+
+		$cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-' . absint( $minutes ) . ' minutes' ) );
+
+		return (int) $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE " . self::table() . " SET status = 'pending', processed_at = NULL, error_message = '' WHERE status = 'processing' AND processed_at < %s",
+				$cutoff
 			)
 		);
 	}

@@ -57,12 +57,14 @@ class Admin_Assets {
 				'nonce'     => wp_create_nonce( 'wp_rest' ),
 				'pluginUrl' => BAM_PLUGIN_URL,
 				'i18n'      => array(
-					'confirm'     => __( 'Are you sure?', 'bulk-actions-manager' ),
-					'processing'  => __( 'Processing...', 'bulk-actions-manager' ),
-					'error'       => __( 'An error occurred.', 'bulk-actions-manager' ),
-					'completed'   => __( 'Completed', 'bulk-actions-manager' ),
-					'paused'      => __( 'Paused', 'bulk-actions-manager' ),
-					'cancelled'   => __( 'Cancelled', 'bulk-actions-manager' ),
+					'confirm'        => __( 'Are you sure?', 'bulk-actions-manager' ),
+					'processing'     => __( 'Processing...', 'bulk-actions-manager' ),
+					'error'          => __( 'An error occurred.', 'bulk-actions-manager' ),
+					'completed'      => __( 'Completed', 'bulk-actions-manager' ),
+					'paused'         => __( 'Paused', 'bulk-actions-manager' ),
+					'cancelled'      => __( 'Cancelled', 'bulk-actions-manager' ),
+					'noValue'        => __( 'No value needed', 'bulk-actions-manager' ),
+					'downloadExport' => __( 'Download Export', 'bulk-actions-manager' ),
 				),
 			)
 		);
@@ -75,18 +77,13 @@ class Admin_Assets {
 				BAM_VERSION
 			);
 
-			wp_enqueue_script(
-				'bam-filter-builder',
-				BAM_PLUGIN_URL . 'assets/js/filter-builder.js',
-				array( 'bam-admin-common' ),
-				BAM_VERSION,
-				true
-			);
+			wp_enqueue_script( 'common' );
+			wp_enqueue_script( 'list' );
 
 			wp_enqueue_script(
-				'bam-preview-panel',
-				BAM_PLUGIN_URL . 'assets/js/preview-panel.js',
-				array( 'bam-admin-common', 'bam-filter-builder' ),
+				'bam-new-job-actions',
+				BAM_PLUGIN_URL . 'assets/js/new-job-actions.js',
+				array( 'bam-admin-common' ),
 				BAM_VERSION,
 				true
 			);
@@ -100,10 +97,10 @@ class Admin_Assets {
 			);
 		}
 
-		if ( 'bam-jobs' === $page ) {
+		if ( 'bam-jobs' === $page && isset( $_GET['job_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			wp_enqueue_script(
-				'bam-job-list',
-				BAM_PLUGIN_URL . 'assets/js/job-list.js',
+				'bam-job-runner',
+				BAM_PLUGIN_URL . 'assets/js/job-runner.js',
 				array( 'bam-admin-common' ),
 				BAM_VERSION,
 				true

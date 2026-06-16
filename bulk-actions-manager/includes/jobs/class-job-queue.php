@@ -16,6 +16,8 @@ class Job_Queue {
 
 	const OPTION_KEY = 'bam_queue_jobs';
 
+	const LOCK_KEY = 'bam_queue_processing';
+
 	/**
 	 * Mark job for background processing.
 	 *
@@ -60,16 +62,26 @@ class Job_Queue {
 	 * Process all queued jobs (one batch each).
 	 */
 	public static function process_queue() {
-		$processor = new Job_Processor();
-		foreach ( self::get_queue() as $job_id ) {
-			$result = $processor->process_batch( $job_id );
-			if ( is_wp_error( $result ) ) {
-				self::unmark( $job_id );
-				continue;
+		if ( get_transient( self::LOCK_KEY ) ) {
+			return;
+		}
+
+		set_transient( self::LOCK_KEY, 1, 5 * MINUTE_IN_SECONDS );
+
+		try {
+			$processor = new Job_Processor();
+			foreach ( self::get_queue() as $job_id ) {
+				$result = $processor->process_batch( $job_id );
+				if ( is_wp_error( $result ) ) {
+					self::unmark( $job_id );
+					continue;
+				}
+				if ( in_array( $result['status'], array( 'completed', 'failed', 'cancelled' ), true ) ) {
+					self::unmark( $job_id );
+				}
 			}
-			if ( in_array( $result['status'], array( 'completed', 'failed', 'cancelled' ), true ) ) {
-				self::unmark( $job_id );
-			}
+		} finally {
+			delete_transient( self::LOCK_KEY );
 		}
 	}
 }

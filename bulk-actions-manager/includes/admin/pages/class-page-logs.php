@@ -7,6 +7,11 @@
 
 namespace BAM\Admin\Pages;
 
+use BAM\Admin\List_Tables\Logs_List_Table;
+use BAM\Database\Repositories\Log_Repository;
+use BAM\Undo\Undo_Manager;
+use BAM\Utils\Capabilities;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -18,6 +23,8 @@ class Page_Logs extends Page_Base {
 	 * Render logs page.
 	 */
 	public static function render() {
+		self::handle_actions();
+
 		$log_id = isset( $_GET['log_id'] ) ? absint( $_GET['log_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $log_id ) {
@@ -26,37 +33,65 @@ class Page_Logs extends Page_Base {
 		}
 
 		self::header( __( 'Logs', 'bulk-actions-manager' ) );
+
+		if ( isset( $_GET['undo_started'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Undo job started.', 'bulk-actions-manager' ) . '</p></div>';
+		}
+
+		$list_table = new Logs_List_Table();
+		$list_table->prepare_items();
 		?>
-		<div id="bam-logs-list">
-			<table class="widefat striped" id="bam-logs-table">
-				<thead>
-					<tr>
-						<th><?php esc_html_e( 'Log ID', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'Job ID', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'User', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'Affected', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'Date', 'bulk-actions-manager' ); ?></th>
-						<th><?php esc_html_e( 'Undo Status', 'bulk-actions-manager' ); ?></th>
-					</tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		</div>
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			if ( typeof bamApi === 'undefined' ) return;
-			bamApi.get('logs').then(function(data) {
-				var tbody = document.querySelector('#bam-logs-table tbody');
-				if ( !tbody || !data.items ) return;
-				tbody.innerHTML = data.items.map(function(log) {
-					return '<tr><td>' + log.id + '</td><td><a href="admin.php?page=bam-jobs&job_id=' + log.job_id + '">' + log.job_id + '</a></td><td>' + log.user + '</td><td>' + log.action_type + '</td><td>' + log.affected_count + '</td><td>' + log.created_at + '</td><td>' + log.undo_status + '</td></tr>';
-				}).join('');
-			});
-		});
-		</script>
+		<form method="get">
+			<input type="hidden" name="page" value="bam-logs" />
+			<?php
+			$list_table->views();
+			$list_table->search_box( __( 'Search Logs', 'bulk-actions-manager' ), 'bam-log-search' );
+			$list_table->display();
+			?>
+		</form>
 		<?php
 		self::footer();
+	}
+
+	/**
+	 * Handle undo action.
+	 */
+	private static function handle_actions() {
+		if ( ! Capabilities::current_user_can() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['bam_action'] ) && 'undo_log' === $_GET['bam_action'] && ! empty( $_GET['log_id'] ) ) {
+			$log_id = absint( $_GET['log_id'] );
+			check_admin_referer( 'bam_undo_log_' . $log_id );
+
+			$result = ( new Undo_Manager() )->create_undo_job( $log_id );
+			if ( is_wp_error( $result ) ) {
+				wp_safe_redirect(
+					add_query_arg(
+						array(
+							'page'       => 'bam-logs',
+							'log_id'     => $log_id,
+							'undo_error' => rawurlencode( $result->get_error_message() ),
+						),
+						admin_url( 'admin.php' )
+					)
+				);
+				exit;
+			}
+
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page'   => 'bam-jobs',
+						'job_id' => (int) $result['job_id'],
+					),
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
 	}
 
 	/**
@@ -65,45 +100,70 @@ class Page_Logs extends Page_Base {
 	 * @param int $log_id Log ID.
 	 */
 	private static function render_detail( $log_id ) {
-		self::header( sprintf(
-			/* translators: %d: log ID */
-			__( 'Log #%d', 'bulk-actions-manager' ),
-			$log_id
-		) );
+		$log = Log_Repository::find( $log_id );
+		if ( ! $log ) {
+			self::header( __( 'Log Not Found', 'bulk-actions-manager' ) );
+			echo '<p>' . esc_html__( 'Log not found.', 'bulk-actions-manager' ) . '</p>';
+			self::footer();
+			return;
+		}
+
+		self::header(
+			sprintf(
+				/* translators: %d: log ID */
+				__( 'Log #%d', 'bulk-actions-manager' ),
+				$log_id
+			)
+		);
+
+		if ( isset( $_GET['undo_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			echo '<div class="notice notice-error"><p>' . esc_html( wp_unslash( $_GET['undo_error'] ) ) . '</p></div>';
+		}
+
+		$user = get_userdata( (int) $log->user_id );
 		?>
 		<p><a href="<?php echo esc_url( admin_url( 'admin.php?page=bam-logs' ) ); ?>">&larr; <?php esc_html_e( 'Back to Logs', 'bulk-actions-manager' ); ?></a></p>
-		<div id="bam-log-detail" data-log-id="<?php echo esc_attr( (string) $log_id ); ?>">
-			<div class="bam-loading"><?php esc_html_e( 'Loading...', 'bulk-actions-manager' ); ?></div>
-		</div>
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			if ( typeof bamApi === 'undefined' ) return;
-			var logId = <?php echo (int) $log_id; ?>;
-			bamApi.get('logs/' + logId).then(function(log) {
-				var el = document.getElementById('bam-log-detail');
-				if ( !el ) return;
-				var html = '<table class="form-table"><tbody>';
-				html += '<tr><th><?php echo esc_js( __( 'Action', 'bulk-actions-manager' ) ); ?></th><td>' + log.action_type + '</td></tr>';
-				html += '<tr><th><?php echo esc_js( __( 'Affected Records', 'bulk-actions-manager' ) ); ?></th><td>' + log.affected_count + '</td></tr>';
-				html += '<tr><th><?php echo esc_js( __( 'Undo Status', 'bulk-actions-manager' ) ); ?></th><td>' + log.undo_status + '</td></tr>';
-				html += '</tbody></table>';
-				if ( log.undo_status === 'available' ) {
-					html += '<p><button type="button" class="button button-primary" id="bam-undo-job" data-log-id="' + log.id + '"><?php echo esc_js( __( 'Undo Job', 'bulk-actions-manager' ) ); ?></button></p>';
-				}
-				el.innerHTML = html;
-				var undoBtn = document.getElementById('bam-undo-job');
-				if ( undoBtn ) {
-					undoBtn.addEventListener('click', function() {
-						if ( !confirm(bamAdmin.i18n.confirm) ) return;
-						bamApi.post('logs/' + logId + '/undo', {}).then(function(res) {
-							alert('<?php echo esc_js( __( 'Undo job started.', 'bulk-actions-manager' ) ); ?> #' + res.job_id);
-							window.location.href = 'admin.php?page=bam-jobs&job_id=' + res.job_id;
-						});
-					});
-				}
-			});
-		});
-		</script>
+
+		<table class="form-table">
+			<tbody>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Job ID', 'bulk-actions-manager' ); ?></th>
+					<td><a href="<?php echo esc_url( admin_url( 'admin.php?page=bam-jobs&job_id=' . (int) $log->job_id ) ); ?>"><?php echo (int) $log->job_id; ?></a></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'User', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo $user ? esc_html( $user->display_name ) : '-'; ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo esc_html( $log->action_type ); ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Affected Records', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo (int) $log->affected_count; ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Failed Records', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo (int) $log->failed_count; ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Undo Status', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo esc_html( $log->undo_status ); ?></td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Date', 'bulk-actions-manager' ); ?></th>
+					<td><?php echo esc_html( $log->created_at ); ?></td>
+				</tr>
+			</tbody>
+		</table>
+
+		<?php if ( 'available' === $log->undo_status ) : ?>
+			<p>
+				<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=bam-logs&bam_action=undo_log&log_id=' . $log_id ), 'bam_undo_log_' . $log_id ) ); ?>">
+					<?php esc_html_e( 'Undo Job', 'bulk-actions-manager' ); ?>
+				</a>
+			</p>
+		<?php endif; ?>
 		<?php
 		self::footer();
 	}

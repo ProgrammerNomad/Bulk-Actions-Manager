@@ -16,9 +16,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class Job_Repository {
 
-	/**
-	 * Table name without prefix.
-	 */
 	const TABLE = 'bam_jobs';
 
 	/**
@@ -111,7 +108,67 @@ class Job_Repository {
 	}
 
 	/**
-	 * List jobs with optional status filter.
+	 * Delete a job.
+	 *
+	 * @param int $id Job ID.
+	 * @return bool
+	 */
+	public static function delete( $id ) {
+		global $wpdb;
+		return false !== $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) );
+	}
+
+	/**
+	 * Build WHERE clause from args.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 * @return array{where: string, params: array<int, mixed>}
+	 */
+	private static function build_where( array $args ) {
+		global $wpdb;
+
+		$where  = '1=1';
+		$params = array();
+
+		if ( ! empty( $args['status'] ) ) {
+			$where   .= ' AND status = %s';
+			$params[] = $args['status'];
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where   .= ' AND (name LIKE %s OR action_type LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+		}
+
+		return array(
+			'where'  => $where,
+			'params' => $params,
+		);
+	}
+
+	/**
+	 * Count jobs matching args.
+	 *
+	 * @param array<string, mixed> $args Query args.
+	 * @return int
+	 */
+	public static function count( array $args = array() ) {
+		global $wpdb;
+
+		$built = self::build_where( $args );
+		$sql   = 'SELECT COUNT(*) FROM ' . self::table() . ' WHERE ' . $built['where'];
+
+		if ( empty( $built['params'] ) ) {
+			return (int) $wpdb->get_var( $sql );
+		}
+
+		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $built['params'] ) );
+	}
+
+	/**
+	 * List jobs.
 	 *
 	 * @param array<string, mixed> $args Query args.
 	 * @return array<int, object>
@@ -121,36 +178,27 @@ class Job_Repository {
 
 		$defaults = array(
 			'status'  => '',
+			'search'  => '',
 			'limit'   => 20,
 			'offset'  => 0,
 			'orderby' => 'created_at',
 			'order'   => 'DESC',
 		);
-		$args = wp_parse_args( $args, $defaults );
+		$args  = wp_parse_args( $args, $defaults );
+		$built = self::build_where( $args );
 
-		$where = '1=1';
-		$params = array();
+		$allowed_orderby = array( 'created_at', 'id', 'status', 'name', 'finished_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = 'ASC' === strtoupper( $args['order'] ) ? 'ASC' : 'DESC';
 
-		if ( ! empty( $args['status'] ) ) {
-			$where   .= ' AND status = %s';
-			$params[] = $args['status'];
-		}
-
-		$orderby = in_array( $args['orderby'], array( 'created_at', 'id', 'status' ), true ) ? $args['orderby'] : 'created_at';
-		$order   = 'ASC' === strtoupper( $args['order'] ) ? 'ASC' : 'DESC';
-
+		$params   = $built['params'];
 		$params[] = (int) $args['limit'];
 		$params[] = (int) $args['offset'];
 
-		$sql = "SELECT * FROM " . self::table() . " WHERE {$where} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
-
-		if ( ! empty( $params ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			return $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
-		}
+		$sql = 'SELECT * FROM ' . self::table() . ' WHERE ' . $built['where'] . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_results( $sql );
+		return $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
 	}
 
 	/**
@@ -177,8 +225,10 @@ class Job_Repository {
 		);
 
 		foreach ( $results as $status => $row ) {
-			$counts[ $status ] = (int) $row->total;
-			$counts['total']  += (int) $row->total;
+			if ( isset( $counts[ $status ] ) ) {
+				$counts[ $status ] = (int) $row->total;
+			}
+			$counts['total'] += (int) $row->total;
 		}
 
 		return $counts;

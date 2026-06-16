@@ -25,6 +25,9 @@ Filter → Preview → Action → Process → Log → Undo
 - [Undo System](#undo-system)
 - [Database Tables](#database-tables)
 - [Settings & Permissions](#settings--permissions)
+- [Background Processing & Cron](#background-processing--cron)
+- [Uninstall & Data Removal](#uninstall--data-removal)
+- [Scale Limits](#scale-limits)
 - [Version 1.0 Scope](#version-10-scope)
 - [Mission](#mission)
 - [Author](#author)
@@ -69,9 +72,12 @@ No frontend frameworks.
 
 ## Requirements
 
-- WordPress 6.0 or higher (recommended)
+- WordPress 6.0 or higher (tested through 6.9)
 - PHP 7.4 or higher
 - MySQL 5.7+ or MariaDB 10.3+
+- `manage_bulk_actions_manager` capability (granted to administrators on activation)
+
+**Optional integrations:** Yoast SEO or Rank Math for SEO-based filters on the New Job page.
 
 ---
 
@@ -102,9 +108,8 @@ No frontend frameworks.
 Bulk Actions Manager
 ├── Dashboard
 ├── New Job
-├── Jobs
+├── Jobs (Runs + Scheduled via type view)
 ├── Logs
-├── Scheduled Jobs
 ├── Tools
 └── Settings
 ```
@@ -287,9 +292,17 @@ Job #121
 Action: Undo Job #120
 ```
 
-### Scheduled Jobs
+### Jobs
 
-Automate recurring bulk operations.
+Single admin page for job runs and recurring schedules.
+
+**Runs view** (default) — one-time and undo job executions with status filters (Running, Queued, Completed, etc.) and a **Type** column (`One-time`, `Undo`).
+
+**Scheduled view** — `?page=bam-jobs&type=schedule` — recurring automation configs with Add/Edit/Run Now. Each scheduled run creates a job visible under Runs; **Last Run** links to that job.
+
+### Scheduled Jobs (automation)
+
+Use the **Scheduled** tab on the Jobs page to automate recurring bulk operations.
 
 Examples:
 
@@ -405,11 +418,83 @@ wp_bam_schedules
 
 ### Permissions
 
-Required capability:
+Required capability (default):
 
 ```text
 manage_bulk_actions_manager
 ```
+
+Granted to the **Administrator** role on plugin activation. To use a different capability:
+
+```php
+add_filter( 'bam_capability', function () {
+	return 'edit_others_posts';
+} );
+```
+
+All admin pages, REST endpoints, and export downloads check this capability.
+
+---
+
+## Background Processing & Cron
+
+Bulk Actions Manager uses two processing modes:
+
+| Mode | Behavior |
+|------|----------|
+| **AJAX** | Browser-driven batches while an admin keeps the job page open |
+| **Background** | WP Cron queue (`bam_process_queue`) processes jobs in the background |
+
+**Cron reliability:** On low-traffic sites, WP Cron only runs when someone visits the site. For predictable background processing, configure a system cron job to call `wp-cron.php` on a fixed interval, or use a cron management plugin.
+
+**Concurrency safeguards (v1.1.2+):**
+
+- Queue mutex prevents overlapping queue processors
+- Per-job transient locks prevent duplicate batch processing
+- Job items are atomically claimed (`pending` → `processing`) before execution
+- Stale `processing` items reset to `pending` after 30 minutes via scheduled cleanup
+
+Scheduled hooks:
+
+```text
+bam_process_queue
+bam_run_schedules
+bam_cleanup_snapshots
+bam_cleanup_logs
+bam_cleanup_stale_jobs
+```
+
+---
+
+## Uninstall & Data Removal
+
+By default, uninstalling (deleting) the plugin **retains** database tables and settings.
+
+To remove all plugin data on uninstall, enable **Drop all plugin data on uninstall** under **Bulk Actions Manager → Settings → General**. When enabled, `uninstall.php` drops:
+
+```text
+wp_bam_jobs
+wp_bam_job_items
+wp_bam_logs
+wp_bam_snapshots
+wp_bam_schedules
+```
+
+and removes related options and scheduled cron events.
+
+---
+
+## Scale Limits
+
+Filter resolution loads matching post IDs in pages of 500. By default, at most **100,000** IDs are returned per filter. Adjust with:
+
+```php
+add_filter( 'bam_max_filter_results', function () {
+	return 50000;
+} );
+```
+
+Jobs themselves process in configurable batch sizes (Settings → default batch size). Very large jobs may take significant time on shared hosting; use background mode and reliable cron for best results.
 
 ---
 

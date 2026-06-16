@@ -115,6 +115,107 @@ class Log_Repository {
 	}
 
 	/**
+	 * Delete log entry.
+	 *
+	 * @param int $id Log ID.
+	 * @return bool
+	 */
+	public static function delete( $id ) {
+		global $wpdb;
+		return false !== $wpdb->delete( self::table(), array( 'id' => $id ), array( '%d' ) );
+	}
+
+	/**
+	 * Build WHERE from args.
+	 *
+	 * @param array<string, mixed> $args Args.
+	 * @return array{where: string, params: array<int, mixed>}
+	 */
+	private static function build_where( array $args ) {
+		global $wpdb;
+
+		$where  = '1=1';
+		$params = array();
+
+		if ( ! empty( $args['undo_status'] ) ) {
+			$where   .= ' AND undo_status = %s';
+			$params[] = $args['undo_status'];
+		}
+
+		if ( ! empty( $args['action_type'] ) ) {
+			$where   .= ' AND action_type = %s';
+			$params[] = $args['action_type'];
+		}
+
+		if ( ! empty( $args['user_id'] ) ) {
+			$where   .= ' AND user_id = %d';
+			$params[] = (int) $args['user_id'];
+		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$like     = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where   .= ' AND (action_type LIKE %s OR CAST(job_id AS CHAR) LIKE %s)';
+			$params[] = $like;
+			$params[] = $like;
+		}
+
+		return array(
+			'where'  => $where,
+			'params' => $params,
+		);
+	}
+
+	/**
+	 * Count logs.
+	 *
+	 * @param array<string, mixed> $args Args.
+	 * @return int
+	 */
+	public static function count( array $args = array() ) {
+		global $wpdb;
+
+		$built = self::build_where( $args );
+		$sql   = 'SELECT COUNT(*) FROM ' . self::table() . ' WHERE ' . $built['where'];
+
+		if ( empty( $built['params'] ) ) {
+			return (int) $wpdb->get_var( $sql );
+		}
+
+		return (int) $wpdb->get_var( $wpdb->prepare( $sql, $built['params'] ) );
+	}
+
+	/**
+	 * Count by undo status.
+	 *
+	 * @return array<string, int>
+	 */
+	public static function count_by_undo_status() {
+		global $wpdb;
+
+		$results = $wpdb->get_results(
+			'SELECT undo_status, COUNT(*) as total FROM ' . self::table() . ' GROUP BY undo_status',
+			OBJECT_K
+		);
+
+		$counts = array(
+			'none'      => 0,
+			'available' => 0,
+			'used'      => 0,
+			'expired'   => 0,
+			'total'     => 0,
+		);
+
+		foreach ( $results as $status => $row ) {
+			if ( isset( $counts[ $status ] ) ) {
+				$counts[ $status ] = (int) $row->total;
+			}
+			$counts['total'] += (int) $row->total;
+		}
+
+		return $counts;
+	}
+
+	/**
 	 * List logs.
 	 *
 	 * @param array<string, mixed> $args Query args.
@@ -124,18 +225,30 @@ class Log_Repository {
 		global $wpdb;
 
 		$defaults = array(
-			'limit'  => 20,
-			'offset' => 0,
+			'undo_status' => '',
+			'action_type' => '',
+			'user_id'     => 0,
+			'search'      => '',
+			'limit'       => 20,
+			'offset'      => 0,
+			'orderby'     => 'created_at',
+			'order'       => 'DESC',
 		);
-		$args = wp_parse_args( $args, $defaults );
+		$args  = wp_parse_args( $args, $defaults );
+		$built = self::build_where( $args );
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT * FROM ' . self::table() . ' ORDER BY created_at DESC LIMIT %d OFFSET %d',
-				(int) $args['limit'],
-				(int) $args['offset']
-			)
-		);
+		$allowed_orderby = array( 'created_at', 'id', 'affected_count', 'job_id' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = 'ASC' === strtoupper( $args['order'] ) ? 'ASC' : 'DESC';
+
+		$params   = $built['params'];
+		$params[] = (int) $args['limit'];
+		$params[] = (int) $args['offset'];
+
+		$sql = 'SELECT * FROM ' . self::table() . ' WHERE ' . $built['where'] . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
 	}
 
 	/**
@@ -144,13 +257,6 @@ class Log_Repository {
 	 * @return int
 	 */
 	public static function count_undo_available() {
-		global $wpdb;
-
-		return (int) $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT COUNT(*) FROM ' . self::table() . ' WHERE undo_status = %s',
-				'available'
-			)
-		);
+		return self::count( array( 'undo_status' => 'available' ) );
 	}
 }

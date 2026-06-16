@@ -48,6 +48,20 @@
 						'</ul>';
 				}
 			}
+
+			if ( data.export_download_url ) {
+				var exportEl = document.getElementById('bam-export-download');
+				if ( !exportEl ) {
+					exportEl = document.createElement('p');
+					exportEl.id = 'bam-export-download';
+					var statsEl = document.getElementById('bam-progress-stats');
+					if ( statsEl && statsEl.parentNode ) {
+						statsEl.parentNode.insertBefore(exportEl, statsEl.nextSibling);
+					}
+				}
+				exportEl.innerHTML = '<a class="button button-secondary" href="' + data.export_download_url + '">' +
+					(bamAdmin.i18n.downloadExport || 'Download Export') + '</a>';
+			}
 		}
 	};
 
@@ -76,22 +90,13 @@
 			bamApi.post('jobs/' + currentJobId + '/cancel', {});
 		});
 
-		// Job detail page
 		var detailEl = document.getElementById('bam-job-detail');
 		if ( detailEl && detailEl.dataset.jobId ) {
-			var jobId = detailEl.dataset.jobId;
+			var jobId = parseInt(detailEl.dataset.jobId, 10);
 			bamApi.get('jobs/' + jobId).then(function (job) {
-				detailEl.innerHTML =
-					'<table class="form-table"><tbody>' +
-					'<tr><th>Status</th><td>' + job.status + '</td></tr>' +
-					'<tr><th>Action</th><td>' + job.action_type + '</td></tr>' +
-					'<tr><th>Progress</th><td>' + job.processed_items + ' / ' + job.total_items + ' (' + job.percent + '%)</td></tr>' +
-					'<tr><th>Undo Available</th><td>' + (job.undo_available ? 'Yes' : 'No') + '</td></tr>' +
-					'</tbody></table>';
-				if ( job.status === 'running' ) {
+				bamJobRunner.updateUI(job);
+				if ( job.status === 'running' || job.status === 'queued' ) {
 					currentJobId = jobId;
-					document.getElementById('bam-job-progress') || detailEl.insertAdjacentHTML('beforeend',
-						'<div class="bam-progress"><div class="bam-progress__bar" id="bam-progress-bar" style="width:' + job.percent + '%"></div></div>');
 					running = true;
 					bamJobRunner.start(jobId);
 				}

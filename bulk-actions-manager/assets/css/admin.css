@@ -125,6 +125,43 @@
 	margin-top: 0;
 }
 
+.bam-condition-group {
+	margin: 12px 0;
+	padding: 12px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	background: #fafafa;
+}
+
+.bam-condition-group__header {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.bam-group-conditions .bam-condition {
+	background: #fff;
+}
+
+.bam-condition-value--multi {
+	min-width: 180px;
+	min-height: 80px;
+}
+
+.bam-no-value {
+	color: #646970;
+	font-style: italic;
+}
+
+.bam-condition-value-container {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+
 .bam-condition {
 	display: flex;
 	flex-wrap: wrap;

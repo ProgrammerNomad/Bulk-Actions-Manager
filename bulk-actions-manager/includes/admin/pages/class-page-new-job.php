@@ -7,6 +7,10 @@
 
 namespace BAM\Admin\Pages;
 
+use BAM\Actions\Action_Registry;
+use BAM\Admin\List_Tables\Filter_Bar;
+use BAM\Admin\List_Tables\Posts_Preview_List_Table;
+use BAM\Filters\Filter_Compiler;
 use BAM\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,42 +25,54 @@ class Page_New_Job extends Page_Base {
 	 */
 	public static function render() {
 		$settings = Settings::all();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$request = wp_unslash( $_GET );
+		$request = is_array( $request ) ? $request : array();
+
+		$payload   = Filter_Bar::parse_request_to_payload( $request );
+		$per_page  = 20;
+		$paged     = isset( $request['paged'] ) ? max( 1, absint( $request['paged'] ) ) : 1;
+		$all_ids   = Filter_Compiler::resolve_ids( $payload );
+		$total     = count( $all_ids );
+		$offset    = ( $paged - 1 ) * $per_page;
+		$page_ids  = array_slice( $all_ids, $offset, $per_page );
+
 		self::header( __( 'New Job', 'bulk-actions-manager' ) );
 		?>
+		<p class="description">
+			<?php esc_html_e( '1. Filter posts below (optional) → 2. Choose an action → 3. Click Start Job', 'bulk-actions-manager' ); ?>
+		</p>
 		<div id="bam-new-job" class="bam-new-job">
-			<section class="bam-panel" id="bam-filter-builder">
-				<h2><?php esc_html_e( 'Filter Builder', 'bulk-actions-manager' ); ?></h2>
+			<section class="bam-panel">
+				<h2><?php esc_html_e( 'Filter Posts', 'bulk-actions-manager' ); ?></h2>
 				<div class="bam-panel__body">
-					<div class="bam-field">
-						<label for="bam-post-type"><?php esc_html_e( 'Content Type', 'bulk-actions-manager' ); ?></label>
-						<select id="bam-post-type" name="post_type"></select>
-					</div>
-					<div id="bam-conditions"></div>
-					<button type="button" class="button" id="bam-add-condition"><?php esc_html_e( 'Add Condition', 'bulk-actions-manager' ); ?></button>
-				</div>
-			</section>
+					<form method="get" id="posts-filter">
+						<input type="hidden" name="page" value="bam-new-job" />
+						<?php if ( ! empty( $request['post_status'] ) ) : ?>
+							<input type="hidden" name="post_status" value="<?php echo esc_attr( sanitize_key( $request['post_status'] ) ); ?>" />
+						<?php else : ?>
+							<input type="hidden" name="post_status" value="all" />
+						<?php endif; ?>
+						<?php Filter_Bar::render( $request ); ?>
 
-			<section class="bam-panel" id="bam-preview-panel">
-				<h2><?php esc_html_e( 'Results Preview', 'bulk-actions-manager' ); ?></h2>
-				<div class="bam-panel__body">
-					<div class="bam-preview-toolbar">
-						<span id="bam-preview-count"><?php esc_html_e( 'No preview yet.', 'bulk-actions-manager' ); ?></span>
-						<button type="button" class="button" id="bam-refresh-preview"><?php esc_html_e( 'Refresh Preview', 'bulk-actions-manager' ); ?></button>
-						<button type="button" class="button" id="bam-export-preview"><?php esc_html_e( 'Export Preview', 'bulk-actions-manager' ); ?></button>
-					</div>
-					<table class="widefat striped" id="bam-preview-table">
-						<thead>
-							<tr>
-								<th><?php esc_html_e( 'ID', 'bulk-actions-manager' ); ?></th>
-								<th><?php esc_html_e( 'Title', 'bulk-actions-manager' ); ?></th>
-								<th><?php esc_html_e( 'Type', 'bulk-actions-manager' ); ?></th>
-								<th><?php esc_html_e( 'Status', 'bulk-actions-manager' ); ?></th>
-								<th><?php esc_html_e( 'Author', 'bulk-actions-manager' ); ?></th>
-								<th><?php esc_html_e( 'Date', 'bulk-actions-manager' ); ?></th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+						<?php
+						$preview_table = new Posts_Preview_List_Table();
+						$preview_table->set_preview_data( $page_ids, $total );
+						if ( $total > 0 ) {
+							printf(
+								'<p class="bam-preview-count">%s</p>',
+								esc_html(
+									sprintf(
+										/* translators: %d: number of posts */
+										_n( '%d item', '%d items', $total, 'bulk-actions-manager' ),
+										$total
+									)
+								)
+							);
+						}
+						$preview_table->display();
+						?>
+					</form>
 				</div>
 			</section>
 
@@ -65,7 +81,9 @@ class Page_New_Job extends Page_Base {
 				<div class="bam-panel__body">
 					<div class="bam-field">
 						<label for="bam-action-type"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></label>
-						<select id="bam-action-type" name="action_type"></select>
+						<select id="bam-action-type" name="action_type">
+							<?php self::render_action_options(); ?>
+						</select>
 						<span id="bam-action-safety" class="bam-badge"></span>
 					</div>
 					<div id="bam-action-fields"></div>
@@ -85,7 +103,7 @@ class Page_New_Job extends Page_Base {
 						<label for="bam-batch-size"><?php esc_html_e( 'Batch Size', 'bulk-actions-manager' ); ?></label>
 						<select id="bam-batch-size" name="batch_size">
 							<?php foreach ( array( 10, 25, 50, 100 ) as $size ) : ?>
-								<option value="<?php echo esc_attr( $size ); ?>" <?php selected( (int) $settings['default_batch_size'], $size ); ?>>
+								<option value="<?php echo esc_attr( (string) $size ); ?>" <?php selected( (int) $settings['default_batch_size'], $size ); ?>>
 									<?php echo esc_html( (string) $size ); ?>
 								</option>
 							<?php endforeach; ?>
@@ -127,7 +145,29 @@ class Page_New_Job extends Page_Base {
 				</div>
 			</section>
 		</div>
+
+		<script type="application/json" id="bam-filter-payload"><?php echo wp_json_encode( $payload ); ?></script>
 		<?php
 		self::footer();
+	}
+
+	/**
+	 * Render action select options.
+	 */
+	private static function render_action_options() {
+		$registry = new Action_Registry();
+		foreach ( $registry->get_grouped() as $group => $actions ) {
+			echo '<optgroup label="' . esc_attr( $group ) . '">';
+			foreach ( $actions as $action ) {
+				printf(
+					'<option value="%1$s" data-safety="%2$s" data-undo="%3$s">%4$s</option>',
+					esc_attr( $action['id'] ),
+					esc_attr( $action['safety_level'] ),
+					esc_attr( $action['supports_undo'] ? '1' : '0' ),
+					esc_html( $action['label'] )
+				);
+			}
+			echo '</optgroup>';
+		}
 	}
 }

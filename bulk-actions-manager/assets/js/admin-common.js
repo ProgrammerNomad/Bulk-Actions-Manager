@@ -21,6 +21,9 @@
 		},
 		del: function (path) {
 			return wp.apiFetch({ path: apiPath(path), method: 'DELETE' });
+		},
+		put: function (path, data) {
+			return wp.apiFetch({ path: apiPath(path), method: 'PUT', data: data || {} });
 		}
 	};
 

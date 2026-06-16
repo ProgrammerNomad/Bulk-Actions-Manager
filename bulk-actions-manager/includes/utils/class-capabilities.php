@@ -15,12 +15,26 @@ defined( 'ABSPATH' ) || exit;
 class Capabilities {
 
 	/**
+	 * Plugin capability slug (filterable).
+	 *
+	 * @return string
+	 */
+	public static function get_capability() {
+		/**
+		 * Filter the capability required to manage Bulk Actions Manager.
+		 *
+		 * @param string $capability Default capability slug.
+		 */
+		return apply_filters( 'bam_capability', BAM_CAPABILITY );
+	}
+
+	/**
 	 * Add plugin capability to administrator role.
 	 */
 	public static function add_to_administrator() {
 		$role = get_role( 'administrator' );
 		if ( $role ) {
-			$role->add_cap( BAM_CAPABILITY );
+			$role->add_cap( self::get_capability() );
 		}
 	}
 
@@ -30,7 +44,11 @@ class Capabilities {
 	public static function remove_from_administrator() {
 		$role = get_role( 'administrator' );
 		if ( $role ) {
-			$role->remove_cap( BAM_CAPABILITY );
+			$role->remove_cap( self::get_capability() );
+			// Legacy cap if filter changed the slug.
+			if ( BAM_CAPABILITY !== self::get_capability() ) {
+				$role->remove_cap( BAM_CAPABILITY );
+			}
 		}
 	}
 
@@ -40,6 +58,6 @@ class Capabilities {
 	 * @return bool
 	 */
 	public static function current_user_can() {
-		return current_user_can( BAM_CAPABILITY );
+		return current_user_can( self::get_capability() );
 	}
 }

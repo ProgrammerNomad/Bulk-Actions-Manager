@@ -135,6 +135,29 @@ class Schema {
 	}
 
 	/**
+	 * Run versioned database migrations.
+	 */
+	public static function run_migrations() {
+		$installed = get_option( 'bam_db_version', '0' );
+
+		if ( version_compare( $installed, BAM_DB_VERSION, '>=' ) ) {
+			return;
+		}
+
+		self::create_tables();
+
+		/**
+		 * Run incremental migrations between stored and target DB versions.
+		 *
+		 * @param string $installed Previously stored DB version.
+		 * @param string $target    Target DB version constant.
+		 */
+		do_action( 'bam_run_db_migrations', $installed, BAM_DB_VERSION );
+
+		update_option( 'bam_db_version', BAM_DB_VERSION );
+	}
+
+	/**
 	 * Drop all plugin tables.
 	 */
 	public static function drop_tables() {

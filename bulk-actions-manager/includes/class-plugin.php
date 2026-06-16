@@ -9,6 +9,7 @@ namespace BAM;
 
 use BAM\Admin\Admin_Menu;
 use BAM\Admin\Admin_Assets;
+use BAM\Admin\Export_Download;
 use BAM\REST\REST_Bootstrap;
 use BAM\Cron\Cron_Scheduler;
 
@@ -72,6 +73,7 @@ final class Plugin {
 		if ( is_admin() ) {
 			new Admin_Menu();
 			new Admin_Assets();
+			new Export_Download();
 		}
 
 		new REST_Bootstrap();
@@ -82,10 +84,6 @@ final class Plugin {
 	 * Run database migrations if needed.
 	 */
 	public function maybe_upgrade_db() {
-		$installed = get_option( 'bam_db_version', '0' );
-		if ( version_compare( $installed, BAM_DB_VERSION, '<' ) ) {
-			Database\Schema::create_tables();
-			update_option( 'bam_db_version', BAM_DB_VERSION );
-		}
+		Database\Schema::run_migrations();
 	}
 }

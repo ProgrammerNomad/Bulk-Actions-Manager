@@ -7,7 +7,6 @@
 
 namespace BAM\Undo;
 
-use BAM\Database\Repositories\Log_Repository;
 use BAM\Database\Repositories\Snapshot_Repository;
 
 defined( 'ABSPATH' ) || exit;
@@ -18,12 +17,14 @@ defined( 'ABSPATH' ) || exit;
 class Snapshot_Cleanup {
 
 	/**
-	 * Delete expired snapshots and update log undo status.
+	 * Mark expired undo logs and delete expired snapshots.
 	 */
 	public static function run() {
-		Snapshot_Repository::delete_expired();
-
 		global $wpdb;
+
+		$now = current_time( 'mysql' );
+
+		// Mark logs expired before deleting snapshot rows (subquery needs matching snapshots).
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}bam_logs SET undo_status = %s WHERE undo_status = %s AND job_id IN (
@@ -31,8 +32,10 @@ class Snapshot_Cleanup {
 				)",
 				'expired',
 				'available',
-				current_time( 'mysql' )
+				$now
 			)
 		);
+
+		Snapshot_Repository::delete_expired();
 	}
 }

@@ -37,19 +37,34 @@ abstract class REST_Controller extends WP_REST_Controller {
 	/**
 	 * Register a route helper.
 	 *
-	 * @param string               $route    Route path.
-	 * @param array<string, mixed> $args     Route args.
+	 * Supports a single endpoint (associative args with `methods`) or multiple
+	 * endpoints (numeric array of route definitions). Each endpoint must have its
+	 * own `permission_callback` per WordPress REST API requirements.
+	 *
+	 * @param string               $route Route path.
+	 * @param array<string, mixed> $args  Route args.
 	 */
 	protected function register_route( $route, array $args ) {
-		register_rest_route(
-			$this->namespace,
-			$route,
-			array_merge(
-				array(
-					'permission_callback' => array( $this, 'permissions_check' ),
-				),
-				$args
-			)
-		);
+		$permission = array( $this, 'permissions_check' );
+
+		if ( isset( $args['methods'] ) ) {
+			if ( ! isset( $args['permission_callback'] ) ) {
+				$args['permission_callback'] = $permission;
+			}
+		} else {
+			foreach ( $args as $key => $endpoint ) {
+				if ( ! is_array( $endpoint ) ) {
+					continue;
+				}
+				if ( ! isset( $endpoint['permission_callback'] ) ) {
+					$args[ $key ] = array_merge(
+						array( 'permission_callback' => $permission ),
+						$endpoint
+					);
+				}
+			}
+		}
+
+		register_rest_route( $this->namespace, $route, $args );
 	}
 }

@@ -7,6 +7,7 @@
 
 namespace BAM\Jobs;
 
+use BAM\Admin\Export_Download;
 use BAM\Actions\Action_Registry;
 use BAM\Actions\Types\Export_Action;
 use BAM\Database\Repositories\Job_Repository;
@@ -62,6 +63,40 @@ class Job_Processor {
 	 * @return array<string, mixed>|\WP_Error
 	 */
 	public function process_batch( $job_id ) {
+		$job_id = (int) $job_id;
+		$lock_key = 'bam_job_lock_' . $job_id;
+
+		if ( get_transient( $lock_key ) ) {
+			$job = Job_Repository::find( $job_id );
+			if ( ! $job ) {
+				return new \WP_Error( 'bam_job_not_found', __( 'Job not found.', 'bulk-actions-manager' ) );
+			}
+			return array(
+				'status'    => $job->status,
+				'processed' => (int) $job->processed_items,
+				'total'     => (int) $job->total_items,
+				'percent'   => $job->total_items > 0 ? round( ( $job->processed_items / $job->total_items ) * 100, 1 ) : 100,
+				'errors'    => array(),
+				'message'   => __( 'Batch already in progress.', 'bulk-actions-manager' ),
+			);
+		}
+
+		set_transient( $lock_key, 1, 2 * MINUTE_IN_SECONDS );
+
+		try {
+			return $this->process_batch_unlocked( $job_id );
+		} finally {
+			delete_transient( $lock_key );
+		}
+	}
+
+	/**
+	 * Process one batch for a job (internal, assumes lock is held).
+	 *
+	 * @param int $job_id Job ID.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private function process_batch_unlocked( $job_id ) {
 		$job = Job_Repository::find( $job_id );
 		if ( ! $job ) {
 			return new \WP_Error( 'bam_job_not_found', __( 'Job not found.', 'bulk-actions-manager' ) );
@@ -98,7 +133,7 @@ class Job_Processor {
 		$payload  = Sanitizer::json_decode( $job->action_payload );
 		$dry_run  = (bool) $job->is_dry_run;
 		$is_undo  = ! empty( $job->parent_job_id );
-		$batch    = Job_Item_Repository::get_pending_batch( $job_id, (int) $job->batch_size );
+		$batch    = Job_Item_Repository::claim_pending_batch( $job_id, (int) $job->batch_size );
 		$errors   = array();
 		$processed = 0;
 		$failed    = 0;
@@ -199,13 +234,14 @@ class Job_Processor {
 		$remaining = max( 0, (int) $job->total_items - (int) $job->processed_items );
 
 		return array(
-			'status'    => $job->status,
-			'processed' => (int) $job->processed_items,
-			'total'     => (int) $job->total_items,
-			'remaining' => $remaining,
-			'percent'   => $percent,
-			'errors'    => $errors,
-			'eta_seconds' => Job_Estimator::estimate( $job ),
+			'status'              => $job->status,
+			'processed'           => (int) $job->processed_items,
+			'total'               => (int) $job->total_items,
+			'remaining'           => $remaining,
+			'percent'             => $percent,
+			'errors'              => $errors,
+			'eta_seconds'         => Job_Estimator::estimate( $job ),
+			'export_download_url' => Export_Download::get_url( $job_id ),
 		);
 	}
 
