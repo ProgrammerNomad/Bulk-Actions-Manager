@@ -1,6 +1,6 @@
 === Bulk Actions Manager ===
-Contributors: nomadprogrammer
-Tags: bulk edit, bulk actions, content management, batch processing, undo
+Contributors: ProgrammerNomad
+Tags: bulk actions, bulk edit, content management, content cleanup, batch processing, posts, pages, media, automation
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
@@ -8,119 +8,205 @@ Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Filter, preview, modify, export, schedule, and manage large amounts of WordPress content safely using batch processing.
+Safely filter, preview, modify, export, schedule, and manage WordPress content at scale using batch processing, audit logs, and undo support.
 
 == Description ==
 
-Bulk Actions Manager helps you perform large-scale content operations safely:
+Bulk Actions Manager is a content operations plugin for WordPress administrators.
+
+Instead of making bulk changes blindly, it follows a safe workflow:
 
 Filter → Preview → Action → Process → Log → Undo
 
-Unlike simple bulk-delete plugins, every workflow supports preview, dry run, logging, and undo (when technically possible).
+Use it to update thousands of posts, clean up content, change authors, manage media, export records, or schedule recurring maintenance — with preview, logging, and undo where supported.
 
-= Key features =
+= Built for safety =
 
-* Edit.php-style filter bar with post preview table
-* Batch processing via AJAX and WP Cron background queue
-* Job queue with pause, resume, and cancel
-* Full audit logs with undo support
-* Scheduled recurring jobs
-* Export jobs and logs
-* Yoast SEO and Rank Math filter integration (when those plugins are active)
-
-= Safety =
-
+* Preview matching content before changes
 * Dry run mode
-* Snapshot-based undo for supported actions
-* Confirmation before destructive operations
-* Per-item error tracking
+* Audit logging for every job
+* Snapshot-based undo (supported actions)
+* Configurable batch processing
+* Live progress with pause, resume, and cancel
+* WordPress admin confirmation dialogs for destructive actions
+
+= Content filters =
+
+* Post type and post status
+* Categories and tags
+* Authors
+* Date created and date modified
+* Featured image status
+* Meta fields (exists, missing, value)
+* Title and content search
+* SEO metadata (Yoast SEO or Rank Math, when active)
+* Advanced filter panel on the New Job screen
+
+Supported content: posts, pages, media, and public custom post types.
+
+= Available actions =
+
+**Status:** Publish, Draft, Pending Review, Private
+
+**Taxonomy:** Add, remove, or replace categories and tags
+
+**Author:** Change author
+
+**Metadata:** Add, update, or remove meta
+
+**Content:** Find and replace, append, prepend
+
+**Media:** Remove featured image, delete featured image file, delete attached media
+
+**Delete:** Move to trash, permanently delete
+
+**Export:** Export IDs, CSV, or JSON
+
+= Undo system =
+
+Snapshot-based undo is available for status, author, taxonomy, metadata, featured image removal, find and replace, and move-to-trash actions.
+
+Permanent deletes and media file deletions cannot be undone. Each action shows its safety level before execution.
+
+= Batch processing =
+
+Jobs run in small batches (10–100 items per batch) to help avoid PHP timeouts, memory limits, and browser timeouts on shared hosting.
+
+**AJAX mode** — live progress while an admin screen is open.
+
+**Background mode** — WP Cron queue for large jobs.
+
+= Scheduled jobs =
+
+Create recurring jobs under Jobs → Scheduled. Frequencies: hourly, daily, weekly, monthly.
+
+= Native WordPress experience =
+
+Uses WP_List_Table, the Settings API, REST API, WP Cron, Dashicons, and standard admin UI patterns. No React build step or third-party admin UI frameworks.
 
 = Permissions =
 
-Administrators receive the `manage_bulk_actions_manager` capability on activation. Developers may change the required capability with the `bam_capability` filter.
+Administrators receive the `manage_bulk_actions_manager` capability on activation. Customize with the `bam_capability` filter.
 
 = Uninstall =
 
-By default, plugin data is retained when the plugin is deleted. Enable **Drop all plugin data on uninstall** in Settings to remove database tables and options on deletion.
+Plugin data is retained by default when the plugin is deleted. Enable **Drop all plugin data on uninstall** in Settings to remove database tables and options.
 
 == Installation ==
 
-1. Upload the `bulk-actions-manager` folder to `/wp-content/plugins/`.
+1. Upload the plugin folder to `/wp-content/plugins/bulk-actions-manager/`.
 2. Activate the plugin through the **Plugins** screen in WordPress.
-3. Open **Bulk Actions Manager** in the admin menu.
+3. Open **Bulk Actions Manager → New Job**.
+4. Configure filters and preview matching content.
+5. Select an action and run the job or perform a dry run.
 
 == Frequently Asked Questions ==
 
-= Does this work on shared hosting? =
+= Does the plugin support custom post types? =
 
-Yes. Jobs process in small batches to stay within PHP time and memory limits. Background mode relies on WP Cron; on low-traffic sites, trigger cron via your host or a real cron job hitting `wp-cron.php`.
+Yes. Any public custom post type registered in WordPress can be filtered and processed.
 
-= How many posts can a single job handle? =
+= Can I preview changes before running a job? =
 
-There is no hard limit, but filter resolution defaults to 100,000 matching IDs. Use the `bam_max_filter_results` filter to raise or lower this cap.
+Yes. The New Job screen shows a match count, results summary, and preview table on load. Use **Preview Job** or dry run mode before starting a real job.
 
-= Is undo always available? =
+= Can I undo bulk actions? =
 
-No. Permanent deletes and file deletions cannot be undone. Supported changes store snapshots according to your retention settings.
+Many actions support snapshot-based undo from the Logs screen. Permanent deletes and file deletions cannot be undone.
+
+= Will this work on shared hosting? =
+
+Yes. Jobs process in batches. For large background jobs, ensure WP Cron runs reliably (system cron hitting `wp-cron.php` is recommended on low-traffic sites).
+
+= Does the plugin support large websites? =
+
+Yes. Filter resolution defaults to 100,000 matching IDs per filter. Adjust with the `bam_max_filter_results` filter. Jobs themselves have no fixed record cap.
+
+= Does the plugin require Yoast SEO or Rank Math? =
+
+No. SEO-related filters appear only when a supported SEO plugin is installed and active.
 
 == Screenshots ==
 
-1. New Job - filter bar and preview table
-2. Jobs list with status filters
-3. Log detail with undo option
+1. Dashboard overview
+2. New Job workflow
+3. Content filtering and preview
+4. Action selection with safety description
+5. Job execution and progress
+6. Jobs screen (runs and scheduled)
+7. Logs and undo
+8. Tools screen
+9. Settings screen
 
 == Changelog ==
 
 = 1.2.2 =
-* Fix: New Job filter refresh no longer shows "Cannot load bam-new-job" (avoid core `post_type` query var on plugin admin URLs)
+
+* Fixed New Job filter refresh showing "Cannot load bam-new-job" by using `bam_post_type` instead of WordPress core `post_type` on plugin admin URLs
+* Added redirect for legacy filter URLs that still pass `post_type`
 
 = 1.2.1 =
-* New Job guided workflow: 4-step postboxes with always-on preview on page load
-* Performance: count + paginated preview query (no full ID resolution on page load)
+
+* New Job guided workflow: four step postboxes with always-on preview on page load
+* Performance: count and paginated preview query (no full ID resolution on page load)
 * Results Summary card with status and category breakdown
-* Action description panel with undo/destructive messaging
-* Preview Job button; Start Job disabled until action selected
+* Action description panel with undo and destructive messaging
 * Advanced Filters accordion (native details/summary)
-* Jobs list status badges; Logs inline Undo button column
+* Jobs list status badges; Logs inline Undo column
+* Preview Job button; Start Job disabled until an action is selected
 
 = 1.2.0 =
+
 * Native WordPress admin UI: postboxes, form-table, Settings API, widefat tables
-* Dashboard server-rendered (no AJAX); Recent Jobs first, then Running and Undoable postboxes
-* New Job 4-step wizard with on-demand preview (`preview=1`)
-* Minimal custom CSS (status badges, progress bars only); removed custom widget/card layout
+* Dashboard server-rendered (no AJAX)
+* Minimal custom CSS (status badges, progress bars, hidden utility class)
 * Settings page uses WordPress Settings API
 
 = 1.1.3 =
-* Unified Jobs admin page: Runs and Scheduled views via `type` query parameter
-* Removed separate Scheduled Jobs menu item; old URLs redirect automatically
+
+* Unified Jobs page with Runs and Scheduled views
+* Removed separate Scheduled Jobs menu; old URLs redirect automatically
 * Type column on job runs (One-time, Undo)
 
 = 1.1.2 =
+
 * Hardening: atomic batch claiming, job-level locks, queue mutex
-* Fix snapshot cleanup log status ordering
 * Filterable capability via `bam_capability`
-* SEO filters only apply when Yoast or Rank Math is active
 * Versioned DB migration runner
-* REST API permission callback fix for multi-method routes
+* SEO filters apply only when Yoast or Rank Math is active
 * WordPress 6.9 compatibility for admin month filter dropdown
+* REST API permission callback fix for multi-method routes
 
 = 1.1.0 =
-* Refactored admin list pages to native `WP_List_Table`
+
+* Refactored admin list pages to native WP_List_Table
 * Edit.php-style filter bar on New Job page
 * Server-rendered Jobs, Logs, and Scheduled pages
 
 = 1.0.0 =
-* Initial release
+
+* Initial release: filters, preview, dry run, batch processing, jobs, logs, undo snapshots, scheduled jobs, export, and tools
 
 == Upgrade Notice ==
 
+= 1.2.2 =
+
+Fixes New Job filter refresh on sites using category, SEO, or other filters. Recommended for all sites.
+
 = 1.2.1 =
+
 New Job workflow redesign with always-on preview and performance-safe queries. Recommended for all sites.
 
 = 1.2.0 =
+
 Admin UI aligned with native WordPress screens. Recommended for all sites.
 
-= 1.1.3 =
-Unified Jobs page with Runs and Scheduled tabs. Recommended for all sites.
+== License ==
 
-= 1.1.2 =
+This plugin is licensed under the GPL v2 or later.
+
+== Credits ==
+
+Developed and maintained by NomadProgrammer.
+
+GitHub: https://github.com/ProgrammerNomad/Bulk-Actions-Manager
