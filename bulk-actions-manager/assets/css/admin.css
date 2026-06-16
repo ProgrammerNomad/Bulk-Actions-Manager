@@ -1,0 +1,168 @@
+/* Bulk Actions Manager — Admin Styles */
+
+.bam-wrap {
+	max-width: 1200px;
+}
+
+.bam-wrap .form-table th {
+	width: 220px;
+}
+
+.bam-wrap .subsubsub {
+	margin-bottom: 12px;
+}
+
+.bam-wrap .widefat th,
+.bam-wrap .widefat td {
+	vertical-align: middle;
+}
+
+.bam-panel {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	margin: 20px 0;
+	padding: 0;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.bam-panel h2 {
+	margin: 0;
+	padding: 12px 16px;
+	border-bottom: 1px solid #c3c4c7;
+	font-size: 14px;
+	background: #f6f7f7;
+}
+
+.bam-panel__body {
+	padding: 16px;
+}
+
+.bam-panel--hidden {
+	display: none;
+}
+
+.bam-field {
+	margin-bottom: 12px;
+}
+
+.bam-field label {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: 600;
+}
+
+.bam-widgets--grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 16px;
+	margin-top: 16px;
+}
+
+.bam-widget {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 16px;
+}
+
+.bam-widget h2 {
+	margin-top: 0;
+	font-size: 14px;
+}
+
+.bam-progress {
+	background: #f0f0f1;
+	border-radius: 4px;
+	height: 24px;
+	overflow: hidden;
+}
+
+.bam-progress__bar {
+	background: #2271b1;
+	height: 100%;
+	transition: width 0.3s ease;
+}
+
+.bam-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 12px;
+	margin-left: 8px;
+}
+
+.bam-badge--safe {
+	background: #d4edda;
+	color: #155724;
+}
+
+.bam-badge--recoverable {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.bam-badge--destructive {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.bam-tools-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.bam-tool-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 16px;
+}
+
+.bam-tool-card h3 {
+	margin-top: 0;
+}
+
+.bam-condition {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+	padding: 8px;
+	background: #f6f7f7;
+	border-radius: 4px;
+}
+
+.bam-condition select,
+.bam-condition input {
+	max-width: 200px;
+}
+
+.bam-preview-toolbar {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.bam-loading {
+	color: #646970;
+	font-style: italic;
+}
+
+.bam-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 8px;
+}
+
+.bam-stat-grid dt {
+	font-weight: 600;
+}
+
+.bam-stat-grid dd {
+	margin: 0 0 8px;
+}

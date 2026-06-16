@@ -77,11 +77,20 @@ No frontend frameworks.
 
 ## Installation
 
-1. Clone or download the repository:
-   ```bash
-   git clone https://github.com/ProgrammerNomad/Bulk-Actions-Manager.git wp-content/plugins/bulk-actions-manager
+1. Copy the **`bulk-actions-manager`** folder from this repository into your WordPress plugins directory:
+   ```text
+   wp-content/plugins/bulk-actions-manager/
    ```
-   Or download the [latest release](https://github.com/ProgrammerNomad/Bulk-Actions-Manager/releases) and extract it to `wp-content/plugins/bulk-actions-manager/`.
+   The main plugin file must be at:
+   ```text
+   wp-content/plugins/bulk-actions-manager/bulk-actions-manager.php
+   ```
+   Or clone the repository and copy only the inner `bulk-actions-manager` folder:
+   ```bash
+   git clone https://github.com/ProgrammerNomad/Bulk-Actions-Manager.git
+   xcopy /E /I Bulk-Actions-Manager\bulk-actions-manager C:\path\to\wordpress\wp-content\plugins\bulk-actions-manager
+   ```
+   Or download the [latest release](https://github.com/ProgrammerNomad/Bulk-Actions-Manager/releases) and copy the `bulk-actions-manager` folder to `wp-content/plugins/bulk-actions-manager/`.
 2. Activate **Bulk Actions Manager** from the WordPress **Plugins** screen.
 3. Open **Bulk Actions Manager** in the admin menu to configure settings and create your first job.
 
