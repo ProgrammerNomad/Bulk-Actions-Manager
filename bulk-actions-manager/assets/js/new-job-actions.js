@@ -11,25 +11,46 @@
 		}
 	}
 
-	function safetyHint(level) {
-		var map = {
-			safe: { icon: 'dashicons-yes-alt', text: 'Undo supported' },
-			recoverable: { icon: 'dashicons-backup', text: 'Recoverable' },
-			destructive: { icon: 'dashicons-warning', text: 'Cannot be undone' }
-		};
-		var item = map[level];
-		if (!item) return '';
-		return '<p class="description"><span class="dashicons ' + item.icon + '" aria-hidden="true"></span> ' + item.text + '</p>';
-	}
-
 	function fieldRow(label, html) {
 		return '<tr><th scope="row">' + label + '</th><td>' + html + '</td></tr>';
 	}
 
+	function safetyLabel(level, supportsUndo) {
+		if (level === 'destructive') {
+			return {
+				icon: 'dashicons-warning',
+				className: 'bam-action-description--destructive',
+				text: bamAdmin.i18n.cannotUndo || 'Cannot be undone'
+			};
+		}
+		if (supportsUndo) {
+			return {
+				icon: 'dashicons-yes-alt',
+				className: 'bam-action-description--safe',
+				text: bamAdmin.i18n.undoSupported || 'Undo supported'
+			};
+		}
+		if (level === 'recoverable') {
+			return {
+				icon: 'dashicons-backup',
+				className: 'bam-action-description--recoverable',
+				text: bamAdmin.i18n.recoverable || 'Recoverable'
+			};
+		}
+		return {
+			icon: 'dashicons-info',
+			className: '',
+			text: bamAdmin.i18n.noUndo || 'Undo not available'
+		};
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
 		var actionSelect = document.getElementById('bam-action-type');
-		var safetyWrap = document.getElementById('bam-action-safety-wrap');
+		var descriptionEl = document.getElementById('bam-action-description');
 		var actionFields = document.getElementById('bam-action-fields');
+		var startBtn = document.getElementById('bam-start-job');
+		var previewBtn = document.getElementById('bam-preview-job');
+		var dryRunNotice = document.getElementById('bam-dry-run-notice');
 
 		if (actionSelect) {
 			actionSelect.addEventListener('change', updateActionUI);
@@ -39,9 +60,28 @@
 		function updateActionUI() {
 			if (!actionSelect) return;
 			var opt = actionSelect.selectedOptions[0];
-			if (!opt) return;
-			if (safetyWrap) {
-				safetyWrap.innerHTML = safetyHint(opt.dataset.safety);
+			var hasAction = opt && opt.value;
+
+			if (startBtn) startBtn.disabled = !hasAction;
+			if (previewBtn) previewBtn.disabled = !hasAction;
+
+			if (!opt || !hasAction) {
+				if (descriptionEl) descriptionEl.innerHTML = '';
+				if (actionFields) actionFields.innerHTML = '';
+				return;
+			}
+
+			var safety = safetyLabel(opt.dataset.safety, opt.dataset.undo === '1');
+			var description = opt.dataset.description || '';
+
+			if (descriptionEl) {
+				var html = '<div class="bam-action-description__panel ' + safety.className + '">';
+				html += '<p class="bam-action-description__safety"><span class="dashicons ' + safety.icon + '" aria-hidden="true"></span> ' + safety.text + '</p>';
+				if (description) {
+					html += '<p class="bam-action-description__text">' + description + '</p>';
+				}
+				html += '</div>';
+				descriptionEl.innerHTML = html;
 			}
 
 			if (!actionFields) return;
@@ -68,45 +108,6 @@
 					fieldRow('Field', '<select id="bam-payload-field"><option value="content">Content</option><option value="title">Title</option></select>') +
 					fieldRow('Text', '<textarea id="bam-payload-text" class="large-text" rows="3"></textarea>');
 			}
-		}
-
-		var startBtn = document.getElementById('bam-start-job');
-		if (startBtn && actionSelect) {
-			startBtn.addEventListener('click', function () {
-				var actionId = actionSelect.value;
-				if (actionId.indexOf('delete.permanent') === 0 && !confirm('This action is destructive and cannot be undone. Continue?')) {
-					return;
-				}
-
-				var payload = buildPayload(actionId);
-				var data = {
-					name: document.getElementById('bam-job-name').value,
-					filter: getFilterPayload(),
-					action_type: actionId,
-					action_payload: payload,
-					is_dry_run: document.getElementById('bam-dry-run').checked,
-					batch_size: parseInt(document.getElementById('bam-batch-size').value, 10),
-					processing_mode: document.getElementById('bam-processing-mode').value
-				};
-
-				startBtn.disabled = true;
-				bamApi.post('jobs', data).then(function (result) {
-					if (result.dry_run) {
-						alert(result.message || 'Dry run complete.');
-						startBtn.disabled = false;
-						return;
-					}
-					if (typeof bamJobRunner !== 'undefined') {
-						var progressBox = document.getElementById('bam-job-progress');
-						if (progressBox) progressBox.classList.remove('bam-hidden');
-						bamJobRunner.start(result.job_id);
-					}
-					startBtn.disabled = false;
-				}).catch(function () {
-					alert(bamAdmin.i18n.error);
-					startBtn.disabled = false;
-				});
-			});
 		}
 
 		function buildPayload(actionId) {
@@ -137,6 +138,61 @@
 				};
 			}
 			return {};
+		}
+
+		function submitJob(isDryRun, button) {
+			if (!actionSelect || !actionSelect.value) return;
+
+			var actionId = actionSelect.value;
+			if (!isDryRun && actionId.indexOf('delete.permanent') === 0 && !confirm(bamAdmin.i18n.confirm)) {
+				return;
+			}
+
+			var data = {
+				name: document.getElementById('bam-job-name').value,
+				filter: getFilterPayload(),
+				action_type: actionId,
+				action_payload: buildPayload(actionId),
+				is_dry_run: isDryRun,
+				batch_size: parseInt(document.getElementById('bam-batch-size').value, 10),
+				processing_mode: document.getElementById('bam-processing-mode').value
+			};
+
+			button.disabled = true;
+			bamApi.post('jobs', data).then(function (result) {
+				if (result.dry_run) {
+					if (dryRunNotice) {
+						dryRunNotice.classList.remove('bam-hidden');
+						var p = dryRunNotice.querySelector('p');
+						if (p) p.textContent = result.message || bamAdmin.i18n.completed;
+					} else {
+						alert(result.message || bamAdmin.i18n.completed);
+					}
+					button.disabled = false;
+					return;
+				}
+				if (typeof bamJobRunner !== 'undefined') {
+					var progressBox = document.getElementById('bam-job-progress');
+					if (progressBox) progressBox.classList.remove('bam-hidden');
+					bamJobRunner.start(result.job_id);
+				}
+				button.disabled = false;
+			}).catch(function () {
+				alert(bamAdmin.i18n.error);
+				button.disabled = false;
+			});
+		}
+
+		if (startBtn && actionSelect) {
+			startBtn.addEventListener('click', function () {
+				submitJob(document.getElementById('bam-dry-run').checked, startBtn);
+			});
+		}
+
+		if (previewBtn && actionSelect) {
+			previewBtn.addEventListener('click', function () {
+				submitJob(true, previewBtn);
+			});
 		}
 	});
 })();

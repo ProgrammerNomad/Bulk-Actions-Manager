@@ -25,84 +25,93 @@ class Page_Dashboard extends Page_Base {
 
 		self::header( __( 'Bulk Actions Manager', 'bulk-actions-manager' ) );
 
-		self::render_jobs_postbox(
-			'bam-recent-jobs',
-			__( 'Recent Jobs', 'bulk-actions-manager' ),
+		self::section_heading( __( 'Recent Jobs', 'bulk-actions-manager' ) );
+		self::render_jobs_table_section(
 			$data['recent_jobs'],
-			admin_url( 'admin.php?page=bam-new-job' )
+			true,
+			admin_url( 'admin.php?page=bam-new-job' ),
+			__( 'Create your first job', 'bulk-actions-manager' )
 		);
 
-		echo '<div id="dashboard-widgets" class="metabox-holder columns-2">';
-		echo '<div class="postbox-container">';
-		self::render_compact_jobs_postbox(
-			'bam-running-jobs',
-			__( 'Running Jobs', 'bulk-actions-manager' ),
+		echo '<div class="bam-dashboard-columns">';
+
+		echo '<div class="bam-dashboard-column">';
+		self::section_heading( __( 'Running Jobs', 'bulk-actions-manager' ) );
+		self::render_jobs_table_section(
 			$data['running_jobs'],
-			admin_url( 'admin.php?page=bam-jobs&status=running' )
+			false,
+			admin_url( 'admin.php?page=bam-jobs&status=running' ),
+			'',
+			__( 'None', 'bulk-actions-manager' )
 		);
-		echo '</div>';
-		echo '<div class="postbox-container">';
-		self::render_compact_jobs_postbox(
-			'bam-undoable-jobs',
-			__( 'Undoable Jobs', 'bulk-actions-manager' ),
-			$data['undoable_jobs'],
-			admin_url( 'admin.php?page=bam-jobs&status=completed' )
-		);
-		echo '</div>';
 		echo '</div>';
 
-		Admin_UI::postbox_open( 'bam-system-status', __( 'System Status', 'bulk-actions-manager' ) );
+		echo '<div class="bam-dashboard-column">';
+		self::section_heading( __( 'Undoable Jobs', 'bulk-actions-manager' ) );
+		self::render_jobs_table_section(
+			$data['undoable_jobs'],
+			false,
+			admin_url( 'admin.php?page=bam-jobs&status=completed' ),
+			'',
+			__( 'None', 'bulk-actions-manager' )
+		);
+		echo '</div>';
+
+		echo '</div>';
+
+		self::section_heading( __( 'System Status', 'bulk-actions-manager' ) );
 		self::render_system_status( $data['system_status'], $data['counts'] );
-		Admin_UI::postbox_close();
 
 		self::footer();
 	}
 
 	/**
-	 * Full-width recent jobs table.
+	 * Section heading (native Settings / list screen style).
 	 *
-	 * @param string             $id       Postbox ID.
-	 * @param string             $title    Title.
-	 * @param array<int, object> $jobs     Jobs.
-	 * @param string             $empty_cta Empty state CTA URL.
+	 * @param string $title Section title.
 	 */
-	private static function render_jobs_postbox( $id, $title, array $jobs, $empty_cta ) {
-		Admin_UI::postbox_open( $id, $title );
-		if ( empty( $jobs ) ) {
-			printf(
-				'<p class="description">%1$s <a href="%2$s">%3$s</a></p>',
-				esc_html__( 'No jobs yet.', 'bulk-actions-manager' ),
-				esc_url( $empty_cta ),
-				esc_html__( 'Create your first job', 'bulk-actions-manager' )
-			);
-			Admin_UI::postbox_close();
-			return;
-		}
-		self::render_jobs_table( $jobs, true );
-		Admin_UI::postbox_close();
+	private static function section_heading( $title ) {
+		echo '<h2>' . esc_html( $title ) . '</h2>';
 	}
 
 	/**
-	 * Compact jobs list for side postboxes.
+	 * Jobs table with optional empty state and view-all link.
 	 *
-	 * @param string             $id       Postbox ID.
-	 * @param string             $title    Title.
-	 * @param array<int, object> $jobs     Jobs.
-	 * @param string             $view_url View all URL.
+	 * @param array<int, object> $jobs       Jobs.
+	 * @param bool               $show_action Show action column.
+	 * @param string             $view_url   View-all URL.
+	 * @param string             $empty_cta  Empty-state link label (recent jobs only).
+	 * @param string             $empty_text Plain empty text (compact sections).
 	 */
-	private static function render_compact_jobs_postbox( $id, $title, array $jobs, $view_url ) {
-		Admin_UI::postbox_open( $id, $title );
+	private static function render_jobs_table_section( array $jobs, $show_action, $view_url, $empty_cta = '', $empty_text = '' ) {
 		if ( empty( $jobs ) ) {
-			echo '<p class="description">' . esc_html__( 'None', 'bulk-actions-manager' ) . '</p>';
-		} else {
-			self::render_jobs_table( $jobs, false );
+			if ( $empty_cta ) {
+				printf(
+					'<p class="description">%1$s <a href="%2$s">%3$s</a></p>',
+					esc_html__( 'No jobs yet.', 'bulk-actions-manager' ),
+					esc_url( $view_url ),
+					esc_html( $empty_cta )
+				);
+			} else {
+				echo '<p class="description">' . esc_html( $empty_text ) . '</p>';
+				printf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( $view_url ),
+					esc_html__( 'View all', 'bulk-actions-manager' )
+				);
+			}
+			return;
 		}
-		printf(
-			'<p><a href="%s">%s</a></p>',
-			esc_url( $view_url ),
-			esc_html__( 'View all', 'bulk-actions-manager' )
-		);
-		Admin_UI::postbox_close();
+
+		self::render_jobs_table( $jobs, $show_action );
+
+		if ( ! $empty_cta ) {
+			printf(
+				'<p><a href="%s">%s</a></p>',
+				esc_url( $view_url ),
+				esc_html__( 'View all', 'bulk-actions-manager' )
+			);
+		}
 	}
 
 	/**

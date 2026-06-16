@@ -4,7 +4,7 @@ Tags: bulk edit, bulk actions, content management, batch processing, undo
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,15 @@ No. Permanent deletes and file deletions cannot be undone. Supported changes sto
 
 == Changelog ==
 
+= 1.2.1 =
+* New Job guided workflow: 4-step postboxes with always-on preview on page load
+* Performance: count + paginated preview query (no full ID resolution on page load)
+* Results Summary card with status and category breakdown
+* Action description panel with undo/destructive messaging
+* Preview Job button; Start Job disabled until action selected
+* Advanced Filters accordion (native details/summary)
+* Jobs list status badges; Logs inline Undo button column
+
 = 1.2.0 =
 * Native WordPress admin UI: postboxes, form-table, Settings API, widefat tables
 * Dashboard server-rendered (no AJAX); Recent Jobs first, then Running and Undoable postboxes
@@ -101,6 +110,9 @@ No. Permanent deletes and file deletions cannot be undone. Supported changes sto
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+New Job workflow redesign with always-on preview and performance-safe queries. Recommended for all sites.
 
 = 1.2.0 =
 Admin UI aligned with native WordPress screens. Recommended for all sites.

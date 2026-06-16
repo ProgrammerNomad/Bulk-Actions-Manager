@@ -114,13 +114,56 @@ class Action_Registry {
 			if ( ! isset( $groups[ $group ] ) ) {
 				$groups[ $group ] = array();
 			}
+			$description = $action->get_description();
+			if ( ! $description ) {
+				$description = self::default_description( $action->get_id() );
+			}
 			$groups[ $group ][] = array(
 				'id'            => $action->get_id(),
 				'label'         => $action->get_label(),
 				'safety_level'  => $action->get_safety_level(),
 				'supports_undo' => $action->supports_undo(),
+				'description'   => $description,
 			);
 		}
 		return $groups;
+	}
+
+	/**
+	 * Default UI descriptions for built-in actions.
+	 *
+	 * @param string $id Action ID.
+	 * @return string
+	 */
+	private static function default_description( $id ) {
+		$map = array(
+			'status.publish'              => __( 'Changes post status to Published. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'status.draft'                => __( 'Changes post status to Draft. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'status.pending'              => __( 'Changes post status to Pending Review. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'status.private'              => __( 'Changes post status to Private. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'delete.trash'                => __( 'Moves posts to trash. Can be restored from the WordPress trash.', 'bulk-actions-manager' ),
+			'delete.permanent'            => __( 'Deletes posts permanently. Deletes related metadata. Cannot be undone.', 'bulk-actions-manager' ),
+			'author.change'               => __( 'Reassigns posts to a different author. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'category.add'                => __( 'Adds categories to matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'category.remove'             => __( 'Removes categories from matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'category.replace'            => __( 'Replaces categories on matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'tag.add'                     => __( 'Adds tags to matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'tag.remove'                  => __( 'Removes tags from matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'tag.replace'                 => __( 'Replaces tags on matching posts. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'meta.add'                    => __( 'Adds custom meta fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'meta.update'                 => __( 'Updates custom meta fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'meta.remove'                 => __( 'Removes custom meta fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'media.remove_thumbnail'      => __( 'Removes featured image references. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'media.delete_thumbnail_file' => __( 'Deletes featured image files from the media library. Recoverable only if backups exist.', 'bulk-actions-manager' ),
+			'media.delete_attached'       => __( 'Deletes attached media files. Cannot be fully undone.', 'bulk-actions-manager' ),
+			'content.find_replace'        => __( 'Finds and replaces text in content fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'content.append'              => __( 'Appends text to content fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'content.prepend'             => __( 'Prepends text to content fields. Creates snapshots for undo.', 'bulk-actions-manager' ),
+			'export.ids'                  => __( 'Exports matching post IDs. No content changes are made.', 'bulk-actions-manager' ),
+			'export.csv'                  => __( 'Exports matching posts as CSV. No content changes are made.', 'bulk-actions-manager' ),
+			'export.json'                 => __( 'Exports matching posts as JSON. No content changes are made.', 'bulk-actions-manager' ),
+		);
+
+		return $map[ $id ] ?? '';
 	}
 }

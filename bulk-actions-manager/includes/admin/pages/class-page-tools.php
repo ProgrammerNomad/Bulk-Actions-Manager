@@ -7,8 +7,6 @@
 
 namespace BAM\Admin\Pages;
 
-use BAM\Admin\Admin_UI;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -74,7 +72,7 @@ class Page_Tools extends Page_Base {
 		);
 
 		foreach ( $groups as $group_key => $group_label ) {
-			Admin_UI::postbox_open( 'bam-tools-' . $group_key, $group_label );
+			echo '<h2>' . esc_html( $group_label ) . '</h2>';
 			?>
 			<table class="widefat striped">
 				<thead>
@@ -107,7 +105,6 @@ class Page_Tools extends Page_Base {
 				</tbody>
 			</table>
 			<?php
-			Admin_UI::postbox_close();
 		}
 		?>
 		<script>

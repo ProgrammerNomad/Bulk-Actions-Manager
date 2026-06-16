@@ -360,20 +360,190 @@ class Filter_Compiler {
 	 * @return array{total: int, ids: array<int, int>}
 	 */
 	public static function query( array $payload, $limit = 0 ) {
-		$all_ids = self::resolve_ids( $payload );
-		$total   = count( $all_ids );
-
 		if ( $limit > 0 ) {
-			return array(
-				'total' => $total,
-				'ids'   => array_slice( $all_ids, 0, $limit ),
-			);
+			return self::query_page( $payload, 1, $limit );
 		}
 
+		$all_ids = self::resolve_ids( $payload );
 		return array(
-			'total' => $total,
+			'total' => count( $all_ids ),
 			'ids'   => $all_ids,
 		);
+	}
+
+	/**
+	 * Paginated preview query — uses found_posts, does not load all matching IDs.
+	 *
+	 * @param array<string, mixed> $payload  Filter payload.
+	 * @param int                  $page     Page number.
+	 * @param int                  $per_page Posts per page.
+	 * @return array{total: int, ids: array<int, int>}
+	 */
+	public static function query_page( array $payload, $page = 1, $per_page = 20 ) {
+		$args = self::compile( $payload );
+		$args['posts_per_page']         = max( 1, (int) $per_page );
+		$args['paged']                  = max( 1, (int) $page );
+		$args['fields']                 = 'ids';
+		$args['no_found_rows']          = false;
+		$args['update_post_meta_cache'] = false;
+		$args['update_post_term_cache'] = false;
+
+		$query = new \WP_Query( $args );
+		self::cleanup_clause_filters();
+
+		return array(
+			'total' => (int) $query->found_posts,
+			'ids'   => array_map( 'intval', $query->posts ),
+		);
+	}
+
+	/**
+	 * Aggregate status and category counts for preview summary.
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @param int                  $total   Total from query_page (avoids extra count query).
+	 * @return array{statuses: array<string, int>, categories: array<string, int>, categories_limited: bool}
+	 */
+	public static function get_aggregates( array $payload, $total = 0 ) {
+		$result = array(
+			'statuses'            => array(),
+			'categories'          => array(),
+			'categories_limited'    => false,
+		);
+
+		if ( $total <= 0 ) {
+			return $result;
+		}
+
+		$locked_status = self::get_locked_status( $payload );
+
+		if ( $locked_status ) {
+			$result['statuses'][ $locked_status ] = $total;
+		} else {
+			foreach ( get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' ) as $status ) {
+				$status_payload = self::payload_with_status( $payload, $status );
+				$count          = self::query_page( $status_payload, 1, 1 )['total'];
+				if ( $count > 0 ) {
+					$result['statuses'][ $status ] = $count;
+				}
+			}
+		}
+
+		if ( $total > 10000 ) {
+			$result['categories_limited'] = true;
+			return $result;
+		}
+
+		$result['categories'] = self::get_top_categories( $payload );
+		return $result;
+	}
+
+	/**
+	 * Get locked post status from payload if filtered to a single status.
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @return string
+	 */
+	private static function get_locked_status( array $payload ) {
+		foreach ( (array) ( $payload['conditions'] ?? array() ) as $condition ) {
+			if ( ! is_array( $condition ) || ( $condition['type'] ?? '' ) !== 'status' ) {
+				continue;
+			}
+			$values = array_map( 'sanitize_key', (array) ( $condition['value'] ?? array() ) );
+			if ( 1 === count( $values ) && 'not_in' !== ( $condition['operator'] ?? '' ) ) {
+				return $values[0];
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Clone payload with a single status condition.
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @param string               $status  Post status slug.
+	 * @return array<string, mixed>
+	 */
+	private static function payload_with_status( array $payload, $status ) {
+		$conditions = array();
+		foreach ( (array) ( $payload['conditions'] ?? array() ) as $condition ) {
+			if ( is_array( $condition ) && ( $condition['type'] ?? '' ) !== 'status' ) {
+				$conditions[] = $condition;
+			}
+		}
+		$conditions[] = array(
+			'type'     => 'status',
+			'operator' => 'in',
+			'value'    => array( sanitize_key( $status ) ),
+		);
+
+		return array_merge(
+			$payload,
+			array(
+				'conditions' => $conditions,
+			)
+		);
+	}
+
+	/**
+	 * Top category counts via filtered subquery (no full ID load in PHP).
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @return array<string, int> Term name => count.
+	 */
+	private static function get_top_categories( array $payload ) {
+		global $wpdb;
+
+		$sql = self::get_filter_subquery_sql( $payload );
+		if ( ! $sql ) {
+			return array();
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows = $wpdb->get_results(
+			"SELECT t.name, COUNT(*) AS cnt
+			FROM ( {$sql} ) AS bam_filtered
+			INNER JOIN {$wpdb->term_relationships} tr ON tr.object_id = bam_filtered.ID
+			INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'category'
+			INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+			GROUP BY t.term_id
+			ORDER BY cnt DESC
+			LIMIT 5"
+		);
+
+		$categories = array();
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$categories[ (string) $row->name ] = (int) $row->cnt;
+			}
+		}
+
+		return $categories;
+	}
+
+	/**
+	 * Build inner SQL for filtered posts (IDs only, no LIMIT).
+	 *
+	 * @param array<string, mixed> $payload Filter payload.
+	 * @return string
+	 */
+	private static function get_filter_subquery_sql( array $payload ) {
+		$args = self::compile( $payload );
+		$args['posts_per_page']         = 1;
+		$args['fields']                 = 'ids';
+		$args['no_found_rows']          = true;
+		$args['update_post_meta_cache'] = false;
+		$args['update_post_term_cache'] = false;
+
+		$query = new \WP_Query( $args );
+		self::cleanup_clause_filters();
+
+		if ( empty( $query->request ) ) {
+			return '';
+		}
+
+		$sql = preg_replace( '/\sLIMIT\s\d+(,\s*\d+)?\s*$/i', '', $query->request );
+		return is_string( $sql ) ? $sql : '';
 	}
 
 	/**
@@ -599,6 +769,60 @@ class Filter_Compiler {
 					'operator' => $rm_map[ $rm_key ],
 				);
 			}
+		}
+
+		if ( ! empty( $request['bam_meta_key'] ) ) {
+			$meta_key = sanitize_text_field( (string) $request['bam_meta_key'] );
+			$meta_op  = ! empty( $request['bam_meta_op'] ) ? sanitize_key( (string) $request['bam_meta_op'] ) : 'exists';
+			if ( in_array( $meta_op, array( 'exists', 'missing' ), true ) ) {
+				$conditions[] = array(
+					'type'     => 'meta',
+					'operator' => $meta_op,
+					'key'      => $meta_key,
+				);
+			}
+		}
+
+		if ( ! empty( $request['bam_meta_value_key'] ) ) {
+			$mv_key = sanitize_text_field( (string) $request['bam_meta_value_key'] );
+			$mv_op  = ! empty( $request['bam_meta_value_op'] ) ? sanitize_key( (string) $request['bam_meta_value_op'] ) : 'equals';
+			$mv_val = isset( $request['bam_meta_value'] ) ? sanitize_text_field( (string) $request['bam_meta_value'] ) : '';
+			if ( in_array( $mv_op, array( 'equals', 'contains', 'empty' ), true ) ) {
+				$conditions[] = array(
+					'type'     => 'meta_value',
+					'operator' => $mv_op,
+					'key'      => $mv_key,
+					'value'    => $mv_val,
+				);
+			}
+		}
+
+		if ( ! empty( $request['bam_featured'] ) ) {
+			$featured = sanitize_key( (string) $request['bam_featured'] );
+			if ( in_array( $featured, array( 'has', 'missing' ), true ) ) {
+				$conditions[] = array(
+					'type'     => 'featured_image',
+					'operator' => $featured,
+				);
+			}
+		}
+
+		if ( ! empty( $request['bam_title'] ) ) {
+			$conditions[] = array(
+				'type'     => 'content',
+				'field'    => 'title',
+				'operator' => 'contains',
+				'value'    => sanitize_text_field( (string) $request['bam_title'] ),
+			);
+		}
+
+		if ( ! empty( $request['bam_content'] ) ) {
+			$conditions[] = array(
+				'type'     => 'content',
+				'field'    => 'content',
+				'operator' => 'contains',
+				'value'    => sanitize_text_field( (string) $request['bam_content'] ),
+			);
 		}
 
 		return array(

@@ -3,7 +3,7 @@
  * Plugin Name:       Bulk Actions Manager
  * Plugin URI:        https://github.com/ProgrammerNomad/Bulk-Actions-Manager
  * Description:       Filter, preview, modify, export, schedule, and manage large amounts of WordPress content safely using batch processing.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            NomadProgrammer
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BAM_VERSION', '1.2.0' );
+define( 'BAM_VERSION', '1.2.1' );
 define( 'BAM_PLUGIN_FILE', __FILE__ );
 define( 'BAM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BAM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

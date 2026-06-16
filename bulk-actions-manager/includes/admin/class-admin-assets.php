@@ -65,11 +65,16 @@ class Admin_Assets {
 					'cancelled'      => __( 'Cancelled', 'bulk-actions-manager' ),
 					'noValue'        => __( 'No value needed', 'bulk-actions-manager' ),
 					'downloadExport' => __( 'Download Export', 'bulk-actions-manager' ),
+					'undoSupported'  => __( 'Undo supported', 'bulk-actions-manager' ),
+					'cannotUndo'     => __( 'Cannot be undone', 'bulk-actions-manager' ),
+					'recoverable'    => __( 'Recoverable', 'bulk-actions-manager' ),
+					'noUndo'         => __( 'Undo not available', 'bulk-actions-manager' ),
 				),
 			)
 		);
 
-		if ( in_array( $page, array( 'bam-dashboard', 'bam-new-job', 'bam-jobs', 'bam-tools' ), true ) ) {
+		$needs_postbox = ( 'bam-new-job' === $page ) || ( 'bam-jobs' === $page && isset( $_GET['job_id'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $needs_postbox ) {
 			wp_enqueue_script( 'postbox' );
 			wp_add_inline_script(
 				'postbox',

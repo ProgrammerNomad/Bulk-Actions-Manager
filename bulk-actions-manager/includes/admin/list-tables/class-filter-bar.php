@@ -118,9 +118,75 @@ class Filter_Bar {
 					</select>
 				<?php endif; ?>
 
-				<input type="submit" name="filter_action" id="post-query-submit" class="button" value="<?php \esc_attr_e( 'Filter', 'bulk-actions-manager' ); ?>" />
+				<input type="submit" name="filter_action" id="post-query-submit" class="button" value="<?php \esc_attr_e( 'Refresh Results', 'bulk-actions-manager' ); ?>" />
 			</div>
 		</div>
+
+		<?php self::render_advanced_filters( $request ); ?>
+		<?php
+	}
+
+	/**
+	 * Advanced filters accordion (native details/summary).
+	 *
+	 * @param array<string, mixed> $request Request args.
+	 */
+	private static function render_advanced_filters( array $request ) {
+		$meta_key         = ! empty( $request['bam_meta_key'] ) ? \sanitize_text_field( (string) $request['bam_meta_key'] ) : '';
+		$meta_op          = ! empty( $request['bam_meta_op'] ) ? \sanitize_key( (string) $request['bam_meta_op'] ) : 'exists';
+		$meta_value_key   = ! empty( $request['bam_meta_value_key'] ) ? \sanitize_text_field( (string) $request['bam_meta_value_key'] ) : '';
+		$meta_value       = isset( $request['bam_meta_value'] ) ? \sanitize_text_field( (string) $request['bam_meta_value'] ) : '';
+		$meta_value_op    = ! empty( $request['bam_meta_value_op'] ) ? \sanitize_key( (string) $request['bam_meta_value_op'] ) : 'equals';
+		$featured         = ! empty( $request['bam_featured'] ) ? \sanitize_key( (string) $request['bam_featured'] ) : '';
+		$title_contains   = ! empty( $request['bam_title'] ) ? \sanitize_text_field( (string) $request['bam_title'] ) : '';
+		$content_contains = ! empty( $request['bam_content'] ) ? \sanitize_text_field( (string) $request['bam_content'] ) : '';
+		$advanced_open    = $meta_key || $meta_value_key || $featured || $title_contains || $content_contains;
+		?>
+		<details class="bam-advanced-filters"<?php echo $advanced_open ? ' open' : ''; ?>>
+			<summary><?php \esc_html_e( 'Advanced Filters', 'bulk-actions-manager' ); ?></summary>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><label for="bam-meta-key"><?php \esc_html_e( 'Meta Key', 'bulk-actions-manager' ); ?></label></th>
+					<td>
+						<input type="text" name="bam_meta_key" id="bam-meta-key" class="regular-text" value="<?php echo \esc_attr( $meta_key ); ?>" />
+						<select name="bam_meta_op" id="bam-meta-op">
+							<option value="exists"<?php \selected( $meta_op, 'exists' ); ?>><?php \esc_html_e( 'Exists', 'bulk-actions-manager' ); ?></option>
+							<option value="missing"<?php \selected( $meta_op, 'missing' ); ?>><?php \esc_html_e( 'Missing', 'bulk-actions-manager' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="bam-meta-value-key"><?php \esc_html_e( 'Meta Value', 'bulk-actions-manager' ); ?></label></th>
+					<td>
+						<input type="text" name="bam_meta_value_key" id="bam-meta-value-key" class="regular-text" placeholder="<?php \esc_attr_e( 'Meta key', 'bulk-actions-manager' ); ?>" value="<?php echo \esc_attr( $meta_value_key ); ?>" />
+						<input type="text" name="bam_meta_value" id="bam-meta-value" class="regular-text" placeholder="<?php \esc_attr_e( 'Value', 'bulk-actions-manager' ); ?>" value="<?php echo \esc_attr( $meta_value ); ?>" />
+						<select name="bam_meta_value_op" id="bam-meta-value-op">
+							<option value="equals"<?php \selected( $meta_value_op, 'equals' ); ?>><?php \esc_html_e( 'Equals', 'bulk-actions-manager' ); ?></option>
+							<option value="contains"<?php \selected( $meta_value_op, 'contains' ); ?>><?php \esc_html_e( 'Contains', 'bulk-actions-manager' ); ?></option>
+							<option value="empty"<?php \selected( $meta_value_op, 'empty' ); ?>><?php \esc_html_e( 'Empty', 'bulk-actions-manager' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="bam-featured"><?php \esc_html_e( 'Featured Image', 'bulk-actions-manager' ); ?></label></th>
+					<td>
+						<select name="bam_featured" id="bam-featured">
+							<option value=""><?php \esc_html_e( 'Any', 'bulk-actions-manager' ); ?></option>
+							<option value="has"<?php \selected( $featured, 'has' ); ?>><?php \esc_html_e( 'Has featured image', 'bulk-actions-manager' ); ?></option>
+							<option value="missing"<?php \selected( $featured, 'missing' ); ?>><?php \esc_html_e( 'Missing featured image', 'bulk-actions-manager' ); ?></option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="bam-title"><?php \esc_html_e( 'Title Contains', 'bulk-actions-manager' ); ?></label></th>
+					<td><input type="text" name="bam_title" id="bam-title" class="regular-text" value="<?php echo \esc_attr( $title_contains ); ?>" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="bam-content"><?php \esc_html_e( 'Content Contains', 'bulk-actions-manager' ); ?></label></th>
+					<td><input type="text" name="bam_content" id="bam-content" class="regular-text" value="<?php echo \esc_attr( $content_contains ); ?>" /></td>
+				</tr>
+			</table>
+		</details>
 		<?php
 	}
 
@@ -207,7 +273,23 @@ class Filter_Bar {
 	 * @return array<string, mixed>
 	 */
 	private static function preserve_filters( array $request, array $exclude = array() ) {
-		$keys = array( 'm', 'cat', 'author', 's', 'seo-filter', 'rankmath-filter', 'tag_id' );
+		$keys = array(
+			'm',
+			'cat',
+			'author',
+			's',
+			'seo-filter',
+			'rankmath-filter',
+			'tag_id',
+			'bam_meta_key',
+			'bam_meta_op',
+			'bam_meta_value_key',
+			'bam_meta_value',
+			'bam_meta_value_op',
+			'bam_featured',
+			'bam_title',
+			'bam_content',
+		);
 		$out  = array();
 		foreach ( $keys as $key ) {
 			if ( \in_array( $key, $exclude, true ) || empty( $request[ $key ] ) ) {

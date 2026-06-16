@@ -50,6 +50,13 @@ interface Action_Interface {
 	public function supports_undo();
 
 	/**
+	 * Human-readable description lines for the New Job action panel.
+	 *
+	 * @return string
+	 */
+	public function get_description();
+
+	/**
 	 * Validate action payload.
 	 *
 	 * @param array<string, mixed> $payload Payload.

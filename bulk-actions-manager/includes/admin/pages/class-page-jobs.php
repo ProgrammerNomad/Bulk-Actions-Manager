@@ -244,12 +244,9 @@ class Page_Jobs extends Page_Base {
 				$post_status = $filter['conditions'][0]['value'][0];
 			}
 		}
-		Admin_UI::postbox_open(
-			'bam-schedule-form',
-			$schedule ? __( 'Edit Schedule', 'bulk-actions-manager' ) : __( 'Add Schedule', 'bulk-actions-manager' )
-		);
 		?>
-				<form method="post">
+		<h2><?php echo esc_html( $schedule ? __( 'Edit Schedule', 'bulk-actions-manager' ) : __( 'Add Schedule', 'bulk-actions-manager' ) ); ?></h2>
+		<form method="post">
 					<?php wp_nonce_field( 'bam_save_schedule' ); ?>
 					<input type="hidden" name="bam_save_schedule" value="1" />
 					<input type="hidden" name="schedule_id" value="<?php echo $schedule ? (int) $schedule->id : 0; ?>" />
@@ -326,7 +323,6 @@ class Page_Jobs extends Page_Base {
 					</p>
 				</form>
 		<?php
-		Admin_UI::postbox_close();
 	}
 
 	/**

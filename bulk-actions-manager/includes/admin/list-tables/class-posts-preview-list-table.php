@@ -22,6 +22,13 @@ class Posts_Preview_List_Table extends List_Table_Base {
 	private $total_items_count = 0;
 
 	/**
+	 * Current page number.
+	 *
+	 * @var int
+	 */
+	private $current_page = 1;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -39,13 +46,9 @@ class Posts_Preview_List_Table extends List_Table_Base {
 	 */
 	public function get_columns() {
 		return array(
-			'cb'         => '<input type="checkbox" />',
-			'title'      => \__( 'Title', 'bulk-actions-manager' ),
-			'author'     => \__( 'Author', 'bulk-actions-manager' ),
-			'categories' => \__( 'Categories', 'bulk-actions-manager' ),
-			'tags'       => \__( 'Tags', 'bulk-actions-manager' ),
-			'date'       => \__( 'Date', 'bulk-actions-manager' ),
-			'status'     => \__( 'Status', 'bulk-actions-manager' ),
+			'id'     => \__( 'ID', 'bulk-actions-manager' ),
+			'title'  => \__( 'Title', 'bulk-actions-manager' ),
+			'status' => \__( 'Status', 'bulk-actions-manager' ),
 		);
 	}
 
@@ -54,9 +57,11 @@ class Posts_Preview_List_Table extends List_Table_Base {
 	 *
 	 * @param array<int, int> $ids   Post IDs for current page.
 	 * @param int             $total Total matching count.
+	 * @param int             $paged Current page.
 	 */
-	public function set_preview_data( array $ids, $total ) {
+	public function set_preview_data( array $ids, $total, $paged = 1 ) {
 		$this->total_items_count = $total;
+		$this->current_page      = max( 1, (int) $paged );
 		$this->items             = array();
 
 		foreach ( $ids as $id ) {
@@ -95,10 +100,13 @@ class Posts_Preview_List_Table extends List_Table_Base {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * ID column.
+	 *
+	 * @param \WP_Post $item Post.
+	 * @return string
 	 */
-	protected function column_cb( $item ) {
-		return \sprintf( '<input type="checkbox" name="post[]" value="%d" disabled />', (int) $item->ID );
+	protected function column_id( $item ) {
+		return (string) (int) $item->ID;
 	}
 
 	/**
@@ -113,63 +121,13 @@ class Posts_Preview_List_Table extends List_Table_Base {
 
 		if ( $edit_link ) {
 			return \sprintf(
-				'<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
+				'<strong><a class="row-title" href="%s">%s</a></strong>',
 				\esc_url( $edit_link ),
-				\esc_attr( $title ),
 				\esc_html( $title )
 			);
 		}
 
 		return '<strong>' . \esc_html( $title ) . '</strong>';
-	}
-
-	/**
-	 * Author column.
-	 *
-	 * @param \WP_Post $item Post.
-	 * @return string
-	 */
-	protected function column_author( $item ) {
-		$user = \get_userdata( (int) $item->post_author );
-		return $user ? \esc_html( $user->display_name ) : '-';
-	}
-
-	/**
-	 * Categories column.
-	 *
-	 * @param \WP_Post $item Post.
-	 * @return string
-	 */
-	protected function column_categories( $item ) {
-		$terms = \get_the_category( $item->ID );
-		if ( empty( $terms ) ) {
-			return '—';
-		}
-		return \esc_html( \implode( ', ', \wp_list_pluck( $terms, 'name' ) ) );
-	}
-
-	/**
-	 * Tags column.
-	 *
-	 * @param \WP_Post $item Post.
-	 * @return string
-	 */
-	protected function column_tags( $item ) {
-		$terms = \get_the_tags( $item->ID );
-		if ( empty( $terms ) || \is_wp_error( $terms ) ) {
-			return '—';
-		}
-		return \esc_html( \implode( ', ', \wp_list_pluck( $terms, 'name' ) ) );
-	}
-
-	/**
-	 * Date column.
-	 *
-	 * @param \WP_Post $item Post.
-	 * @return string
-	 */
-	protected function column_date( $item ) {
-		return \esc_html( \get_the_date( '', $item ) );
 	}
 
 	/**

@@ -11,6 +11,7 @@ use BAM\Actions\Action_Registry;
 use BAM\Admin\Admin_UI;
 use BAM\Admin\List_Tables\Filter_Bar;
 use BAM\Admin\List_Tables\Posts_Preview_List_Table;
+use BAM\Admin\Preview_Summary;
 use BAM\Filters\Filter_Compiler;
 use BAM\Settings;
 
@@ -30,29 +31,18 @@ class Page_New_Job extends Page_Base {
 		$request = wp_unslash( $_GET );
 		$request = is_array( $request ) ? $request : array();
 
-		$payload        = Filter_Bar::parse_request_to_payload( $request );
-		$filters_active = self::has_active_filters( $request );
-		$show_preview   = ! empty( $request['preview'] );
-		$total          = 0;
-		$page_ids       = array();
-
-		if ( $filters_active ) {
-			$all_ids = Filter_Compiler::resolve_ids( $payload );
-			$total   = count( $all_ids );
-			if ( $show_preview ) {
-				$per_page = 20;
-				$paged    = isset( $request['paged'] ) ? max( 1, absint( $request['paged'] ) ) : 1;
-				$offset   = ( $paged - 1 ) * $per_page;
-				$page_ids = array_slice( $all_ids, $offset, $per_page );
-			}
-		}
+		$payload  = Filter_Bar::parse_request_to_payload( $request );
+		$per_page = 20;
+		$paged    = isset( $request['paged'] ) ? max( 1, absint( $request['paged'] ) ) : 1;
+		$result   = Filter_Compiler::query_page( $payload, $paged, $per_page );
+		$total    = $result['total'];
+		$page_ids = $result['ids'];
+		$summary  = Preview_Summary::build( $payload, $total );
 
 		self::header( __( 'New Job', 'bulk-actions-manager' ) );
 		?>
 		<div id="bam-new-job">
-			<?php
-			Admin_UI::postbox_open( 'bam-step-filter', __( 'Step 1: Filter Content', 'bulk-actions-manager' ) );
-			?>
+			<?php Admin_UI::postbox_open( 'bam-step-filter', __( 'Step 1: Filter Content', 'bulk-actions-manager' ) ); ?>
 			<form method="get" id="posts-filter">
 				<input type="hidden" name="page" value="bam-new-job" />
 				<?php if ( ! empty( $request['post_status'] ) ) : ?>
@@ -62,60 +52,51 @@ class Page_New_Job extends Page_Base {
 				<?php endif; ?>
 				<?php Filter_Bar::render( $request ); ?>
 			</form>
-			<?php if ( $filters_active ) : ?>
+			<?php Preview_Summary::render_count_notice( $total ); ?>
+			<?php Admin_UI::postbox_close(); ?>
+
+			<?php Admin_UI::postbox_open( 'bam-step-preview', __( 'Step 2: Preview Results', 'bulk-actions-manager' ) ); ?>
+			<?php Preview_Summary::render( $summary ); ?>
+			<?php if ( $total > 0 ) : ?>
 				<p class="description">
 					<?php
 					echo esc_html(
 						sprintf(
-							/* translators: %d: number of posts */
-							_n( '%d item matches your filters.', '%d items match your filters.', $total, 'bulk-actions-manager' ),
-							$total
+							/* translators: 1: shown count, 2: total count */
+							__( 'Showing %1$s of %2$s records', 'bulk-actions-manager' ),
+							number_format_i18n( min( $per_page, count( $page_ids ) ) ),
+							number_format_i18n( $total )
 						)
 					);
 					?>
 				</p>
-			<?php else : ?>
-				<p class="description"><?php esc_html_e( 'Apply filters to see how many items match.', 'bulk-actions-manager' ); ?></p>
-			<?php endif; ?>
-			<?php
-			Admin_UI::postbox_close();
-
-			Admin_UI::postbox_open( 'bam-step-preview', __( 'Step 2: Preview Results', 'bulk-actions-manager' ) );
-			if ( ! $filters_active ) {
-				echo '<p class="description">' . esc_html__( 'Complete step 1 first.', 'bulk-actions-manager' ) . '</p>';
-			} elseif ( ! $show_preview ) {
-				$preview_url = add_query_arg( array_merge( $request, array( 'page' => 'bam-new-job', 'preview' => '1' ) ), admin_url( 'admin.php' ) );
-				printf(
-					'<p><a class="button button-secondary" href="%s">%s</a></p>',
-					esc_url( $preview_url ),
-					esc_html__( 'Preview Matching Posts', 'bulk-actions-manager' )
-				);
-			} else {
+				<?php
 				$preview_table = new Posts_Preview_List_Table();
-				$preview_table->set_preview_data( $page_ids, $total );
+				$preview_table->set_preview_data( $page_ids, $total, $paged );
 				$preview_table->display();
-			}
-			Admin_UI::postbox_close();
+				?>
+			<?php else : ?>
+				<p class="description"><?php esc_html_e( 'No posts match the current filters.', 'bulk-actions-manager' ); ?></p>
+			<?php endif; ?>
+			<?php Admin_UI::postbox_close(); ?>
 
-			Admin_UI::postbox_open( 'bam-step-action', __( 'Step 3: Select Action', 'bulk-actions-manager' ) );
-			?>
+			<?php Admin_UI::postbox_open( 'bam-step-action', __( 'Step 3: Select Action', 'bulk-actions-manager' ) ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="bam-action-type"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></label></th>
 					<td>
 						<select id="bam-action-type" name="action_type">
+							<option value=""><?php esc_html_e( '— Select an action —', 'bulk-actions-manager' ); ?></option>
 							<?php self::render_action_options(); ?>
 						</select>
-						<div id="bam-action-safety-wrap"><?php echo Admin_UI::safety_hint( 'safe' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 					</td>
 				</tr>
 			</table>
+			<div id="bam-action-description" class="bam-action-description"></div>
 			<table class="form-table" role="presentation" id="bam-action-fields"></table>
-			<?php
-			Admin_UI::postbox_close();
+			<?php Admin_UI::postbox_close(); ?>
 
-			Admin_UI::postbox_open( 'bam-step-run', __( 'Step 4: Execute', 'bulk-actions-manager' ) );
-			?>
+			<?php Admin_UI::postbox_open( 'bam-step-run', __( 'Step 4: Execute', 'bulk-actions-manager' ) ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Dry Run', 'bulk-actions-manager' ); ?></th>
@@ -150,55 +131,33 @@ class Page_New_Job extends Page_Base {
 					<td><input type="text" id="bam-job-name" name="job_name" class="regular-text" /></td>
 				</tr>
 			</table>
-			<p>
-				<button type="button" class="button button-primary" id="bam-start-job"><?php esc_html_e( 'Start Job', 'bulk-actions-manager' ); ?></button>
+			<p class="submit">
+				<button type="button" class="button button-secondary" id="bam-preview-job" disabled><?php esc_html_e( 'Preview Job', 'bulk-actions-manager' ); ?></button>
+				<button type="button" class="button button-primary" id="bam-start-job" disabled><?php esc_html_e( 'Start Job', 'bulk-actions-manager' ); ?></button>
 			</p>
-			<?php
-			Admin_UI::postbox_close();
+			<div id="bam-dry-run-notice" class="bam-hidden notice notice-success inline"><p></p></div>
+			<?php Admin_UI::postbox_close(); ?>
 
-			Admin_UI::postbox_open( 'bam-job-progress', __( 'Job Progress', 'bulk-actions-manager' ), 'bam-hidden' );
-			?>
-			<div class="bam-job-progress">
-				<progress id="bam-progress-bar" max="100" value="0"></progress>
-				<p id="bam-progress-text" class="description">0%</p>
-				<p id="bam-progress-stats" class="description"></p>
-				<p>
-					<button type="button" class="button button-secondary" id="bam-pause-job"><?php esc_html_e( 'Pause', 'bulk-actions-manager' ); ?></button>
-					<button type="button" class="button button-secondary" id="bam-resume-job"><?php esc_html_e( 'Resume', 'bulk-actions-manager' ); ?></button>
-					<button type="button" class="button button-link-delete" id="bam-cancel-job"><?php esc_html_e( 'Cancel', 'bulk-actions-manager' ); ?></button>
-				</p>
-				<div id="bam-job-errors"></div>
+			<div id="bam-job-progress" class="bam-hidden">
+				<?php Admin_UI::postbox_open( 'bam-job-progress-box', __( 'Job Progress', 'bulk-actions-manager' ) ); ?>
+				<div class="bam-job-progress">
+					<progress id="bam-progress-bar" max="100" value="0"></progress>
+					<p id="bam-progress-text" class="description">0%</p>
+					<p id="bam-progress-stats" class="description"></p>
+					<p>
+						<button type="button" class="button button-secondary" id="bam-pause-job"><?php esc_html_e( 'Pause', 'bulk-actions-manager' ); ?></button>
+						<button type="button" class="button button-secondary" id="bam-resume-job"><?php esc_html_e( 'Resume', 'bulk-actions-manager' ); ?></button>
+						<button type="button" class="button button-link-delete" id="bam-cancel-job"><?php esc_html_e( 'Cancel', 'bulk-actions-manager' ); ?></button>
+					</p>
+					<div id="bam-job-errors"></div>
+				</div>
+				<?php Admin_UI::postbox_close(); ?>
 			</div>
-			<?php
-			Admin_UI::postbox_close();
-			?>
 		</div>
 
 		<script type="application/json" id="bam-filter-payload"><?php echo wp_json_encode( $payload ); ?></script>
 		<?php
 		self::footer();
-	}
-
-	/**
-	 * Whether filter query args are active.
-	 *
-	 * @param array<string, mixed> $request Request args.
-	 * @return bool
-	 */
-	private static function has_active_filters( array $request ) {
-		$keys = array( 'm', 'cat', 'author', 's', 'seo-filter', 'rankmath-filter', 'tag_id', 'preview' );
-		foreach ( $keys as $key ) {
-			if ( ! empty( $request[ $key ] ) ) {
-				return true;
-			}
-		}
-
-		if ( ! empty( $request['post_type'] ) && 'post' !== sanitize_key( (string) $request['post_type'] ) ) {
-			return true;
-		}
-
-		$post_status = ! empty( $request['post_status'] ) ? sanitize_key( (string) $request['post_status'] ) : 'all';
-		return 'all' !== $post_status;
 	}
 
 	/**
@@ -210,10 +169,11 @@ class Page_New_Job extends Page_Base {
 			echo '<optgroup label="' . esc_attr( $group ) . '">';
 			foreach ( $actions as $action ) {
 				printf(
-					'<option value="%1$s" data-safety="%2$s" data-undo="%3$s">%4$s</option>',
+					'<option value="%1$s" data-safety="%2$s" data-undo="%3$s" data-description="%4$s">%5$s</option>',
 					esc_attr( $action['id'] ),
 					esc_attr( $action['safety_level'] ),
 					esc_attr( $action['supports_undo'] ? '1' : '0' ),
+					esc_attr( $action['description'] ),
 					esc_html( $action['label'] )
 				);
 			}

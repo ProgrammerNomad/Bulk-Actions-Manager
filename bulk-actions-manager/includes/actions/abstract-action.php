@@ -36,6 +36,15 @@ abstract class Abstract_Action implements Action_Interface {
 	}
 
 	/**
+	 * Default empty description; override in action classes.
+	 *
+	 * @return string
+	 */
+	public function get_description() {
+		return '';
+	}
+
+	/**
 	 * Default undo not supported.
 	 *
 	 * @param int                  $object_id Object ID.

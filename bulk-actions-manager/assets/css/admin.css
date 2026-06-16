@@ -9,6 +9,28 @@
 	vertical-align: middle;
 }
 
+.wrap .widefat {
+	width: 100%;
+	max-width: 100%;
+}
+
+.bam-dashboard-columns {
+	display: grid;
+	grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+	gap: 0 24px;
+	margin: 1em 0 1.5em;
+}
+
+.bam-dashboard-column {
+	min-width: 0;
+}
+
+@media screen and ( max-width: 782px ) {
+	.bam-dashboard-columns {
+		grid-template-columns: 1fr;
+	}
+}
+
 .bam-hidden {
 	display: none;
 }
@@ -54,4 +76,77 @@
 	width: 16px;
 	height: 16px;
 	vertical-align: text-bottom;
+}
+
+/* New Job workflow (postboxes scoped to workflow pages only). */
+#bam-new-job .postbox,
+#bam-job-detail .postbox,
+#bam-job-progress .postbox {
+	max-width: 100%;
+	margin-bottom: 16px;
+}
+
+#bam-new-job .inside,
+#bam-job-detail .inside {
+	overflow-x: auto;
+}
+
+#bam-new-job .bam-result-notice {
+	margin: 12px 0 0;
+}
+
+.bam-results-summary {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-left: 4px solid #2271b1;
+	padding: 12px 16px;
+	margin: 0 0 16px;
+}
+
+.bam-results-summary h3 {
+	margin: 0 0 8px;
+	font-size: 14px;
+}
+
+.bam-results-summary__list {
+	margin: 0 0 8px 1.2em;
+}
+
+.bam-advanced-filters {
+	margin: 12px 0 0;
+	padding: 8px 0;
+}
+
+.bam-advanced-filters summary {
+	cursor: pointer;
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.bam-action-description__panel {
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	padding: 12px 16px;
+	margin: 0 0 12px;
+}
+
+.bam-action-description__safety {
+	margin: 0 0 6px;
+	font-weight: 600;
+}
+
+.bam-action-description__safety .dashicons {
+	vertical-align: text-bottom;
+}
+
+.bam-action-description--destructive .bam-action-description__safety {
+	color: #b32d2e;
+}
+
+.bam-action-description--safe .bam-action-description__safety {
+	color: #007017;
+}
+
+.bam-action-description__text {
+	margin: 0;
 }

@@ -7,6 +7,7 @@
 
 namespace BAM\Admin\List_Tables;
 
+use BAM\Admin\Admin_UI;
 use BAM\Database\Repositories\Job_Repository;
 use BAM\Database\Repositories\Schedule_Repository;
 use BAM\Jobs\Job_Manager;
@@ -471,6 +472,16 @@ class Jobs_List_Table extends List_Table_Base {
 	 */
 	protected function column_records( $item ) {
 		return (int) $item->processed_items . ' / ' . (int) $item->total_items;
+	}
+
+	/**
+	 * Status column with badge.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_status( $item ) {
+		return Admin_UI::status_badge( $item->status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

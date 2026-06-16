@@ -37,6 +37,7 @@ class Logs_List_Table extends List_Table_Base {
 			'affected_count' => __( 'Affected', 'bulk-actions-manager' ),
 			'created_at'     => __( 'Date', 'bulk-actions-manager' ),
 			'undo_status'    => __( 'Undo Status', 'bulk-actions-manager' ),
+			'undo'           => __( 'Undo', 'bulk-actions-manager' ),
 		);
 	}
 
@@ -216,6 +217,55 @@ class Logs_List_Table extends List_Table_Base {
 	protected function column_user( $item ) {
 		$user = \get_userdata( (int) $item->user_id );
 		return $user ? \esc_html( $user->display_name ) : '-';
+	}
+
+	/**
+	 * Undo status column.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_undo_status( $item ) {
+		$labels = array(
+			'available' => __( 'Undo Available', 'bulk-actions-manager' ),
+			'used'      => __( 'Used', 'bulk-actions-manager' ),
+			'expired'   => __( 'Expired', 'bulk-actions-manager' ),
+		);
+		$status = isset( $labels[ $item->undo_status ] ) ? $labels[ $item->undo_status ] : $item->undo_status;
+		if ( 'available' === $item->undo_status ) {
+			return '<span class="bam-status-badge bam-status-badge--completed">' . \esc_html( $status ) . '</span>';
+		}
+		return \esc_html( $status );
+	}
+
+	/**
+	 * Inline undo action column.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_undo( $item ) {
+		if ( 'available' !== $item->undo_status ) {
+			return '—';
+		}
+
+		$undo_url = \wp_nonce_url(
+			\add_query_arg(
+				array(
+					'page'       => 'bam-logs',
+					'bam_action' => 'undo_log',
+					'log_id'     => (int) $item->id,
+				),
+				\admin_url( 'admin.php' )
+			),
+			'bam_undo_log_' . (int) $item->id
+		);
+
+		return \sprintf(
+			'<a class="button button-secondary" href="%s">%s</a>',
+			\esc_url( $undo_url ),
+			\esc_html__( 'Undo', 'bulk-actions-manager' )
+		);
 	}
 
 	/**

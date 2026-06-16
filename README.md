@@ -498,6 +498,20 @@ Jobs themselves process in configurable batch sizes (Settings → default batch 
 
 ---
 
+## Version 1.2.1 — Guided New Job Workflow
+
+- **Always-on preview** on page load (count + first 20 rows; no `?preview=1` click)
+- **Performance-safe queries** — uses `found_posts` + paginated IDs, not full ID resolution on load
+- **Results Summary** card (status + top categories) above preview table
+- **4-step postboxes**: Filter → Preview → Action → Execute
+- **Action description panel** with undo/destructive trust messaging
+- **Advanced Filters** via native `<details>` accordion
+- **Jobs** status badges; **Logs** inline Undo column
+
+Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to deploy.
+
+---
+
 ## Version 1.2.0 — Native Admin UI
 
 The admin interface now follows standard WordPress screen patterns:
