@@ -7,15 +7,15 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 
 ---
 
-## [1.2.2] — 2026-06-16
+## [1.2.2] - 2026-06-16
 
 ### Fixed
 
-- New Job filter refresh no longer shows **Cannot load bam-new-job** — filter forms use `bam_post_type` instead of WordPress core’s `post_type` query variable on plugin admin URLs.
+- New Job filter refresh no longer shows **Cannot load bam-new-job** - filter forms use `bam_post_type` instead of WordPress core’s `post_type` query variable on plugin admin URLs.
 
 ---
 
-## [1.2.1] — 2026-06-16
+## [1.2.1] - 2026-06-16
 
 ### Added
 
@@ -28,11 +28,11 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 
 ### Changed
 
-- Preview uses `found_posts` and paginated IDs — no full ID resolution on page load.
+- Preview uses `found_posts` and paginated IDs - no full ID resolution on page load.
 
 ---
 
-## [1.2.0] — 2026-06-16
+## [1.2.0] - 2026-06-16
 
 ### Changed
 
@@ -99,10 +99,10 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 | Version | Recommendation |
 |---------|----------------|
 | 1.2.2 | Recommended for all sites using New Job filters. |
-| 1.2.1 | Recommended — New Job workflow and performance improvements. |
-| 1.2.0 | Recommended — native WordPress admin UI refresh. |
-| 1.1.3 | Recommended — unified Jobs page. |
-| 1.1.2 | Recommended — processing hardening and WP 6.9 fixes. |
+| 1.2.1 | Recommended - New Job workflow and performance improvements. |
+| 1.2.0 | Recommended - native WordPress admin UI refresh. |
+| 1.1.3 | Recommended - unified Jobs page. |
+| 1.1.2 | Recommended - processing hardening and WP 6.9 fixes. |
 
 ---
 

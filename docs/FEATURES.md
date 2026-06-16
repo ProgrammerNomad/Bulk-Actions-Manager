@@ -143,17 +143,17 @@ Destructive actions require confirmation via a WordPress admin dialog before the
 
 Lists all jobs: ID, name, action, status, records, created, finished.
 
-**Runs view** (default) — one-time and undo executions. Status filters and **Type** column (`One-time`, `Undo`).
+**Runs view** (default) - one-time and undo executions. Status filters and **Type** column (`One-time`, `Undo`).
 
-**Scheduled view** — `?page=bam-jobs&type=schedule` — recurring configs with Add / Edit / Run Now. Each run creates a job visible under Runs.
+**Scheduled view** - `?page=bam-jobs&type=schedule` - recurring configs with Add / Edit / Run Now. Each run creates a job visible under Runs.
 
 ### Scheduled jobs
 
 Examples:
 
-- **Daily** — move old content to draft
-- **Weekly** — clean posts missing SEO fields
-- **Monthly** — orphan media cleanup
+- **Daily** - move old content to draft
+- **Weekly** - clean posts missing SEO fields
+- **Monthly** - orphan media cleanup
 
 ---
 

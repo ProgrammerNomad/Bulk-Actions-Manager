@@ -98,7 +98,7 @@ add_filter( 'bam_max_filter_results', function () {
 } );
 ```
 
-Jobs process in configurable batch sizes. Very large jobs may take significant time on shared hosting — use background mode and reliable cron for best results.
+Jobs process in configurable batch sizes. Very large jobs may take significant time on shared hosting - use background mode and reliable cron for best results.
 
 ---
 
@@ -141,6 +141,6 @@ No React, Vue, or Bootstrap build step. Confirmations use WordPress jQuery UI di
 
 ### Core principles
 
-- **Safe by default** — preview, dry run, confirmation, logging, undo when possible
-- **Scalable** — batched processing, never thousands of records in one request
-- **Auditable** — full job and log history with snapshot-based recovery
+- **Safe by default** - preview, dry run, confirmation, logging, undo when possible
+- **Scalable** - batched processing, never thousands of records in one request
+- **Auditable** - full job and log history with snapshot-based recovery
