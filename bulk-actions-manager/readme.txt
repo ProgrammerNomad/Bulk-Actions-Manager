@@ -65,7 +65,7 @@ No. Permanent deletes and file deletions cannot be undone. Supported changes sto
 
 == Screenshots ==
 
-1. New Job — filter bar and preview table
+1. New Job - filter bar and preview table
 2. Jobs list with status filters
 3. Log detail with undo option
 

@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 class Cron_Scheduler {
 
 	/**
-	 * Constructor — bind cron hooks.
+	 * Constructor - bind cron hooks.
 	 */
 	public function __construct() {
 		add_action( 'bam_process_queue', array( Job_Queue::class, 'process_queue' ) );

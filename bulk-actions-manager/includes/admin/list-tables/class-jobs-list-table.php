@@ -501,7 +501,7 @@ class Jobs_List_Table extends List_Table_Base {
 	 * @return string
 	 */
 	protected function column_next_run_at( $item ) {
-		return $item->next_run_at ? \esc_html( $item->next_run_at ) : '—';
+		return $item->next_run_at ? \esc_html( $item->next_run_at ) : '-';
 	}
 
 	/**
@@ -512,7 +512,7 @@ class Jobs_List_Table extends List_Table_Base {
 	 */
 	protected function column_last_run_at( $item ) {
 		if ( ! $item->last_run_at ) {
-			return '—';
+			return '-';
 		}
 
 		if ( ! empty( $item->last_job_id ) ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall handler — optionally drop tables when plugin is deleted.
+ * Uninstall handler - optionally drop tables when plugin is deleted.
  *
  * @package BulkActionsManager
  */

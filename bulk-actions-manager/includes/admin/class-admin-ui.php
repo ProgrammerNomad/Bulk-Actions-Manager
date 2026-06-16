@@ -23,10 +23,21 @@ class Admin_UI {
 	 */
 	public static function postbox_open( $id, $title, $class = '' ) {
 		printf(
-			'<div id="%1$s" class="postbox %2$s"><div class="postbox-header"><h2 class="hndle">%3$s</h2></div><div class="inside">',
+			'<div id="%1$s" class="postbox %2$s">
+				<div class="postbox-header">
+					<h2 class="hndle ui-sortable-handle"><span>%3$s</span></h2>
+					<div class="handle-actions hide-if-no-js">
+						<button type="button" class="handlediv" aria-expanded="true">
+							<span class="screen-reader-text">%4$s</span>
+							<span class="toggle-indicator" aria-hidden="true"></span>
+						</button>
+					</div>
+				</div>
+				<div class="inside">',
 			esc_attr( $id ),
 			esc_attr( $class ),
-			esc_html( $title )
+			esc_html( $title ),
+			esc_html__( 'Toggle panel', 'bulk-actions-manager' )
 		);
 	}
 

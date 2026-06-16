@@ -1,6 +1,6 @@
 <?php
 /**
- * Job manager — create and control jobs.
+ * Job manager - create and control jobs.
  *
  * @package BulkActionsManager
  */

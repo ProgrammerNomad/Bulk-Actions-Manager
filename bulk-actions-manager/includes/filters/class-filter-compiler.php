@@ -66,7 +66,7 @@ class Filter_Compiler {
 						'conditions' => $condition['conditions'] ?? array(),
 					)
 				);
-				// Nested groups handled via sub-query IDs intersection — simplified for v1.
+				// Nested groups handled via sub-query IDs intersection - simplified for v1.
 				continue;
 			}
 
@@ -372,7 +372,7 @@ class Filter_Compiler {
 	}
 
 	/**
-	 * Paginated preview query — uses found_posts, does not load all matching IDs.
+	 * Paginated preview query - uses found_posts, does not load all matching IDs.
 	 *
 	 * @param array<string, mixed> $payload  Filter payload.
 	 * @param int                  $page     Page number.

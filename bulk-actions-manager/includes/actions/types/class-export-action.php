@@ -1,6 +1,6 @@
 <?php
 /**
- * Export actions — writes file during job completion.
+ * Export actions - writes file during job completion.
  *
  * @package BulkActionsManager
  */

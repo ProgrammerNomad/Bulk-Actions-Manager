@@ -70,7 +70,7 @@ class Preview_Controller extends REST_Controller {
 	}
 
 	/**
-	 * POST /preview/export — CSV download.
+	 * POST /preview/export - CSV download.
 	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return \WP_REST_Response|\WP_Error

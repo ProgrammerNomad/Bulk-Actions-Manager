@@ -33,7 +33,7 @@ class Action_Registry {
 	private $actions = array();
 
 	/**
-	 * Constructor — register default actions.
+	 * Constructor - register default actions.
 	 */
 	public function __construct() {
 		$this->register_defaults();

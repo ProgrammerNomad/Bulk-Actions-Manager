@@ -41,7 +41,7 @@ class Page_New_Job extends Page_Base {
 
 		self::header( __( 'New Job', 'bulk-actions-manager' ) );
 		?>
-		<div id="bam-new-job">
+		<div id="bam-new-job" class="metabox-holder">
 			<?php Admin_UI::postbox_open( 'bam-step-filter', __( 'Step 1: Filter Content', 'bulk-actions-manager' ) ); ?>
 			<form method="get" id="posts-filter">
 				<input type="hidden" name="page" value="bam-new-job" />
@@ -86,7 +86,7 @@ class Page_New_Job extends Page_Base {
 					<th scope="row"><label for="bam-action-type"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></label></th>
 					<td>
 						<select id="bam-action-type" name="action_type">
-							<option value=""><?php esc_html_e( '— Select an action —', 'bulk-actions-manager' ); ?></option>
+							<option value=""><?php esc_html_e( 'Select an action', 'bulk-actions-manager' ); ?></option>
 							<?php self::render_action_options(); ?>
 						</select>
 					</td>
@@ -138,7 +138,7 @@ class Page_New_Job extends Page_Base {
 			<div id="bam-dry-run-notice" class="bam-hidden notice notice-success inline"><p></p></div>
 			<?php Admin_UI::postbox_close(); ?>
 
-			<div id="bam-job-progress" class="bam-hidden">
+			<div id="bam-job-progress" class="bam-hidden metabox-holder">
 				<?php Admin_UI::postbox_open( 'bam-job-progress-box', __( 'Job Progress', 'bulk-actions-manager' ) ); ?>
 				<div class="bam-job-progress">
 					<progress id="bam-progress-bar" max="100" value="0"></progress>

@@ -246,7 +246,7 @@ class Logs_List_Table extends List_Table_Base {
 	 */
 	protected function column_undo( $item ) {
 		if ( 'available' !== $item->undo_status ) {
-			return '—';
+			return '-';
 		}
 
 		$undo_url = \wp_nonce_url(

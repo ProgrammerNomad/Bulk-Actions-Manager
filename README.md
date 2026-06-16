@@ -296,9 +296,9 @@ Action: Undo Job #120
 
 Single admin page for job runs and recurring schedules.
 
-**Runs view** (default) — one-time and undo job executions with status filters (Running, Queued, Completed, etc.) and a **Type** column (`One-time`, `Undo`).
+**Runs view** (default) - one-time and undo job executions with status filters (Running, Queued, Completed, etc.) and a **Type** column (`One-time`, `Undo`).
 
-**Scheduled view** — `?page=bam-jobs&type=schedule` — recurring automation configs with Add/Edit/Run Now. Each scheduled run creates a job visible under Runs; **Last Run** links to that job.
+**Scheduled view** - `?page=bam-jobs&type=schedule` - recurring automation configs with Add/Edit/Run Now. Each scheduled run creates a job visible under Runs; **Last Run** links to that job.
 
 ### Scheduled Jobs (automation)
 
@@ -498,10 +498,10 @@ Jobs themselves process in configurable batch sizes (Settings → default batch 
 
 ---
 
-## Version 1.2.1 — Guided New Job Workflow
+## Version 1.2.1 - Guided New Job Workflow
 
 - **Always-on preview** on page load (count + first 20 rows; no `?preview=1` click)
-- **Performance-safe queries** — uses `found_posts` + paginated IDs, not full ID resolution on load
+- **Performance-safe queries** - uses `found_posts` + paginated IDs, not full ID resolution on load
 - **Results Summary** card (status + top categories) above preview table
 - **4-step postboxes**: Filter → Preview → Action → Execute
 - **Action description panel** with undo/destructive trust messaging
@@ -512,15 +512,15 @@ Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to de
 
 ---
 
-## Version 1.2.0 — Native Admin UI
+## Version 1.2.0 - Native Admin UI
 
 The admin interface now follows standard WordPress screen patterns:
 
-- **Dashboard** — server-rendered postboxes (Recent Jobs, Running, Undoable, System Status); no AJAX loading
-- **New Job** — four-step wizard with on-demand preview (`preview=1` in the URL)
-- **Settings** — WordPress Settings API (`options.php`, `form-table`, postbox wrapper)
-- **Tools** — `widefat striped` tables inside postboxes
-- **Custom CSS** — limited to status badges, progress bars, and `.bam-hidden`
+- **Dashboard** - server-rendered postboxes (Recent Jobs, Running, Undoable, System Status); no AJAX loading
+- **New Job** - four-step wizard with on-demand preview (`preview=1` in the URL)
+- **Settings** - WordPress Settings API (`options.php`, `form-table`, postbox wrapper)
+- **Tools** - `widefat striped` tables inside postboxes
+- **Custom CSS** - limited to status badges, progress bars, and `.bam-hidden`
 
 Copy the updated `bulk-actions-manager/` folder into `wp-content/plugins/` to deploy.
 

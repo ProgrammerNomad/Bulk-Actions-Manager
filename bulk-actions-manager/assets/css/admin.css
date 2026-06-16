@@ -1,4 +1,4 @@
-/* Bulk Actions Manager — minimal admin overrides (20% custom UI) */
+/* Bulk Actions Manager - minimal admin overrides (20% custom UI) */
 
 .wrap .subsubsub {
 	margin-bottom: 8px;
@@ -42,7 +42,7 @@
 	height: 22px;
 }
 
-/* Status badges — admin neutrals + theme accent only. */
+/* Status badges - admin neutrals + theme accent only. */
 .bam-status-badge {
 	display: inline-block;
 	padding: 2px 8px;
@@ -79,6 +79,12 @@
 }
 
 /* New Job workflow (postboxes scoped to workflow pages only). */
+#bam-new-job.metabox-holder,
+#bam-job-detail.metabox-holder,
+#bam-job-progress.metabox-holder {
+	padding-top: 0;
+}
+
 #bam-new-job .postbox,
 #bam-job-detail .postbox,
 #bam-job-progress .postbox {
@@ -86,8 +92,26 @@
 	margin-bottom: 16px;
 }
 
-#bam-new-job .inside,
-#bam-job-detail .inside {
+#bam-new-job .postbox-header,
+#bam-job-detail .postbox-header,
+#bam-job-progress .postbox-header {
+	border-bottom: 1px solid #c3c4c7;
+}
+
+#bam-new-job .postbox-header .hndle,
+#bam-job-detail .postbox-header .hndle,
+#bam-job-progress .postbox-header .hndle {
+	padding: 12px;
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+#bam-new-job .postbox .inside,
+#bam-job-detail .postbox .inside,
+#bam-job-progress .postbox .inside {
+	padding: 0 12px 12px;
+	margin: 0;
 	overflow-x: auto;
 }
 

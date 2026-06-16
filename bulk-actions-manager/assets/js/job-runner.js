@@ -40,10 +40,10 @@
 					bar.style.width = (data.percent || 0) + '%';
 				}
 			}
-			if ( text ) text.textContent = (data.percent || 0) + '% — ' + (data.status || '');
+			if ( text ) text.textContent = (data.percent || 0) + '% - ' + (data.status || '');
 			if ( stats ) {
 				stats.textContent = 'Processed: ' + (data.processed || 0) + ' / ' + (data.total || 0) +
-					(data.eta_seconds ? ' — ETA: ~' + data.eta_seconds + 's' : '');
+					(data.eta_seconds ? ' - ETA: ~' + data.eta_seconds + 's' : '');
 			}
 
 			if ( data.errors && data.errors.length ) {

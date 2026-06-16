@@ -383,11 +383,11 @@ class Page_Jobs extends Page_Base {
 		</table>
 
 		<?php if ( in_array( $job->status, array( 'running', 'queued', 'paused' ), true ) ) : ?>
-		<div id="bam-job-detail" data-job-id="<?php echo esc_attr( (string) $job_id ); ?>">
+		<div id="bam-job-detail" class="metabox-holder" data-job-id="<?php echo esc_attr( (string) $job_id ); ?>">
 			<?php Admin_UI::postbox_open( 'bam-job-progress-detail', __( 'Job Progress', 'bulk-actions-manager' ) ); ?>
 			<div class="bam-job-progress">
 				<progress id="bam-progress-bar" max="100" value="<?php echo esc_attr( (string) $formatted['percent'] ); ?>"></progress>
-				<p id="bam-progress-text" class="description"><?php echo esc_html( (string) $formatted['percent'] . '% — ' . $job->status ); ?></p>
+				<p id="bam-progress-text" class="description"><?php echo esc_html( (string) $formatted['percent'] . '% - ' . $job->status ); ?></p>
 				<p id="bam-progress-stats" class="description"></p>
 				<div id="bam-job-errors"></div>
 			</div>

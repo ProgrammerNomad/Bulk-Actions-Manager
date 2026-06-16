@@ -138,7 +138,7 @@ class Job_Processor {
 		$processed = 0;
 		$failed    = 0;
 
-		// Dry run without queue items — simulate count only.
+		// Dry run without queue items - simulate count only.
 		if ( $dry_run && empty( $batch ) ) {
 			Job_Repository::update(
 				$job_id,
