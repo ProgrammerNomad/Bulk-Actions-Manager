@@ -152,6 +152,9 @@ class Page_Jobs extends Page_Base {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Schedule triggered.', 'bulk-actions-manager' ) . '</p></div>';
 		}
 
+		$list_table = new Jobs_List_Table();
+		$list_table->render_mode_tabs();
+
 		// Schedules are created/edited on the New Job page - show a button linking there.
 		if ( $is_schedule ) {
 			?>
@@ -163,7 +166,6 @@ class Page_Jobs extends Page_Base {
 			<?php
 		}
 
-		$list_table = new Jobs_List_Table();
 		$list_table->prepare_items();
 		$search_label = $is_schedule
 			? __( 'Search Schedules', 'bulk-actions-manager' )
@@ -477,7 +479,7 @@ class Page_Jobs extends Page_Base {
 		<p id="bam-job-controls">
 			<a id="bam-control-pause" class="button" href="<?php echo esc_url( $pause_url ); ?>"<?php echo 'running' !== $job->status ? ' style="display:none;"' : ''; ?>><?php esc_html_e( 'Pause', 'bulk-actions-manager' ); ?></a>
 			<a id="bam-control-resume" class="button" href="<?php echo esc_url( $resume_url ); ?>"<?php echo 'paused' !== $job->status ? ' style="display:none;"' : ''; ?>><?php esc_html_e( 'Resume', 'bulk-actions-manager' ); ?></a>
-			<a id="bam-control-cancel" class="button button-link-delete" href="<?php echo esc_url( $cancel_url ); ?>"><?php esc_html_e( 'Cancel', 'bulk-actions-manager' ); ?></a>
+			<a id="bam-control-cancel" class="button button-link-delete bam-cancel-job-link" href="<?php echo esc_url( $cancel_url ); ?>"><?php esc_html_e( 'Cancel', 'bulk-actions-manager' ); ?></a>
 		</p>
 
 		<div id="bam-job-detail" class="metabox-holder" data-job-id="<?php echo esc_attr( (string) $job_id ); ?>">

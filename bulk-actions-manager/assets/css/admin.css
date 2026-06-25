@@ -4,6 +4,15 @@
 	margin-bottom: 8px;
 }
 
+.bam-jobs-type-nav {
+	margin-bottom: 8px;
+}
+
+.bam-jobs-type-nav + .subsubsub {
+	margin-top: 0;
+	margin-bottom: 12px;
+}
+
 .wrap .widefat th,
 .wrap .widefat td {
 	vertical-align: middle;
@@ -319,22 +328,88 @@
 	margin: 0;
 }
 
-/* WordPress-style confirmation dialog (jQuery UI + wp-jquery-ui-dialog). */
-.bam-confirm-dialog .bam-confirm-dialog__message {
-	margin: 0 0 8px;
-	font-size: 13px;
+/* Native dialog modal (reusable bamDialog / bamConfirm / bamAlert). */
+.bam-dialog {
+	padding: 0;
+	border: 1px solid #c3c4c7;
+	border-radius: 0;
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+	max-width: calc(100vw - 32px);
+	width: 480px;
 }
 
-.bam-confirm-dialog .bam-confirm-dialog__detail {
-	margin: 0;
+.bam-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.55);
 }
 
-.bam-confirm-dialog--destructive .ui-dialog-titlebar {
+.bam-dialog__panel {
+	background: #fff;
+}
+
+.bam-dialog__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	border-bottom: 1px solid #c3c4c7;
+}
+
+.bam-dialog--destructive .bam-dialog__header {
 	border-bottom-color: #d63638;
 }
 
-.bam-confirm-dialog .ui-dialog-buttonset .button-link-delete {
-	float: right;
+.bam-dialog__title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.bam-dialog__close {
+	background: transparent;
+	border: 0;
+	color: #646970;
+	cursor: pointer;
+	font-size: 20px;
+	line-height: 1;
+	padding: 0;
+}
+
+.bam-dialog__close:hover,
+.bam-dialog__close:focus {
+	color: #1d2327;
+}
+
+.bam-dialog__body {
+	padding: 16px;
+}
+
+.bam-dialog__message {
+	margin: 0 0 8px;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.bam-dialog__message:last-child {
+	margin-bottom: 0;
+}
+
+.bam-dialog__detail {
+	margin: 0;
+}
+
+.bam-dialog__footer {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 12px 16px 16px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.bam-dialog__footer .button-link-delete {
+	margin-left: auto;
 }
 
 .bam-logs-undo-cell {

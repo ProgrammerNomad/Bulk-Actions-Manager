@@ -13,6 +13,23 @@
 		return status === 'running' || status === 'queued' || status === 'paused';
 	}
 
+	function cancelJobConfirmOptions() {
+		var i18n = bamAdmin.i18n || {};
+		return {
+			title: i18n.confirmCancelJob || 'Cancel this job?',
+			message: i18n.confirmCancelJobMessage || 'Processing will stop and the job will be marked as cancelled.',
+			destructive: true,
+			okText: i18n.confirmCancelJobOk || 'Yes, cancel job'
+		};
+	}
+
+	function confirmCancelJob() {
+		if (typeof window.bamConfirm === 'function') {
+			return window.bamConfirm(cancelJobConfirmOptions());
+		}
+		return Promise.resolve(window.confirm(cancelJobConfirmOptions().message));
+	}
+
 	window.bamJobRunner = {
 		syncStatusUI: function (data) {
 			var status = data.status || '';
@@ -59,9 +76,12 @@
 				} else {
 					running = false;
 				}
-			}).catch(function () {
+			}).catch(function (err) {
 				running = false;
-				bamAlert({ title: bamAdmin.i18n.errorTitle, message: bamAdmin.i18n.error });
+				bamAlert({
+					title: bamAdmin.i18n.errorTitle,
+					message: typeof bamRestErrorMessage === 'function' ? bamRestErrorMessage(err) : bamAdmin.i18n.error
+				});
 			});
 		},
 
@@ -137,10 +157,62 @@
 					skipEl.style.display = 'none';
 				}
 			}
+		},
+
+		cancelCurrentJob: function () {
+			if (!currentJobId) {
+				return Promise.resolve();
+			}
+
+			return bamApi.post('jobs/' + currentJobId + '/cancel', {}).then(function () {
+				running = false;
+			});
 		}
 	};
 
+	function wireCancelControls() {
+		var cancelButton = document.getElementById('bam-cancel-job');
+		if (cancelButton) {
+			cancelButton.addEventListener('click', function () {
+				confirmCancelJob().then(function (confirmed) {
+					if (!confirmed) {
+						return;
+					}
+					bamJobRunner.cancelCurrentJob().then(function () {
+						running = false;
+						if (currentJobId) {
+							window.location.href = (bamAdmin.jobsUrl || '') + '&job_id=' + currentJobId + '&cancelled=1';
+						}
+					}).catch(function (err) {
+						bamAlert({
+							title: bamAdmin.i18n.errorTitle,
+							message: typeof bamRestErrorMessage === 'function' ? bamRestErrorMessage(err) : bamAdmin.i18n.error
+						});
+					});
+				});
+			});
+		}
+
+		var cancelLink = document.getElementById('bam-control-cancel');
+		if (cancelLink && cancelLink.classList.contains('bam-cancel-job-link')) {
+			cancelLink.addEventListener('click', function (event) {
+				if (typeof window.bamConfirm !== 'function') {
+					return;
+				}
+				event.preventDefault();
+				var href = cancelLink.href;
+				confirmCancelJob().then(function (confirmed) {
+					if (confirmed && href) {
+						window.location.href = href;
+					}
+				});
+			});
+		}
+	}
+
 	document.addEventListener('DOMContentLoaded', function () {
+		wireCancelControls();
+
 		var detailEl = document.getElementById('bam-job-detail');
 		if (detailEl && detailEl.dataset.jobId) {
 			var jobId = parseInt(detailEl.dataset.jobId, 10);

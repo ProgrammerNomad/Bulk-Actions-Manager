@@ -161,7 +161,7 @@ class Page_Logs extends Page_Base {
 
 		<?php if ( 'available' === $log->undo_status ) : ?>
 			<p>
-				<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=bam-logs&bam_action=undo_log&log_id=' . $log_id ), 'bam_undo_log_' . $log_id ) ); ?>">
+				<a class="button button-primary bam-undo-log-link" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=bam-logs&bam_action=undo_log&log_id=' . $log_id ), 'bam_undo_log_' . $log_id ) ); ?>">
 					<?php esc_html_e( 'Undo Job', 'bulk-actions-manager' ); ?>
 				</a>
 			</p>

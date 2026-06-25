@@ -441,8 +441,11 @@ class Page_New_Job extends Page_Base {
 						updateBtn.disabled = true;
 						bamApi.put('jobs/' + jobId, payload).then(function() {
 							window.location.href = bamAdmin.jobsUrl + '&job_id=' + jobId;
-						}).catch(function() {
-							bamAlert({ title: bamAdmin.i18n.errorTitle, message: bamAdmin.i18n.error });
+						}).catch(function(err) {
+							bamAlert({
+								title: bamAdmin.i18n.errorTitle,
+								message: typeof bamRestErrorMessage === 'function' ? bamRestErrorMessage(err) : bamAdmin.i18n.error
+							});
 							updateBtn.disabled = false;
 						});
 					});

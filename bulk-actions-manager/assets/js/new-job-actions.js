@@ -188,15 +188,20 @@
 						var linkEl = backgroundNotice.querySelector('.bam-background-notice__link');
 						if (linkEl) linkEl.href = jobUrl;
 						backgroundNotice.classList.remove('bam-hidden');
+						backgroundNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+						if (linkEl) linkEl.focus();
 					} else {
 						bamAlert({
-							message: bamAdmin.i18n.backgroundQueued + ' <a href="' + jobUrl + '">' + (bamAdmin.i18n.backgroundJobsLink || 'View job') + '</a>'
+							html: bamAdmin.i18n.backgroundQueued + ' <a href="' + jobUrl + '">' + (bamAdmin.i18n.backgroundJobsLink || 'View job') + '</a>'
 						});
 					}
 				}
 				button.disabled = false;
-			}).catch(function () {
-				bamAlert({ title: bamAdmin.i18n.errorTitle, message: bamAdmin.i18n.error });
+			}).catch(function (err) {
+				bamAlert({
+					title: bamAdmin.i18n.errorTitle,
+					message: typeof bamRestErrorMessage === 'function' ? bamRestErrorMessage(err) : bamAdmin.i18n.error
+				});
 				button.disabled = false;
 			});
 		}

@@ -183,7 +183,11 @@ class Logs_List_Table extends List_Table_Base {
 				),
 				'bam_undo_log_' . (int) $item->id
 			);
-			$actions['undo'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $undo_url ), \esc_html__( 'Undo', 'bulk-actions-manager' ) );
+			$actions['undo'] = \sprintf(
+				'<a href="%1$s" class="bam-undo-log-link">%2$s</a>',
+				\esc_url( $undo_url ),
+				\esc_html__( 'Undo', 'bulk-actions-manager' )
+			);
 		}
 
 		return \sprintf(
@@ -291,7 +295,7 @@ class Logs_List_Table extends List_Table_Base {
 		);
 
 		return sprintf(
-			'<div class="bam-logs-undo-cell"><span class="bam-status-badge bam-status-badge--completed">%1$s</span> <a class="button button-secondary" href="%2$s">%3$s</a></div>',
+			'<div class="bam-logs-undo-cell"><span class="bam-status-badge bam-status-badge--completed">%1$s</span> <a class="button button-secondary bam-undo-log-link" href="%2$s">%3$s</a></div>',
 			esc_html( $status ),
 			esc_url( $undo_url ),
 			esc_html__( 'Undo', 'bulk-actions-manager' )

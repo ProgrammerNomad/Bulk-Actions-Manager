@@ -357,12 +357,12 @@ class Jobs_List_Table extends List_Table_Base {
 	}
 
 	/**
-	 * Type and filter views.
+	 * Secondary filter views (status or active/inactive) for the current mode.
 	 *
 	 * @return array<string, string>
 	 */
 	protected function get_views() {
-		$views = $this->get_type_views();
+		$views = array();
 
 		if ( $this->is_schedule_type() ) {
 			$counts  = Schedule_Repository::count_by_active();
@@ -399,22 +399,26 @@ class Jobs_List_Table extends List_Table_Base {
 	}
 
 	/**
-	 * Runs vs Scheduled type switcher links.
-	 *
-	 * @return array<string, string>
+	 * Render Runs vs Scheduled mode tabs (primary navigation).
 	 */
-	private function get_type_views() {
+	public function render_mode_tabs() {
 		$run_label      = __( 'Runs', 'bulk-actions-manager' );
 		$schedule_label = __( 'Scheduled', 'bulk-actions-manager' );
-		$run_url        = $this->page_url( array( 'type' => 'run' ) );
-		$schedule_url   = $this->page_url( array( 'type' => 'schedule' ) );
-		$run_class      = ! $this->is_schedule_type() ? ' class="current"' : '';
-		$schedule_class = $this->is_schedule_type() ? ' class="current"' : '';
-
-		return array(
-			'type_run' => '<a href="' . \esc_url( $run_url ) . '"' . $run_class . '>' . \esc_html( $run_label ) . '</a>',
-			'type_schedule' => '<a href="' . \esc_url( $schedule_url ) . '"' . $schedule_class . '>' . \esc_html( $schedule_label ) . '</a>',
+		$run_url        = \add_query_arg( 'page', 'bam-jobs', \admin_url( 'admin.php' ) );
+		$schedule_url   = \add_query_arg(
+			array(
+				'page' => 'bam-jobs',
+				'type' => 'schedule',
+			),
+			\admin_url( 'admin.php' )
 		);
+		$run_class      = ! $this->is_schedule_type() ? ' nav-tab-active' : '';
+		$schedule_class = $this->is_schedule_type() ? ' nav-tab-active' : '';
+
+		echo '<h2 class="nav-tab-wrapper bam-jobs-type-nav">';
+		echo '<a href="' . \esc_url( $run_url ) . '" class="nav-tab' . \esc_attr( $run_class ) . '">' . \esc_html( $run_label ) . '</a>';
+		echo '<a href="' . \esc_url( $schedule_url ) . '" class="nav-tab' . \esc_attr( $schedule_class ) . '">' . \esc_html( $schedule_label ) . '</a>';
+		echo '</h2>';
 	}
 
 	/**
@@ -564,7 +568,11 @@ class Jobs_List_Table extends List_Table_Base {
 				),
 				'bam_cancel_job_' . (int) $item->id
 			);
-			$actions['cancel'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $cancel_url ), \esc_html__( 'Cancel', 'bulk-actions-manager' ) );
+			$actions['cancel'] = \sprintf(
+				'<a href="%1$s" class="bam-cancel-job-link">%2$s</a>',
+				\esc_url( $cancel_url ),
+				\esc_html__( 'Cancel', 'bulk-actions-manager' )
+			);
 		}
 
 		return \sprintf(
@@ -615,8 +623,16 @@ class Jobs_List_Table extends List_Table_Base {
 
 		$actions = array(
 			'edit'   => \sprintf( '<a href="%s">%s</a>', \esc_url( $edit_url ), \esc_html__( 'Edit', 'bulk-actions-manager' ) ),
-			'run'    => \sprintf( '<a href="%s">%s</a>', \esc_url( $run_url ), \esc_html__( 'Run Now', 'bulk-actions-manager' ) ),
-			'delete' => \sprintf( '<a href="%s">%s</a>', \esc_url( $delete_url ), \esc_html__( 'Delete', 'bulk-actions-manager' ) ),
+			'run'    => \sprintf(
+				'<a href="%1$s" class="bam-schedule-run-link">%2$s</a>',
+				\esc_url( $run_url ),
+				\esc_html__( 'Run Now', 'bulk-actions-manager' )
+			),
+			'delete' => \sprintf(
+				'<a href="%1$s" class="bam-schedule-delete-link">%2$s</a>',
+				\esc_url( $delete_url ),
+				\esc_html__( 'Delete', 'bulk-actions-manager' )
+			),
 		);
 
 		return \sprintf(

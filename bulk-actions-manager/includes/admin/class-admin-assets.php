@@ -36,16 +36,14 @@ class Admin_Assets {
 		wp_enqueue_style(
 			'bam-admin',
 			BAM_PLUGIN_URL . 'assets/css/admin.css',
-			array( 'wp-jquery-ui-dialog' ),
+			array(),
 			BAM_VERSION
 		);
-
-		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 
 		wp_enqueue_script(
 			'bam-admin-common',
 			BAM_PLUGIN_URL . 'assets/js/admin-common.js',
-			array( 'wp-api-fetch', 'jquery', 'jquery-ui-dialog', 'wpdialogs' ),
+			array( 'wp-api-fetch' ),
 			BAM_VERSION,
 			true
 		);
@@ -72,6 +70,14 @@ class Admin_Assets {
 					'confirmDeleteJobDetail'  => __( 'Audit log entries are kept. This cannot be undone.', 'bulk-actions-manager' ),
 					'confirmCancelJob'   => __( 'Cancel this job?', 'bulk-actions-manager' ),
 					'confirmCancelJobMessage' => __( 'Processing will stop and the job will be marked as cancelled.', 'bulk-actions-manager' ),
+					'confirmCancelJobOk'      => __( 'Yes, cancel job', 'bulk-actions-manager' ),
+					'confirmUndoLogTitle'     => __( 'Undo this job?', 'bulk-actions-manager' ),
+					'confirmUndoLogMessage'   => __( 'A new undo job will be created to reverse the changes from this log entry.', 'bulk-actions-manager' ),
+					'confirmUndoLogOk'        => __( 'Undo', 'bulk-actions-manager' ),
+					'confirmScheduleDeleteTitle'   => __( 'Delete this schedule?', 'bulk-actions-manager' ),
+					'confirmScheduleDeleteMessage' => __( 'This recurring schedule will be removed. Existing job runs are not deleted.', 'bulk-actions-manager' ),
+					'confirmScheduleRunTitle'      => __( 'Run this schedule now?', 'bulk-actions-manager' ),
+					'confirmScheduleRunMessage'    => __( 'A new background job will be created using this schedule configuration.', 'bulk-actions-manager' ),
 					'confirmRunTool'       => __( 'Run this tool?', 'bulk-actions-manager' ),
 					'confirmRunToolMessage' => __( 'This maintenance tool may change or remove data on your site.', 'bulk-actions-manager' ),
 					'noticeTitle'          => __( 'Notice', 'bulk-actions-manager' ),
@@ -139,6 +145,26 @@ class Admin_Assets {
 				'bam-jobs-list',
 				BAM_PLUGIN_URL . 'assets/js/jobs-list.js',
 				array( 'bam-admin-common', 'jquery' ),
+				BAM_VERSION,
+				true
+			);
+		}
+
+		if ( 'bam-logs' === $page && ! isset( $_GET['log_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_enqueue_script(
+				'bam-logs-list',
+				BAM_PLUGIN_URL . 'assets/js/logs-list.js',
+				array( 'bam-admin-common' ),
+				BAM_VERSION,
+				true
+			);
+		}
+
+		if ( 'bam-logs' === $page && isset( $_GET['log_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_enqueue_script(
+				'bam-logs-detail',
+				BAM_PLUGIN_URL . 'assets/js/logs-list.js',
+				array( 'bam-admin-common' ),
 				BAM_VERSION,
 				true
 			);

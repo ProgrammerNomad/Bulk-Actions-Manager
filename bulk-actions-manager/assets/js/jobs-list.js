@@ -1,30 +1,83 @@
 (function ($) {
 	'use strict';
 
+	var i18n = function () {
+		return (window.bamAdmin && bamAdmin.i18n) || {};
+	};
+
 	function deleteJobConfirmOptions() {
-		var i18n = (window.bamAdmin && bamAdmin.i18n) || {};
+		var strings = i18n();
 
 		return {
-			title: i18n.confirmDeleteJobTitle || 'Delete selected jobs?',
+			title: strings.confirmDeleteJobTitle || 'Delete selected jobs?',
 			message:
-				i18n.confirmDeleteJobMessage ||
+				strings.confirmDeleteJobMessage ||
 				'Remove the selected job records from the jobs list.',
 			detail:
-				i18n.confirmDeleteJobDetail ||
+				strings.confirmDeleteJobDetail ||
 				'Audit log entries are kept. This cannot be undone.',
 			destructive: true,
-			okText: i18n.confirmDeleteOk || 'Delete'
+			okText: strings.confirmDeleteOk || 'Delete'
 		};
 	}
 
-	function confirmDeleteJob() {
-		var opts = deleteJobConfirmOptions();
+	function cancelJobConfirmOptions() {
+		var strings = i18n();
 
+		return {
+			title: strings.confirmCancelJob || 'Cancel this job?',
+			message: strings.confirmCancelJobMessage || 'Processing will stop and the job will be marked as cancelled.',
+			destructive: true,
+			okText: strings.confirmCancelJobOk || 'Yes, cancel job'
+		};
+	}
+
+	function scheduleDeleteConfirmOptions() {
+		var strings = i18n();
+
+		return {
+			title: strings.confirmScheduleDeleteTitle || 'Delete this schedule?',
+			message: strings.confirmScheduleDeleteMessage || 'This recurring schedule will be removed.',
+			destructive: true,
+			okText: strings.confirmDeleteOk || 'Delete'
+		};
+	}
+
+	function scheduleRunConfirmOptions() {
+		var strings = i18n();
+
+		return {
+			title: strings.confirmScheduleRunTitle || 'Run this schedule now?',
+			message: strings.confirmScheduleRunMessage || 'A new background job will be created using this schedule configuration.',
+			okText: strings.confirmOk || 'Continue'
+		};
+	}
+
+	function confirmWith(options) {
 		if (typeof window.bamConfirm === 'function') {
-			return window.bamConfirm(opts);
+			return window.bamConfirm(options);
 		}
 
-		return Promise.resolve(window.confirm(opts.message));
+		return Promise.resolve(window.confirm(options.message));
+	}
+
+	function confirmDeleteJob() {
+		return confirmWith(deleteJobConfirmOptions());
+	}
+
+	function confirmCancelJob() {
+		return confirmWith(cancelJobConfirmOptions());
+	}
+
+	function confirmLink(event, options) {
+		event.preventDefault();
+		var href = event.currentTarget.href;
+
+		confirmWith(options).then(function (confirmed) {
+			if (confirmed && href) {
+				window.location.href = href;
+			}
+		});
 	}
 
 	function getBulkActionValue($form) {
@@ -40,34 +93,56 @@
 	$(function () {
 		var $form = $('#bam-jobs-list-form');
 
-		if (!$form.length) {
-			return;
+		if ($form.length) {
+			$form.on('submit', function (event) {
+				var action = getBulkActionValue($form);
+
+				if ('delete' === action) {
+					event.preventDefault();
+					var form = this;
+
+					confirmDeleteJob().then(function (confirmed) {
+						if (confirmed) {
+							form.submit();
+						}
+					});
+					return;
+				}
+
+				if ('cancel' === action) {
+					event.preventDefault();
+					var cancelForm = this;
+
+					confirmCancelJob().then(function (confirmed) {
+						if (confirmed) {
+							cancelForm.submit();
+						}
+					});
+				}
+			});
+
+			$form.on('click', 'a.bam-delete-job-link', function (event) {
+				confirmLink(event, deleteJobConfirmOptions());
+			});
+
+			$form.on('click', 'a.bam-cancel-job-link', function (event) {
+				confirmLink(event, cancelJobConfirmOptions());
+			});
+
+			$form.on('click', 'a.bam-schedule-delete-link', function (event) {
+				confirmLink(event, scheduleDeleteConfirmOptions());
+			});
+
+			$form.on('click', 'a.bam-schedule-run-link', function (event) {
+				confirmLink(event, scheduleRunConfirmOptions());
+			});
 		}
 
-		$form.on('submit', function (event) {
-			if ('delete' !== getBulkActionValue($form)) {
+		$(document).on('click', 'a.bam-cancel-job-link', function (event) {
+			if ($form.length && $form[0].contains(event.currentTarget)) {
 				return;
 			}
-
-			event.preventDefault();
-			var form = this;
-
-			confirmDeleteJob().then(function (confirmed) {
-				if (confirmed) {
-					form.submit();
-				}
-			});
-		});
-
-		$form.on('click', 'a.bam-delete-job-link', function (event) {
-			event.preventDefault();
-			var href = $(this).attr('href');
-
-			confirmDeleteJob().then(function (confirmed) {
-				if (confirmed && href) {
-					window.location.href = href;
-				}
-			});
+			confirmLink(event, cancelJobConfirmOptions());
 		});
 	});
 })(jQuery);

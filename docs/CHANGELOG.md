@@ -33,6 +33,8 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 - **Skipped vs Errors on job and log detail** - job progress and log detail pages show separate Errors (real failures) and Skipped (already in desired state) lists.
 - **Per-batch auto-pause** - max errors setting applies to failures in the current batch only; set to `0` to disable auto-pause. Resume no longer instantly re-pauses due to historical failure counts.
 - **Sidebar menu title** - admin menu shows **Bulk Actions** (page title remains Bulk Actions Manager).
+- **Jobs list mode tabs** - Runs and Scheduled appear as primary `nav-tab` tabs above status/active filters on the Jobs list page.
+- **Native dialog modals** - reusable `bamConfirm` / `bamAlert` use the HTML `<dialog>` element instead of jQuery UI; fixes Start Job with Permanently Delete and standardizes confirmations across admin screens.
 
 ### Changed
 

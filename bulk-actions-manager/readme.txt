@@ -167,6 +167,8 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 * Job and log detail pages show separate Errors and Skipped item lists; skipped items do not count toward auto-pause
 * Per-batch auto-pause threshold (0 disables); resume no longer re-pauses due to historical failure counts
 * Admin sidebar menu title is now Bulk Actions
+* Jobs list: Runs and Scheduled are primary tabs above status or active/inactive filters
+* Native dialog modals for confirmations and alerts; fixes Start Job with Permanently Delete after confirm
 
 = 1.2.2 =
 
