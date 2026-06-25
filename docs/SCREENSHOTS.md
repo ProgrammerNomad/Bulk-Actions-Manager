@@ -18,49 +18,54 @@ Custom BAM styling is limited to layout, spacing, small status badges, and stat 
 
 Screenshot numbers are **fixed** and shared by:
 
-- [`assets/screenshot-N.png`](../assets/) - image files (WordPress.org SVN `assets/` + GitHub)
+- [`bulk-actions-manager/screenshot-N.png`](../bulk-actions-manager/) - image files (plugin root)
 - [`bulk-actions-manager/readme.txt`](../bulk-actions-manager/readme.txt) - WordPress.org `== Screenshots ==` section (**numbered captions only**, no paths)
-- [`README.md`](../README.md) - GitHub image embeds
+- [`README.md`](../README.md) - GitHub image embeds (paths from the **GitHub repo root**, one level above the plugin folder)
 
 Do not renumber captions or rename files after release prep. Replace image files in place only.
 
 ---
 
-## Directory layout (official WordPress.org)
+## Repository layout (GitHub vs plugin / SVN)
 
-WordPress.org expects marketing images in the **SVN top-level `assets/` folder** (same level as `trunk/`), **not** inside the plugin zip or `trunk/assets/`.
+This project uses an **outer GitHub repo** with an **inner plugin folder** so you can zip and ship everything from one directory:
 
 ```text
-repo-root/
-├── assets/                          ← WordPress.org SVN assets/ (this folder)
-│   ├── screenshot-1.png
-│   ├── screenshot-2.png
-│   …
-│   ├── screenshot-9.png
-│   ├── banner-772x250.png             ← add before .org release (optional but recommended)
-│   ├── banner-1544x500.png          ← optional retina
-│   ├── icon-128x128.png
-│   └── icon-256x256.png
-├── bulk-actions-manager/              ← plugin code only (trunk contents)
-│   ├── bulk-actions-manager.php
-│   ├── readme.txt                     ← captions only for screenshots
-│   └── assets/                        ← plugin CSS/JS — NOT directory images
-│       ├── css/
-│       └── js/
-└── docs/
+Bulk-Actions-Manager/                  ← GitHub repo root (docs, LICENSE, README)
+├── README.md
+├── docs/
+│   └── SCREENSHOTS.md
+└── bulk-actions-manager/              ← plugin + SVN trunk source (zip this folder)
+    ├── bulk-actions-manager.php
+    ├── readme.txt
+    ├── screenshot-1.png
+    ├── screenshot-2.png
+    …
+    ├── screenshot-9.png
+    ├── banner-772x250.png             ← optional, add before .org release
+    ├── icon-256x256.png               ← optional
+    └── assets/                        ← plugin CSS/JS only (not directory screenshots)
+        ├── css/
+        └── js/
 ```
 
-WordPress.org maps readme caption `1.` → `assets/screenshot-1.png`, `2.` → `screenshot-2.png`, and so on.
+- **Local zip / install:** copy or zip `bulk-actions-manager/` into `wp-content/plugins/`.
+- **GitHub README:** embed `bulk-actions-manager/screenshot-N.png` (path from repo root).
+- **WordPress.org SVN:** commit plugin code to `trunk/` from this inner folder; copy `screenshot-*.png` and banner/icon files to the SVN top-level `assets/` directory (sibling of `trunk/`, not inside `trunk/assets/css`).
 
-**Do not** put `screenshot-*.png` in `bulk-actions-manager/` — they bloat the plugin zip and are not read from there on WordPress.org.
+WordPress.org maps readme caption `1.` → `screenshot-1.png` in SVN `assets/`, `2.` → `screenshot-2.png`, and so on.
 
-GitHub README embeds (paths from repo root):
+GitHub README embed example:
 
 ```markdown
-![Dashboard](assets/screenshot-1.png)
+![Dashboard](bulk-actions-manager/screenshot-1.png)
 ```
 
-See also [`assets/README.md`](../assets/README.md) for banner/icon filenames and SVN mime-type notes.
+From inside the plugin folder (e.g. plugin-only notes), the same file is just:
+
+```markdown
+![Dashboard](screenshot-1.png)
+```
 
 ---
 
@@ -86,15 +91,15 @@ Use a clean local or staging site. Recommended viewport: **1200×900** (or 1280�
 
 | # | File | Admin URL | What to show | Hide / avoid |
 |---|------|-----------|--------------|--------------|
-| 1 | `assets/screenshot-1.png` | `wp-admin/admin.php?page=bam-dashboard` | KPI summary row, Recent Jobs postbox, Activity postbox, System Health | Unrelated admin notices, personal data |
-| 2 | `assets/screenshot-2.png` | `wp-admin/admin.php?page=bam-new-job` | Steps 1–3 with action selected; schedule collapsed | Full Step 4 + schedule section |
-| 3 | `assets/screenshot-3.png` | New Job - Steps 1–2 | Filter bar, results summary stat chips, preview table | Zero-match empty state |
-| 4 | `assets/screenshot-4.png` | New Job - Step 3 | Action dropdown + safety / undo description panel | Empty action selection |
-| 5 | `assets/screenshot-5.png` | New Job - Step 4 (AJAX mode) | **Live progress**: progress bar, processed/total count, pause/cancel | Background “queued” notice |
-| 6 | `assets/screenshot-6.png` | `wp-admin/admin.php?page=bam-jobs` | **Runs** tab (primary nav) + status filters; badges and row actions | Scheduled tab only |
-| 7 | `assets/screenshot-7.png` | `wp-admin/admin.php?page=bam-logs` | Source column, affected/failed counts, Undo badge + button | Rows with Affected = 0 only |
-| 8 | `assets/screenshot-8.png` | `wp-admin/admin.php?page=bam-tools` | Postbox groups, Details badges, Download vs Run Cleanup | Plain Run-only rows |
-| 9 | `assets/screenshot-9.png` | `wp-admin/admin.php?page=bam-settings` | General, Undo, Logging, Data & Uninstall sections | Unrelated notices |
+| 1 | `bulk-actions-manager/screenshot-1.png` | `wp-admin/admin.php?page=bam-dashboard` | KPI summary row, Recent Jobs postbox, Activity postbox, System Health | Unrelated admin notices, personal data |
+| 2 | `bulk-actions-manager/screenshot-2.png` | `wp-admin/admin.php?page=bam-new-job` | Steps 1–3 with action selected; schedule collapsed | Full Step 4 + schedule section |
+| 3 | `bulk-actions-manager/screenshot-3.png` | New Job - Steps 1–2 | Filter bar, results summary stat chips, preview table | Zero-match empty state |
+| 4 | `bulk-actions-manager/screenshot-4.png` | New Job - Step 3 | Action dropdown + safety / undo description panel | Empty action selection |
+| 5 | `bulk-actions-manager/screenshot-5.png` | New Job - Step 4 (AJAX mode) | **Live progress**: progress bar, processed/total count, pause/cancel | Background “queued” notice |
+| 6 | `bulk-actions-manager/screenshot-6.png` | `wp-admin/admin.php?page=bam-jobs` | **Runs** tab (primary nav) + status filters; badges and row actions | Scheduled tab only |
+| 7 | `bulk-actions-manager/screenshot-7.png` | `wp-admin/admin.php?page=bam-logs` | Source column, affected/failed counts, Undo badge + button | Rows with Affected = 0 only |
+| 8 | `bulk-actions-manager/screenshot-8.png` | `wp-admin/admin.php?page=bam-tools` | Postbox groups, Details badges, Download vs Run Cleanup | Plain Run-only rows |
+| 9 | `bulk-actions-manager/screenshot-9.png` | `wp-admin/admin.php?page=bam-settings` | General, Undo, Logging, Data & Uninstall sections | Unrelated notices |
 
 ---
 
@@ -171,9 +176,9 @@ No staging required. Intro paragraph and all sections visible.
 When updating screenshots:
 
 1. Capture the screen per the checklist above.
-2. Save as `assets/screenshot-N.png` (same `N` as the readme caption).
+2. Save as `bulk-actions-manager/screenshot-N.png` (same folder as `bulk-actions-manager.php`, same `N` as the readme caption).
 3. **Overwrite** the existing file - do not rename or renumber.
-4. Copy the same files to WordPress.org SVN `assets/` on release.
+4. On WordPress.org release, copy the same files from the plugin folder into SVN top-level `assets/` (sibling of `trunk/`).
 5. Do not change `readme.txt` or `README.md` caption order unless you are deliberately redoing the entire set.
 
 ---
@@ -196,7 +201,7 @@ These captions must stay aligned with file numbers:
 
 ## Banner and icon (WordPress.org)
 
-Add to this same `assets/` folder before a polished directory listing:
+Store these in the **plugin folder** (`bulk-actions-manager/`) alongside screenshots for shipping; copy to SVN top-level `assets/` on release:
 
 | Asset | Filename | Notes |
 |-------|----------|-------|
@@ -207,3 +212,10 @@ Add to this same `assets/` folder before a polished directory listing:
 | Icon SVG | `icon.svg` | Optional; PNG fallback required |
 
 Banner max ~4MB; icon max ~1MB. Without icons, WordPress.org auto-generates a generic icon.
+
+Set SVN mime types after upload:
+
+```bash
+svn propset svn:mime-type image/png *.png
+svn propset svn:mime-type image/jpeg *.jpg
+```

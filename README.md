@@ -262,19 +262,19 @@ Bulk Actions Manager
 | | |
 |---|---|
 | **Dashboard** | **New Job workflow** |
-| ![Dashboard](assets/screenshot-1.png) | ![New Job](assets/screenshot-2.png) |
+| ![Dashboard](bulk-actions-manager/screenshot-1.png) | ![New Job](bulk-actions-manager/screenshot-2.png) |
 | **Filter & preview** | **Action safety panel** |
-| ![Filter preview](assets/screenshot-3.png) | ![Action selection](assets/screenshot-4.png) |
+| ![Filter preview](bulk-actions-manager/screenshot-3.png) | ![Action selection](bulk-actions-manager/screenshot-4.png) |
 | **Live job progress** | **Jobs (Runs)** |
-| ![Job progress](assets/screenshot-5.png) | ![Jobs runs](assets/screenshot-6.png) |
+| ![Job progress](bulk-actions-manager/screenshot-5.png) | ![Jobs runs](bulk-actions-manager/screenshot-6.png) |
 | **Logs & undo** | **Tools** |
-| ![Logs](assets/screenshot-7.png) | ![Tools](assets/screenshot-8.png) |
+| ![Logs](bulk-actions-manager/screenshot-7.png) | ![Tools](bulk-actions-manager/screenshot-8.png) |
 
 **Settings**
 
-![Settings](assets/screenshot-9.png)
+![Settings](bulk-actions-manager/screenshot-9.png)
 
-Directory images live in [`assets/`](assets/) (WordPress.org SVN `assets/` folder). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the capture checklist and banner/icon requirements.
+Screenshots live in the plugin folder next to `bulk-actions-manager.php`. See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for paths, capture checklist, and WordPress.org upload notes.
 
 ---
 
