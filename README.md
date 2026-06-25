@@ -206,7 +206,7 @@ Built with WordPress administration patterns:
 * REST API (`bam/v1`)
 * WP Cron
 * Dashicons
-* jQuery UI confirmation dialogs (no browser `alert()` / `confirm()`)
+* Native `<dialog>` confirmation modals via reusable `bamConfirm` / `bamAlert`
 
 No React build process. No Vue or Bootstrap. No third-party admin UI frameworks.
 
@@ -262,19 +262,19 @@ Bulk Actions Manager
 | | |
 |---|---|
 | **Dashboard** | **New Job workflow** |
-| ![Dashboard](bulk-actions-manager/screenshot-1.png) | ![New Job](bulk-actions-manager/screenshot-2.png) |
+| ![Dashboard](assets/screenshot-1.png) | ![New Job](assets/screenshot-2.png) |
 | **Filter & preview** | **Action safety panel** |
-| ![Filter preview](bulk-actions-manager/screenshot-3.png) | ![Action selection](bulk-actions-manager/screenshot-4.png) |
+| ![Filter preview](assets/screenshot-3.png) | ![Action selection](assets/screenshot-4.png) |
 | **Live job progress** | **Jobs (Runs)** |
-| ![Job progress](bulk-actions-manager/screenshot-5.png) | ![Jobs runs](bulk-actions-manager/screenshot-6.png) |
+| ![Job progress](assets/screenshot-5.png) | ![Jobs runs](assets/screenshot-6.png) |
 | **Logs & undo** | **Tools** |
-| ![Logs](bulk-actions-manager/screenshot-7.png) | ![Tools](bulk-actions-manager/screenshot-8.png) |
+| ![Logs](assets/screenshot-7.png) | ![Tools](assets/screenshot-8.png) |
 
 **Settings**
 
-![Settings](bulk-actions-manager/screenshot-9.png)
+![Settings](assets/screenshot-9.png)
 
-Save captures as `bulk-actions-manager/screenshot-*.png` - see [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the capture checklist.
+Directory images live in [`assets/`](assets/) (WordPress.org SVN `assets/` folder). See [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the capture checklist and banner/icon requirements.
 
 ---
 

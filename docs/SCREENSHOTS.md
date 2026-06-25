@@ -1,6 +1,6 @@
 # Screenshots
 
-Operational guide for plugin admin screenshots used on WordPress.org and in the GitHub README.
+Operational guide for plugin directory images used on WordPress.org and in the GitHub README.
 
 ---
 
@@ -18,32 +18,49 @@ Custom BAM styling is limited to layout, spacing, small status badges, and stat 
 
 Screenshot numbers are **fixed** and shared by:
 
-- [`bulk-actions-manager/readme.txt`](../bulk-actions-manager/readme.txt) - WordPress.org `== Screenshots ==` section (numbered captions only)
+- [`assets/screenshot-N.png`](../assets/) - image files (WordPress.org SVN `assets/` + GitHub)
+- [`bulk-actions-manager/readme.txt`](../bulk-actions-manager/readme.txt) - WordPress.org `== Screenshots ==` section (**numbered captions only**, no paths)
 - [`README.md`](../README.md) - GitHub image embeds
 
 Do not renumber captions or rename files after release prep. Replace image files in place only.
 
 ---
 
-## File naming
+## Directory layout (official WordPress.org)
 
-All screenshots live in the **plugin root** (same folder as `bulk-actions-manager.php`):
+WordPress.org expects marketing images in the **SVN top-level `assets/` folder** (same level as `trunk/`), **not** inside the plugin zip or `trunk/assets/`.
 
 ```text
-bulk-actions-manager/
-├── screenshot-1.png
-├── screenshot-2.png
-…
-└── screenshot-9.png
+repo-root/
+├── assets/                          ← WordPress.org SVN assets/ (this folder)
+│   ├── screenshot-1.png
+│   ├── screenshot-2.png
+│   …
+│   ├── screenshot-9.png
+│   ├── banner-772x250.png             ← add before .org release (optional but recommended)
+│   ├── banner-1544x500.png          ← optional retina
+│   ├── icon-128x128.png
+│   └── icon-256x256.png
+├── bulk-actions-manager/              ← plugin code only (trunk contents)
+│   ├── bulk-actions-manager.php
+│   ├── readme.txt                     ← captions only for screenshots
+│   └── assets/                        ← plugin CSS/JS — NOT directory images
+│       ├── css/
+│       └── js/
+└── docs/
 ```
 
-WordPress.org maps caption `1.` to `screenshot-1.png`, `2.` to `screenshot-2.png`, and so on.
+WordPress.org maps readme caption `1.` → `assets/screenshot-1.png`, `2.` → `screenshot-2.png`, and so on.
 
-GitHub README paths (repo root is one level above the plugin folder):
+**Do not** put `screenshot-*.png` in `bulk-actions-manager/` — they bloat the plugin zip and are not read from there on WordPress.org.
+
+GitHub README embeds (paths from repo root):
 
 ```markdown
-![Dashboard](bulk-actions-manager/screenshot-1.png)
+![Dashboard](assets/screenshot-1.png)
 ```
+
+See also [`assets/README.md`](../assets/README.md) for banner/icon filenames and SVN mime-type notes.
 
 ---
 
@@ -56,7 +73,7 @@ GitHub README paths (repo root is one level above the plugin folder):
 | 3 | Filter & preview | Near ready | Results Summary stat chips | Tight crop: filter bar + count notice + summary + preview table top rows |
 | 4 | Action safety | Staging | Action description panel | Step 3 dominant; undoable action selected (e.g. Move to Draft) |
 | 5 | Job progress | Live run | Existing AJAX UI | Start small AJAX job; capture live progress bar + pause/cancel |
-| 6 | Jobs Runs | Minor polish | Human-readable action labels | Runs tab; 6–8 varied jobs/statuses; hover row for Edit/Clone/View |
+| 6 | Jobs Runs | Minor polish | Mode tabs + action labels | **Runs** primary tab; status filters below; 6–8 varied jobs; hover row for actions |
 | 7 | Logs | Minor polish | Action labels + merged Undo column | 6–8 varied logs; Tool + Job sources; undo rows at top; non-zero Affected |
 | 8 | Tools | After UI | Postbox groups + Details badges | Three postbox groups; Download vs Run Cleanup visible |
 | 9 | Settings | Ready | Intro + uninstall option | Full settings form; intro visible; dismiss notices |
@@ -69,15 +86,15 @@ Use a clean local or staging site. Recommended viewport: **1200×900** (or 1280�
 
 | # | File | Admin URL | What to show | Hide / avoid |
 |---|------|-----------|--------------|--------------|
-| 1 | `screenshot-1.png` | `wp-admin/admin.php?page=bam-dashboard` | KPI summary row, Recent Jobs postbox, Activity postbox, System Health | Unrelated admin notices, personal data |
-| 2 | `screenshot-2.png` | `wp-admin/admin.php?page=bam-new-job` | Steps 1–3 with action selected; schedule collapsed | Full Step 4 + schedule section |
-| 3 | `screenshot-3.png` | New Job - Steps 1–2 | Filter bar, results summary stat chips, preview table | Zero-match empty state |
-| 4 | `screenshot-4.png` | New Job - Step 3 | Action dropdown + safety / undo description panel | Empty action selection |
-| 5 | `screenshot-5.png` | New Job - Step 4 (AJAX mode) | **Live progress**: progress bar, processed/total count, pause/cancel | Background “queued” notice |
-| 6 | `screenshot-6.png` | `wp-admin/admin.php?page=bam-jobs` | **Runs** tab: status badges, row actions, varied jobs | Scheduled tab only |
-| 7 | `screenshot-7.png` | `wp-admin/admin.php?page=bam-logs` | Source column, affected/failed counts, Undo badge + button | Rows with Affected = 0 only |
-| 8 | `screenshot-8.png` | `wp-admin/admin.php?page=bam-tools` | Postbox groups, Details badges, Download vs Run Cleanup | Plain Run-only rows |
-| 9 | `screenshot-9.png` | `wp-admin/admin.php?page=bam-settings` | General, Undo, Logging, Data & Uninstall sections | Unrelated notices |
+| 1 | `assets/screenshot-1.png` | `wp-admin/admin.php?page=bam-dashboard` | KPI summary row, Recent Jobs postbox, Activity postbox, System Health | Unrelated admin notices, personal data |
+| 2 | `assets/screenshot-2.png` | `wp-admin/admin.php?page=bam-new-job` | Steps 1–3 with action selected; schedule collapsed | Full Step 4 + schedule section |
+| 3 | `assets/screenshot-3.png` | New Job - Steps 1–2 | Filter bar, results summary stat chips, preview table | Zero-match empty state |
+| 4 | `assets/screenshot-4.png` | New Job - Step 3 | Action dropdown + safety / undo description panel | Empty action selection |
+| 5 | `assets/screenshot-5.png` | New Job - Step 4 (AJAX mode) | **Live progress**: progress bar, processed/total count, pause/cancel | Background “queued” notice |
+| 6 | `assets/screenshot-6.png` | `wp-admin/admin.php?page=bam-jobs` | **Runs** tab (primary nav) + status filters; badges and row actions | Scheduled tab only |
+| 7 | `assets/screenshot-7.png` | `wp-admin/admin.php?page=bam-logs` | Source column, affected/failed counts, Undo badge + button | Rows with Affected = 0 only |
+| 8 | `assets/screenshot-8.png` | `wp-admin/admin.php?page=bam-tools` | Postbox groups, Details badges, Download vs Run Cleanup | Plain Run-only rows |
+| 9 | `assets/screenshot-9.png` | `wp-admin/admin.php?page=bam-settings` | General, Undo, Logging, Data & Uninstall sections | Unrelated notices |
 
 ---
 
@@ -108,7 +125,7 @@ Example curated jobs:
 - Export posts missing SEO title (Completed)
 - Find & Replace outdated name (Failed, optional)
 
-Hover a row before capture so **View / Edit / Clone / Pause / Resume** row actions are visible (e.g. hover a **Paused** row for Resume, or a **Running** row for Pause).
+Show the **Runs | Scheduled** primary tabs (v1.3.0). Hover a row before capture so **View / Edit / Clone / Pause / Resume** row actions are visible.
 
 On the **Paused** filter, the bulk dropdown should show **Resume** and **Cancel** (not Delete). Use a mixed status set on the **All** or **Runs** tab for screenshot variety.
 
@@ -139,12 +156,13 @@ No staging required. Intro paragraph and all sections visible.
 
 ## Capture rules
 
-- **Format:** PNG
+- **Format:** PNG (or JPG on WordPress.org)
+- **Filenames:** lowercase `screenshot-N.png` only
 - **Theme:** Default WordPress admin (same color scheme for all 9 shots)
 - **Zoom:** Browser at 100%
 - **Notices:** Dismiss unrelated update/plugin notices before capturing
 - **Privacy:** No production domains, real user emails, or client branding unless intentional
-- **Size:** Target ~1200×900; WordPress.org will scale down as needed
+- **Size:** Target ~1200×900; max 10MB per file on WordPress.org
 
 ---
 
@@ -153,9 +171,10 @@ No staging required. Intro paragraph and all sections visible.
 When updating screenshots:
 
 1. Capture the screen per the checklist above.
-2. Save as `bulk-actions-manager/screenshot-N.png` (same `N` as the readme caption).
+2. Save as `assets/screenshot-N.png` (same `N` as the readme caption).
 3. **Overwrite** the existing file - do not rename or renumber.
-4. Do not change `readme.txt` or `README.md` caption order unless you are deliberately redoing the entire set.
+4. Copy the same files to WordPress.org SVN `assets/` on release.
+5. Do not change `readme.txt` or `README.md` caption order unless you are deliberately redoing the entire set.
 
 ---
 
@@ -175,6 +194,16 @@ These captions must stay aligned with file numbers:
 
 ---
 
-## WordPress.org assets (optional, separate)
+## Banner and icon (WordPress.org)
 
-Plugin directory **banner** and **icon** assets (e.g. `banner-772x250.png`, `icon-256x256.png`) are uploaded via the WordPress.org SVN `/assets/` folder, not the plugin zip. They are out of scope for the `screenshot-N.png` files above.
+Add to this same `assets/` folder before a polished directory listing:
+
+| Asset | Filename | Notes |
+|-------|----------|-------|
+| Banner | `banner-772x250.png` | Exactly 772×250 px |
+| Banner retina | `banner-1544x500.png` | Requires base banner; not standalone |
+| Icon | `icon-128x128.png` | Exactly 128×128 px |
+| Icon retina | `icon-256x256.png` | Exactly 256×256 px |
+| Icon SVG | `icon.svg` | Optional; PNG fallback required |
+
+Banner max ~4MB; icon max ~1MB. Without icons, WordPress.org auto-generates a generic icon.
