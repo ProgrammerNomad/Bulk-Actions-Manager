@@ -57,6 +57,16 @@
 			updateActionUI();
 		}
 
+		var scheduleToggle = document.getElementById('bam-save-as-schedule');
+		var schedulePanel = document.getElementById('bam-schedule-panel');
+		if (scheduleToggle && schedulePanel) {
+			scheduleToggle.addEventListener('change', function () {
+				var expanded = scheduleToggle.checked;
+				schedulePanel.classList.toggle('bam-hidden', !expanded);
+				scheduleToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+			});
+		}
+
 		function updateActionUI() {
 			if (!actionSelect) return;
 			var opt = actionSelect.selectedOptions[0];

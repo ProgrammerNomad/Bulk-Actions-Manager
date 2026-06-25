@@ -125,10 +125,51 @@ class Jobs_List_Table extends List_Table_Base {
 			return array();
 		}
 
-		return array(
-			'cancel' => __( 'Cancel', 'bulk-actions-manager' ),
-			'delete' => __( 'Delete', 'bulk-actions-manager' ),
-		);
+		$view = $this->get_status_view();
+
+		switch ( $view ) {
+			case 'running':
+				return array(
+					'pause'  => __( 'Pause', 'bulk-actions-manager' ),
+					'cancel' => __( 'Cancel', 'bulk-actions-manager' ),
+				);
+			case 'paused':
+				return array(
+					'resume' => __( 'Resume', 'bulk-actions-manager' ),
+					'cancel' => __( 'Cancel', 'bulk-actions-manager' ),
+				);
+			case 'queued':
+				return array(
+					'cancel' => __( 'Cancel', 'bulk-actions-manager' ),
+				);
+			case 'completed':
+			case 'failed':
+			case 'cancelled':
+				return array(
+					'delete' => __( 'Delete', 'bulk-actions-manager' ),
+				);
+			default:
+				return array(
+					'pause'  => __( 'Pause', 'bulk-actions-manager' ),
+					'resume' => __( 'Resume', 'bulk-actions-manager' ),
+					'cancel' => __( 'Cancel', 'bulk-actions-manager' ),
+					'delete' => __( 'Delete', 'bulk-actions-manager' ),
+				);
+		}
+	}
+
+	/**
+	 * Current runs status filter from request or prepare_items.
+	 *
+	 * @return string
+	 */
+	private function get_status_view() {
+		if ( '' !== $this->status_view ) {
+			return $this->status_view;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_REQUEST['status'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['status'] ) ) : '';
 	}
 
 	/**
@@ -140,7 +181,7 @@ class Jobs_List_Table extends List_Table_Base {
 		}
 
 		$action = $this->current_action();
-		if ( ! $action ) {
+		if ( ! $action || ! in_array( $action, array( 'pause', 'resume', 'cancel', 'delete' ), true ) ) {
 			return;
 		}
 
@@ -152,14 +193,48 @@ class Jobs_List_Table extends List_Table_Base {
 		}
 
 		$manager = new Job_Manager();
+		$updated = 0;
+		$skipped = 0;
 
 		foreach ( $ids as $id ) {
-			if ( 'cancel' === $action ) {
-				$manager->cancel( $id );
-			} elseif ( 'delete' === $action ) {
-				Job_Repository::delete( $id );
+			$result = null;
+
+			switch ( $action ) {
+				case 'pause':
+					$result = $manager->pause( $id );
+					break;
+				case 'resume':
+					$result = $manager->resume( $id );
+					break;
+				case 'cancel':
+					$result = $manager->cancel( $id );
+					break;
+				case 'delete':
+					$result = $manager->delete_job( $id );
+					break;
+			}
+
+			if ( is_wp_error( $result ) ) {
+				$skipped++;
+			} else {
+				$updated++;
 			}
 		}
+
+		$redirect_args = array(
+			'page'            => 'bam-jobs',
+			'bam_bulk'        => 1,
+			'bam_bulk_action' => $action,
+			'bam_updated'     => $updated,
+			'bam_skipped'     => $skipped,
+		);
+
+		if ( $this->status_view ) {
+			$redirect_args['status'] = $this->status_view;
+		}
+
+		\wp_safe_redirect( \add_query_arg( $redirect_args, \admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	/**
@@ -171,11 +246,13 @@ class Jobs_List_Table extends List_Table_Base {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->status_view = isset( $_REQUEST['status'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['status'] ) ) : '';
+
 		$this->process_bulk_action();
 
 		$per_page     = $this->get_items_per_page_value();
 		$current_page = max( 1, $this->get_pagenum() );
-		$this->status_view = isset( $_REQUEST['status'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['status'] ) ) : '';
 
 		$orderby = isset( $_REQUEST['orderby'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['orderby'] ) ) : 'created_at';
 		$order   = isset( $_REQUEST['order'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['order'] ) ) : 'DESC';
@@ -379,6 +456,19 @@ class Jobs_List_Table extends List_Table_Base {
 			'view' => \sprintf( '<a href="%s">%s</a>', \esc_url( $view_url ), \esc_html__( 'View', 'bulk-actions-manager' ) ),
 		);
 
+		if ( 'running' === $item->status ) {
+			$pause_url = \wp_nonce_url(
+				$this->page_url(
+					array(
+						'bam_action' => 'pause_job',
+						'job_id'     => (int) $item->id,
+					)
+				),
+				'bam_pause_job_' . (int) $item->id
+			);
+			$actions['pause'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $pause_url ), \esc_html__( 'Pause', 'bulk-actions-manager' ) );
+		}
+
 		// Edit: queued or paused jobs can be edited on the New Job page.
 		if ( \in_array( $item->status, array( 'queued', 'paused' ), true ) ) {
 			$edit_url = \add_query_arg(
@@ -391,8 +481,21 @@ class Jobs_List_Table extends List_Table_Base {
 			$actions['edit'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $edit_url ), \esc_html__( 'Edit', 'bulk-actions-manager' ) );
 		}
 
+		if ( 'paused' === $item->status ) {
+			$resume_url = \wp_nonce_url(
+				$this->page_url(
+					array(
+						'bam_action' => 'resume_job',
+						'job_id'     => (int) $item->id,
+					)
+				),
+				'bam_resume_job_' . (int) $item->id
+			);
+			$actions['resume'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $resume_url ), \esc_html__( 'Resume', 'bulk-actions-manager' ) );
+		}
+
 		// Clone: terminal jobs (completed/failed/cancelled) can be cloned.
-		if ( \in_array( $item->status, array( 'completed', 'failed', 'cancelled' ), true ) ) {
+		if ( Job_Manager::is_terminal_status( $item->status ) ) {
 			$clone_url = \add_query_arg(
 				array(
 					'page'         => 'bam-new-job',
@@ -401,6 +504,21 @@ class Jobs_List_Table extends List_Table_Base {
 				\admin_url( 'admin.php' )
 			);
 			$actions['clone'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $clone_url ), \esc_html__( 'Clone', 'bulk-actions-manager' ) );
+
+			$delete_url = \wp_nonce_url(
+				$this->page_url(
+					array(
+						'bam_action' => 'delete_job',
+						'job_id'     => (int) $item->id,
+					)
+				),
+				'bam_delete_job_' . (int) $item->id
+			);
+			$actions['delete'] = \sprintf(
+				'<a href="%1$s" class="bam-delete-job-link">%2$s</a>',
+				\esc_url( $delete_url ),
+				\esc_html__( 'Delete', 'bulk-actions-manager' )
+			);
 		}
 
 		if ( \in_array( $item->status, array( 'running', 'queued', 'paused' ), true ) ) {
@@ -484,6 +602,16 @@ class Jobs_List_Table extends List_Table_Base {
 	 */
 	protected function column_id( $item ) {
 		return (string) (int) $item->id;
+	}
+
+	/**
+	 * Action column with human-readable label.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_action_type( $item ) {
+		return esc_html( \BAM\Admin\Admin_UI::action_label( $item->action_type ) );
 	}
 
 	/**

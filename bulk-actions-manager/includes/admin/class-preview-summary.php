@@ -27,11 +27,11 @@ class Preview_Summary {
 		$aggregates = Filter_Compiler::get_aggregates( $payload, $total );
 
 		return array(
-			'total'                => $total,
-			'statuses'             => $aggregates['statuses'],
-			'categories'           => $aggregates['categories'],
-			'categories_limited'   => $aggregates['categories_limited'],
-			'post_type'            => sanitize_key( (string) ( $payload['post_type'][0] ?? 'post' ) ),
+			'total'              => $total,
+			'statuses'           => $aggregates['statuses'],
+			'categories'         => $aggregates['categories'],
+			'categories_limited' => $aggregates['categories_limited'],
+			'post_type'          => sanitize_key( (string) ( $payload['post_type'][0] ?? 'post' ) ),
 		);
 	}
 
@@ -46,27 +46,29 @@ class Preview_Summary {
 		?>
 		<div class="bam-results-summary">
 			<h3><?php esc_html_e( 'Results Summary', 'bulk-actions-manager' ); ?></h3>
-			<p>
-				<strong><?php echo esc_html( $type_label ); ?>:</strong>
-				<?php echo esc_html( number_format_i18n( (int) $summary['total'] ) ); ?>
-			</p>
-			<?php if ( ! empty( $summary['statuses'] ) ) : ?>
-				<p><strong><?php esc_html_e( 'Statuses:', 'bulk-actions-manager' ); ?></strong></p>
-				<ul class="bam-results-summary__list">
+			<div class="bam-results-summary__stats">
+				<div class="bam-results-summary__stat">
+					<span class="bam-results-summary__stat-label"><?php echo esc_html( $type_label ); ?></span>
+					<span class="bam-results-summary__stat-value"><?php echo esc_html( number_format_i18n( (int) $summary['total'] ) ); ?></span>
+				</div>
+				<?php if ( ! empty( $summary['statuses'] ) ) : ?>
 					<?php foreach ( $summary['statuses'] as $status => $count ) : ?>
 						<?php
 						$status_obj = get_post_status_object( $status );
 						$label      = $status_obj ? $status_obj->label : $status;
 						?>
-						<li><?php echo esc_html( $label ); ?>: <?php echo esc_html( number_format_i18n( (int) $count ) ); ?></li>
+						<div class="bam-results-summary__stat">
+							<span class="bam-results-summary__stat-label"><?php echo esc_html( $label ); ?></span>
+							<span class="bam-results-summary__stat-value"><?php echo esc_html( number_format_i18n( (int) $count ) ); ?></span>
+						</div>
 					<?php endforeach; ?>
-				</ul>
-			<?php endif; ?>
+				<?php endif; ?>
+			</div>
 			<?php if ( ! empty( $summary['categories'] ) ) : ?>
-				<p><strong><?php esc_html_e( 'Categories:', 'bulk-actions-manager' ); ?></strong></p>
+				<p class="bam-results-summary__subheading"><strong><?php esc_html_e( 'Top Categories', 'bulk-actions-manager' ); ?></strong></p>
 				<ul class="bam-results-summary__list">
 					<?php foreach ( $summary['categories'] as $name => $count ) : ?>
-						<li><?php echo esc_html( $name ); ?>: <?php echo esc_html( number_format_i18n( (int) $count ) ); ?></li>
+						<li><span class="bam-results-summary__cat-name"><?php echo esc_html( $name ); ?></span> - <strong><?php echo esc_html( number_format_i18n( (int) $count ) ); ?></strong></li>
 					<?php endforeach; ?>
 				</ul>
 			<?php elseif ( ! empty( $summary['categories_limited'] ) ) : ?>

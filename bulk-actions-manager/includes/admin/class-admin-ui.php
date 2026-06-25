@@ -7,6 +7,8 @@
 
 namespace BAM\Admin;
 
+use BAM\Actions\Action_Registry;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -85,6 +87,104 @@ class Admin_UI {
 		}
 
 		return '<span class="description">' . esc_html__( 'No', 'bulk-actions-manager' ) . '</span>';
+	}
+
+	/**
+	 * Human-readable label for an action type slug.
+	 *
+	 * @param string $action_type Action ID (e.g. delete.trash).
+	 * @return string
+	 */
+	public static function action_label( $action_type ) {
+		$action_type = (string) $action_type;
+		if ( '' === $action_type ) {
+			return '';
+		}
+
+		static $registry = null;
+		if ( null === $registry ) {
+			$registry = new Action_Registry();
+		}
+
+		$action = $registry->get( $action_type );
+		return $action ? $action->get_label() : $action_type;
+	}
+
+	/**
+	 * Render metadata badges for a tool row.
+	 *
+	 * @param array<string, mixed> $tool Tool definition from Page_Tools::get_tools().
+	 * @return string
+	 */
+	public static function tool_meta_badges( array $tool ) {
+		$badges = array();
+
+		$kind_labels = array(
+			'cleanup' => __( 'Cleanup', 'bulk-actions-manager' ),
+			'orphan'  => __( 'Orphan', 'bulk-actions-manager' ),
+			'export'  => __( 'Export', 'bulk-actions-manager' ),
+		);
+
+		if ( ! empty( $tool['kind'] ) && isset( $kind_labels[ $tool['kind'] ] ) ) {
+			$badges[] = array( 'label' => $kind_labels[ $tool['kind'] ], 'class' => '' );
+		}
+
+		if ( ! empty( $tool['destructive'] ) ) {
+			$badges[] = array(
+				'label' => __( 'Destructive', 'bulk-actions-manager' ),
+				'class' => 'bam-status-badge--destructive',
+			);
+		}
+
+		if ( ! empty( $tool['batched'] ) ) {
+			$badges[] = array(
+				'label' => __( 'Batched', 'bulk-actions-manager' ),
+				'class' => '',
+			);
+		}
+
+		if ( ! empty( $tool['logged'] ) ) {
+			$badges[] = array(
+				'label' => __( 'Logged', 'bulk-actions-manager' ),
+				'class' => '',
+			);
+		}
+
+		if ( ! empty( $tool['instant_download'] ) ) {
+			$badges[] = array(
+				'label' => __( 'Instant download', 'bulk-actions-manager' ),
+				'class' => 'bam-status-badge--completed',
+			);
+		}
+
+		if ( ! empty( $tool['destructive'] ) || ( isset( $tool['undo'] ) && ! $tool['undo'] && 'export' !== ( $tool['kind'] ?? '' ) ) ) {
+			if ( empty( $tool['instant_download'] ) ) {
+				$badges[] = array(
+					'label' => __( 'No undo', 'bulk-actions-manager' ),
+					'class' => '',
+				);
+			}
+		}
+
+		if ( empty( $badges ) ) {
+			return '';
+		}
+
+		$html = '<div class="bam-tool-meta">';
+		foreach ( $badges as $badge ) {
+			$class = 'bam-status-badge';
+			if ( ! empty( $badge['class'] ) ) {
+				$class .= ' ' . $badge['class'];
+			}
+			$html .= sprintf(
+				'<span class="%1$s">%2$s</span>',
+				esc_attr( $class ),
+				esc_html( $badge['label'] )
+			);
+		}
+		$html .= '</div>';
+
+		return $html;
 	}
 
 	/**

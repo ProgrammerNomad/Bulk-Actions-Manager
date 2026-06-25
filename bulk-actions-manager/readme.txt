@@ -8,7 +8,7 @@ Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Safely filter, preview, modify, export, schedule, and manage WordPress content at scale using batch processing, audit logs, and undo support.
+Safely filter, preview, update, export, schedule, and manage WordPress content in bulk using batch processing, audit logs, and undo support.
 
 == Description ==
 
@@ -27,8 +27,8 @@ Use it to update thousands of posts, clean up content, change authors, manage me
 * Audit logging for every job
 * Snapshot-based undo (supported actions)
 * Configurable batch processing
-* Live progress with pause, resume, and cancel
-* WordPress admin confirmation dialogs for destructive actions
+* Live progress for AJAX jobs, with pause, resume, and cancel controls
+* Clear warnings and confirmations for destructive actions
 
 = Content filters =
 
@@ -78,7 +78,14 @@ Jobs run in small batches (10-100 items per batch) to help avoid PHP timeouts, m
 
 = Scheduled jobs =
 
-Create recurring jobs under Jobs → Scheduled. Frequencies: hourly, daily, weekly, monthly.
+Create and edit recurring jobs from the New Job workflow, then manage them from the Jobs → Scheduled view.
+
+Supported frequencies include:
+
+* Hourly
+* Daily
+* Weekly
+* Monthly
 
 = Native WordPress experience =
 
@@ -108,7 +115,7 @@ Yes. Any public custom post type registered in WordPress can be filtered and pro
 
 = Can I preview changes before running a job? =
 
-Yes. The New Job screen shows a match count, results summary, and preview table on load. Use **Preview Job** or dry run mode before starting a real job.
+Yes. The New Job screen shows a match count, results summary, and preview table on load. Use the preview and dry run options on the New Job screen before starting a real job.
 
 = Can I undo bulk actions? =
 
@@ -120,7 +127,7 @@ Yes. Jobs process in batches. For large background jobs, ensure WP Cron runs rel
 
 = Does the plugin support large websites? =
 
-Yes. Filter resolution defaults to 100,000 matching IDs per filter. Adjust with the `bam_max_filter_results` filter. Jobs themselves have no fixed record cap.
+Yes. Bulk Actions Manager is designed to handle large content sets using batched processing and configurable limits. Advanced sites can further tune limits and behavior using plugin hooks and settings.
 
 = Does the plugin require Yoast SEO or Rank Math? =
 
@@ -128,15 +135,15 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 
 == Screenshots ==
 
-1. Dashboard overview
-2. New Job workflow
-3. Content filtering and preview
-4. Action selection with safety description
-5. Job execution and progress
-6. Jobs screen (runs and scheduled)
-7. Logs and undo
-8. Tools screen
-9. Settings screen
+1. Dashboard overview with job statistics and system health
+2. New Job guided workflow (filter, preview, action, execute)
+3. Content filtering, results summary, and preview table
+4. Action selection with safety and undo description panel
+5. Job execution with live progress and batch processing status
+6. Jobs screen: Runs tab with status badges and row actions
+7. Logs screen with affected counts, source labels, and undo actions
+8. Tools screen with cleanup and export utilities
+9. Settings screen for batch size, processing mode, and retention
 
 == Changelog ==
 
@@ -201,9 +208,13 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 
 = 1.0.0 =
 
-* Initial release: filters, preview, dry run, batch processing, jobs, logs, undo snapshots, scheduled jobs, export, and tools
+* Initial public release with core filters, preview, dry run, batch processing, jobs, logs, and the initial action framework
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+
+Production hardening release with a sequential background queue, safer scheduled job processing, editable queued and paused jobs, batched cleanup tools, improved logs, and a unified New Job workflow for jobs and schedules.
 
 = 1.2.2 =
 

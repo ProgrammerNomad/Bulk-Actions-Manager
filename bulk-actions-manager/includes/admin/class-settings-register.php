@@ -19,12 +19,14 @@ class Settings_Register {
 	const PAGE     = 'bam-settings';
 	const GROUP    = 'bam_settings_group';
 	const OPTION   = 'bam_settings';
+	const UNINSTALL_OPTION = 'bam_drop_data_on_uninstall';
 
 	/**
 	 * Register hooks.
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'register' ) );
+		add_action( 'admin_init', array( __CLASS__, 'register_uninstall' ) );
 	}
 
 	/**
@@ -116,6 +118,40 @@ class Settings_Register {
 			array( __CLASS__, 'field_max_errors' ),
 			self::PAGE,
 			'bam_logging'
+		);
+	}
+
+	/**
+	 * Register uninstall option (separate from bam_settings array).
+	 */
+	public static function register_uninstall() {
+		register_setting(
+			self::GROUP,
+			self::UNINSTALL_OPTION,
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => static function ( $value ) {
+					return ! empty( $value );
+				},
+				'default'           => false,
+			)
+		);
+
+		add_settings_section(
+			'bam_uninstall',
+			__( 'Data & Uninstall', 'bulk-actions-manager' ),
+			static function () {
+				echo '<p class="description">' . esc_html__( 'Control whether plugin data is removed when the plugin is deleted from WordPress.', 'bulk-actions-manager' ) . '</p>';
+			},
+			self::PAGE
+		);
+
+		add_settings_field(
+			'drop_data_on_uninstall',
+			__( 'Drop Plugin Data', 'bulk-actions-manager' ),
+			array( __CLASS__, 'field_drop_data_on_uninstall' ),
+			self::PAGE,
+			'bam_uninstall'
 		);
 	}
 
@@ -261,6 +297,20 @@ class Settings_Register {
 		$settings = self::values();
 		?>
 		<input type="number" name="<?php echo esc_attr( self::name( 'max_errors_before_pause' ) ); ?>" id="max_errors_before_pause" value="<?php echo esc_attr( (string) $settings['max_errors_before_pause'] ); ?>" min="1" max="100" class="small-text" />
+		<?php
+	}
+
+	/**
+	 * Drop data on uninstall field.
+	 */
+	public static function field_drop_data_on_uninstall() {
+		$checked = (bool) get_option( self::UNINSTALL_OPTION, false );
+		?>
+		<label>
+			<input type="checkbox" name="<?php echo esc_attr( self::UNINSTALL_OPTION ); ?>" value="1" <?php checked( $checked ); ?> />
+			<?php esc_html_e( 'Drop all plugin data on uninstall', 'bulk-actions-manager' ); ?>
+		</label>
+		<p class="description"><?php esc_html_e( 'When enabled, deleting the plugin removes database tables, logs, jobs, schedules, and plugin options.', 'bulk-actions-manager' ); ?></p>
 		<?php
 	}
 }

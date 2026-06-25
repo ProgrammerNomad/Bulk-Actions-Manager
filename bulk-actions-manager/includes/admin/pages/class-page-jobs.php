@@ -226,7 +226,7 @@ class Page_Jobs extends Page_Base {
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></th>
-					<td><?php echo esc_html( $job->action_type ); ?></td>
+					<td><?php echo esc_html( Admin_UI::action_label( $job->action_type ) ); ?></td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Mode', 'bulk-actions-manager' ); ?></th>

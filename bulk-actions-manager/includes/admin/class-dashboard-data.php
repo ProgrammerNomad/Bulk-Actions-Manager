@@ -30,7 +30,7 @@ class Dashboard_Data {
 		$counts = Job_Repository::count_by_status();
 
 		return array(
-			'recent_jobs'   => self::format_jobs( Job_Repository::list( array( 'limit' => 10 ) ) ),
+			'recent_jobs'   => self::format_jobs( Job_Repository::list( array( 'limit' => 5 ) ) ),
 			'running_jobs'  => self::format_jobs( Job_Repository::list_by_statuses( array( 'running', 'queued', 'paused' ), 8 ) ),
 			'undoable_jobs' => self::format_jobs( Job_Repository::list_undoable( 8 ) ),
 			'counts'        => array(

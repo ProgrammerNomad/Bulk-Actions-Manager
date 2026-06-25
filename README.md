@@ -1,6 +1,6 @@
 # Bulk Actions Manager
 
-Safely filter, preview, modify, export, schedule, and manage WordPress content at scale using batch processing, audit logs, and undo support.
+Safely filter, preview, update, export, schedule, and manage WordPress content in bulk using batch processing, audit logs, and undo support.
 
 ---
 
@@ -56,7 +56,7 @@ Features include:
 * Results summary (status and category breakdown)
 * Paginated preview table
 * Dry-run mode
-* Preview Job without making changes
+* Preview and dry run options on the New Job screen
 
 No changes are made until a job is started (unless dry run is enabled for simulation only).
 
@@ -115,7 +115,7 @@ Each action shows a description and safety level (undo supported, recoverable, o
 
 ## Batch Processing
 
-Bulk Actions Manager is built for sites with hundreds, thousands, or large filtered sets (default cap: 100,000 matching IDs per filter; configurable via `bam_max_filter_results`).
+Bulk Actions Manager is designed to handle large content sets using batched processing and configurable limits. Advanced sites can further tune limits and behavior using plugin hooks and settings.
 
 Operations run in configurable batches to reduce:
 
@@ -126,16 +126,15 @@ Operations run in configurable batches to reduce:
 
 ### AJAX Processing
 
-Recommended for most sites.
+Recommended for most sites when an admin screen stays open.
 
-* Live progress bar
-* Pause, resume, and cancel
+* Live progress bar with pause, resume, and cancel controls
 
 ### Background Queue
 
-Recommended for very large jobs.
+Recommended for very large jobs that can run without live browser progress.
 
-Uses WP Cron (`bam_process_queue`) for asynchronous batch processing.
+Uses WP Cron (`bam_process_queue`) for asynchronous, sequential batch processing.
 
 ---
 
@@ -159,7 +158,7 @@ Snapshot-based undo for supported actions. Snapshots are stored before changes a
 * Featured image file deletion
 * Attached media file deletion
 
-Destructive actions use WordPress admin confirmation dialogs before the job starts.
+Destructive actions show clear warnings and confirmations before the job starts.
 
 ---
 
@@ -178,7 +177,7 @@ Every job creates a log entry with:
 
 ## Scheduled Jobs
 
-Recurring jobs are managed under **Jobs → Scheduled** (`?page=bam-jobs&type=schedule`).
+Create and edit recurring jobs from the **New Job** workflow, then manage them from **Jobs → Scheduled**.
 
 Examples:
 
@@ -258,6 +257,27 @@ Bulk Actions Manager
 
 ---
 
+## Screenshots
+
+| | |
+|---|---|
+| **Dashboard** | **New Job workflow** |
+| ![Dashboard](bulk-actions-manager/screenshot-1.png) | ![New Job](bulk-actions-manager/screenshot-2.png) |
+| **Filter & preview** | **Action safety panel** |
+| ![Filter preview](bulk-actions-manager/screenshot-3.png) | ![Action selection](bulk-actions-manager/screenshot-4.png) |
+| **Live job progress** | **Jobs (Runs)** |
+| ![Job progress](bulk-actions-manager/screenshot-5.png) | ![Jobs runs](bulk-actions-manager/screenshot-6.png) |
+| **Logs & undo** | **Tools** |
+| ![Logs](bulk-actions-manager/screenshot-7.png) | ![Tools](bulk-actions-manager/screenshot-8.png) |
+
+**Settings**
+
+![Settings](bulk-actions-manager/screenshot-9.png)
+
+Save captures as `bulk-actions-manager/screenshot-*.png` - see [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) for the capture checklist.
+
+---
+
 ## Documentation
 
 Detailed documentation lives in the [`docs/`](docs/) directory.
@@ -268,6 +288,7 @@ Detailed documentation lives in the [`docs/`](docs/) directory.
 | [CONFIGURATION.md](docs/CONFIGURATION.md) | Settings, permissions, cron, scale limits, uninstall |
 | [CHANGELOG.md](docs/CHANGELOG.md) | Release history and upgrade notes |
 | [CONTRIBUTING.md](docs/CONTRIBUTING.md) | Contribution guidelines |
+| [SCREENSHOTS.md](docs/SCREENSHOTS.md) | Screenshot filenames, URLs, and capture checklist |
 
 WordPress.org plugin readme: [`bulk-actions-manager/readme.txt`](bulk-actions-manager/readme.txt)
 

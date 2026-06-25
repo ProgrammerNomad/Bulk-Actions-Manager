@@ -266,7 +266,13 @@ class Page_New_Job extends Page_Base {
 
 			<?php if ( ! $limited_edit && ! $is_edit_job ) : ?>
 			<hr />
-			<h3><?php esc_html_e( 'Save as Schedule', 'bulk-actions-manager' ); ?></h3>
+			<p>
+				<label>
+					<input type="checkbox" id="bam-save-as-schedule" value="1" aria-controls="bam-schedule-panel" aria-expanded="false" />
+					<?php esc_html_e( 'Save as recurring schedule', 'bulk-actions-manager' ); ?>
+				</label>
+			</p>
+			<div id="bam-schedule-panel" class="bam-hidden">
 			<p class="description"><?php esc_html_e( 'Instead of running now, save this as a recurring scheduled job.', 'bulk-actions-manager' ); ?></p>
 			<form method="post" id="bam-schedule-form">
 				<?php wp_nonce_field( 'bam_save_schedule' ); ?>
@@ -308,6 +314,7 @@ class Page_New_Job extends Page_Base {
 					<button type="submit" class="button button-primary" id="bam-save-schedule"><?php esc_html_e( 'Save Schedule', 'bulk-actions-manager' ); ?></button>
 				</p>
 			</form>
+			</div>
 			<?php elseif ( $is_edit_schedule && $existing_schedule ) : ?>
 			<hr />
 			<h3><?php esc_html_e( 'Schedule Settings', 'bulk-actions-manager' ); ?></h3>

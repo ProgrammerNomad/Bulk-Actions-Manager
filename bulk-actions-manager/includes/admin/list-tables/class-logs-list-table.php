@@ -7,6 +7,7 @@
 
 namespace BAM\Admin\List_Tables;
 
+use BAM\Admin\Admin_UI;
 use BAM\Database\Repositories\Log_Repository;
 use BAM\Utils\Capabilities;
 
@@ -39,7 +40,6 @@ class Logs_List_Table extends List_Table_Base {
 			'failed_count'   => __( 'Failed', 'bulk-actions-manager' ),
 			'created_at'     => __( 'Date', 'bulk-actions-manager' ),
 			'undo_status'    => __( 'Undo', 'bulk-actions-manager' ),
-			'undo'           => '',
 		);
 	}
 
@@ -240,6 +240,16 @@ class Logs_List_Table extends List_Table_Base {
 	}
 
 	/**
+	 * Action column with human-readable label.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_action_type( $item ) {
+		return esc_html( Admin_UI::action_label( $item->action_type ) );
+	}
+
+	/**
 	 * User column.
 	 *
 	 * @param object $item Item.
@@ -263,39 +273,28 @@ class Logs_List_Table extends List_Table_Base {
 			'expired'   => __( 'Expired', 'bulk-actions-manager' ),
 		);
 		$status = isset( $labels[ $item->undo_status ] ) ? $labels[ $item->undo_status ] : $item->undo_status;
-		if ( 'available' === $item->undo_status ) {
-			return '<span class="bam-status-badge bam-status-badge--completed">' . \esc_html( $status ) . '</span>';
-		}
-		return \esc_html( $status );
-	}
 
-	/**
-	 * Inline undo action column.
-	 *
-	 * @param object $item Item.
-	 * @return string
-	 */
-	protected function column_undo( $item ) {
 		if ( 'available' !== $item->undo_status ) {
-			return '-';
+			return esc_html( $status );
 		}
 
-		$undo_url = \wp_nonce_url(
-			\add_query_arg(
+		$undo_url = wp_nonce_url(
+			add_query_arg(
 				array(
 					'page'       => 'bam-logs',
 					'bam_action' => 'undo_log',
 					'log_id'     => (int) $item->id,
 				),
-				\admin_url( 'admin.php' )
+				admin_url( 'admin.php' )
 			),
 			'bam_undo_log_' . (int) $item->id
 		);
 
-		return \sprintf(
-			'<a class="button button-secondary" href="%s">%s</a>',
-			\esc_url( $undo_url ),
-			\esc_html__( 'Undo', 'bulk-actions-manager' )
+		return sprintf(
+			'<div class="bam-logs-undo-cell"><span class="bam-status-badge bam-status-badge--completed">%1$s</span> <a class="button button-secondary" href="%2$s">%3$s</a></div>',
+			esc_html( $status ),
+			esc_url( $undo_url ),
+			esc_html__( 'Undo', 'bulk-actions-manager' )
 		);
 	}
 
