@@ -9,6 +9,7 @@ namespace BAM;
 
 use BAM\Admin\Admin_Menu;
 use BAM\Admin\Admin_Assets;
+use BAM\Admin\Pages\Page_Jobs;
 use BAM\Admin\Export_Download;
 use BAM\Admin\Settings_Register;
 use BAM\REST\REST_Bootstrap;
@@ -73,6 +74,7 @@ final class Plugin {
 
 		if ( is_admin() ) {
 			Settings_Register::init();
+			Page_Jobs::init();
 			new Admin_Menu();
 			new Admin_Assets();
 			new Export_Download();

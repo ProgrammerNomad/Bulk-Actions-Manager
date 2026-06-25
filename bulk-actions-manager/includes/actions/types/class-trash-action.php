@@ -50,20 +50,56 @@ class Trash_Action extends Abstract_Action {
 
 	/** @inheritDoc */
 	public function execute( $object_id, array $payload, $dry_run ) {
-		if ( ! $this->get_post( $object_id ) ) {
-			return new Action_Result( false, __( 'Post not found.', 'bulk-actions-manager' ) );
+		$post = $this->get_post( $object_id );
+		if ( ! $post ) {
+			return $this->post_not_found_result( $object_id );
 		}
+
+		if ( 'trash' === $post->post_status ) {
+			return Action_Result::skipped(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'Post #%d is already in trash.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'already_trashed'
+			);
+		}
+
 		if ( $dry_run ) {
-			return new Action_Result( true );
+			return Action_Result::success();
 		}
+
+		if ( ! current_user_can( 'delete_post', $object_id ) ) {
+			return Action_Result::failed(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'You do not have permission to trash post #%d.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'cannot_delete_post'
+			);
+		}
+
 		$result = wp_trash_post( $object_id );
-		return $result ? new Action_Result( true ) : new Action_Result( false, __( 'Failed to trash post.', 'bulk-actions-manager' ) );
+		if ( ! $result ) {
+			return Action_Result::failed(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'WordPress could not move post #%d to the Trash.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'wp_trash_failed'
+			);
+		}
+
+		return Action_Result::success( '', 'trashed' );
 	}
 
 	/** @inheritDoc */
 	public function undo( $object_id, array $snapshot ) {
 		unset( $snapshot );
 		$result = wp_untrash_post( $object_id );
-		return $result ? new Action_Result( true ) : new Action_Result( false, __( 'Failed to untrash post.', 'bulk-actions-manager' ) );
+		return $result ? Action_Result::success() : Action_Result::failed( __( 'Failed to untrash post.', 'bulk-actions-manager' ), 'wp_untrash_failed' );
 	}
 }

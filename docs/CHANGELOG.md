@@ -28,10 +28,17 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 - **`Job_Queue::has_active_work()`** and **`Job_Repository::get_running_job_id()`** - helpers used by the sequential queue and schedule anti-flood.
 - **`Job_Item_Repository::delete_for_job()`** - used when a queued job's filter is fully replaced on edit.
 - **Background mode UX** - when processing mode is `background`, submitting a job from New Job no longer starts the live AJAX runner. A notice with a direct link to the job detail is shown instead.
+- **Jobs admin early action handling** - single-job and bulk actions run on `admin_init` before headers are sent, fixing blank pages after Resume, Pause, Cancel, and bulk actions.
+- **Reason-aware job outcomes** - supported actions (trash, permanent delete, status, author, featured image remove) return success, skipped, or failed with specific per-item messages.
+- **Skipped vs Errors on job and log detail** - job progress and log detail pages show separate Errors (real failures) and Skipped (already in desired state) lists.
+- **Per-batch auto-pause** - max errors setting applies to failures in the current batch only; set to `0` to disable auto-pause. Resume no longer instantly re-pauses due to historical failure counts.
+- **Sidebar menu title** - admin menu shows **Bulk Actions** (page title remains Bulk Actions Manager).
 
 ### Changed
 
-- `Schedule_Runner::run_due()` now processes a single due schedule per tick (was: all due schedules).
+- `Job_Manager::resume()` clears stale `error_message` when resuming a paused job.
+- Job detail live UI syncs status badge, controls, and last-error row from REST/batch responses.
+- Bulk action redirects land on the appropriate status tab (Running, Paused, Cancelled).
 - Jobs page schedule "Add Schedule" button now links to New Job instead of an on-page form. Schedule row "Edit" links to `?page=bam-new-job&schedule_id=`.
 - `Jobs_List_Table::column_name_schedule()` "Edit" link updated to New Job.
 - `Job_Manager::resume()` no longer immediately fires a batch - the cron queue picks it up on the next tick (avoids double-processing on manual resume from the REST API).

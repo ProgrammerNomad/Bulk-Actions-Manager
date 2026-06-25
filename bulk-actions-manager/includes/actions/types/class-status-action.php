@@ -86,11 +86,25 @@ class Status_Action extends Abstract_Action {
 	public function execute( $object_id, array $payload, $dry_run ) {
 		$post = $this->get_post( $object_id );
 		if ( ! $post ) {
-			return new Action_Result( false, __( 'Post not found.', 'bulk-actions-manager' ) );
+			return $this->post_not_found_result( $object_id );
 		}
+
+		if ( $this->status === $post->post_status ) {
+			return Action_Result::skipped(
+				sprintf(
+					/* translators: 1: post ID, 2: status slug */
+					__( 'Post #%1$d is already %2$s.', 'bulk-actions-manager' ),
+					(int) $object_id,
+					$this->status
+				),
+				'already_target_status'
+			);
+		}
+
 		if ( $dry_run ) {
-			return new Action_Result( true );
+			return Action_Result::success();
 		}
+
 		$result = wp_update_post(
 			array(
 				'ID'          => $object_id,
@@ -99,15 +113,15 @@ class Status_Action extends Abstract_Action {
 			true
 		);
 		if ( is_wp_error( $result ) ) {
-			return new Action_Result( false, $result->get_error_message() );
+			return Action_Result::failed( $result->get_error_message(), 'wp_update_failed' );
 		}
-		return new Action_Result( true );
+		return Action_Result::success( '', 'status_changed' );
 	}
 
 	/** @inheritDoc */
 	public function undo( $object_id, array $snapshot ) {
 		if ( empty( $snapshot['post_status'] ) ) {
-			return new Action_Result( false, __( 'Invalid snapshot.', 'bulk-actions-manager' ) );
+			return Action_Result::failed( __( 'Invalid snapshot.', 'bulk-actions-manager' ), 'invalid_snapshot' );
 		}
 		$result = wp_update_post(
 			array(
@@ -117,8 +131,8 @@ class Status_Action extends Abstract_Action {
 			true
 		);
 		if ( is_wp_error( $result ) ) {
-			return new Action_Result( false, $result->get_error_message() );
+			return Action_Result::failed( $result->get_error_message(), 'wp_update_failed' );
 		}
-		return new Action_Result( true );
+		return Action_Result::success();
 	}
 }

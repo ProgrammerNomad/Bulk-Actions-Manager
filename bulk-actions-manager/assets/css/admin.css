@@ -123,6 +123,29 @@
 	height: 22px;
 }
 
+.bam-job-errors-list {
+	margin-top: 12px;
+	padding: 8px 12px;
+	border-left: 4px solid #d63638;
+	background: #fcf0f1;
+}
+
+.bam-job-errors-list ul,
+.bam-job-skipped-list ul {
+	margin: 0.5em 0 0 1.2em;
+}
+
+.bam-job-skipped-list {
+	margin-top: 12px;
+	padding: 8px 12px;
+	border-left: 4px solid #c3c4c7;
+	background: #f6f7f7;
+}
+
+.bam-item-list-heading {
+	margin: 0 0 4px;
+}
+
 /* Status badges - admin neutrals + theme accent only. */
 .bam-status-badge {
 	display: inline-block;

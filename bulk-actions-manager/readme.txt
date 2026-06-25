@@ -162,6 +162,11 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 * Export tools (export_jobs, export_logs) now trigger real browser JSON file downloads
 * Tool actions appear in the Logs page with Source column distinguishing Job vs Tool entries
 * Logs list table adds Source, Failed, and improved Job link columns
+* Jobs admin actions run on admin_init - fixes blank page after Resume, Pause, Cancel, and bulk actions
+* Reason-aware outcomes for trash, permanent delete, status, author, and featured image remove (success, skipped, failed with specific messages)
+* Job and log detail pages show separate Errors and Skipped item lists; skipped items do not count toward auto-pause
+* Per-batch auto-pause threshold (0 disables); resume no longer re-pauses due to historical failure counts
+* Admin sidebar menu title is now Bulk Actions
 
 = 1.2.2 =
 
@@ -214,7 +219,7 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 
 = 1.3.0 =
 
-Production hardening release with a sequential background queue, safer scheduled job processing, editable queued and paused jobs, batched cleanup tools, improved logs, and a unified New Job workflow for jobs and schedules.
+Production hardening release with sequential queue, safer schedules, reason-aware job outcomes (Errors vs Skipped), per-batch auto-pause, fixed Jobs redirects, and Bulk Actions sidebar menu.
 
 = 1.2.2 =
 

@@ -49,13 +49,38 @@ class Permanent_Delete_Action extends Abstract_Action {
 
 	/** @inheritDoc */
 	public function execute( $object_id, array $payload, $dry_run ) {
-		if ( ! $this->get_post( $object_id ) ) {
-			return new Action_Result( false, __( 'Post not found.', 'bulk-actions-manager' ) );
+		$post = $this->get_post( $object_id );
+		if ( ! $post ) {
+			return $this->post_not_found_result( $object_id );
 		}
+
 		if ( $dry_run ) {
-			return new Action_Result( true );
+			return Action_Result::success();
 		}
+
+		if ( ! current_user_can( 'delete_post', $object_id ) ) {
+			return Action_Result::failed(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'You do not have permission to delete post #%d.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'cannot_delete_post'
+			);
+		}
+
 		$result = wp_delete_post( $object_id, true );
-		return $result ? new Action_Result( true ) : new Action_Result( false, __( 'Failed to delete post.', 'bulk-actions-manager' ) );
+		if ( ! $result ) {
+			return Action_Result::failed(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'WordPress could not permanently delete post #%d.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'wp_delete_failed'
+			);
+		}
+
+		return Action_Result::success( '', 'deleted' );
 	}
 }

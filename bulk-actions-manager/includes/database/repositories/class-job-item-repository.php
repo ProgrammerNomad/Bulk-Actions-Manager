@@ -202,4 +202,25 @@ class Job_Item_Repository {
 		global $wpdb;
 		return false !== $wpdb->delete( self::table(), array( 'job_id' => $job_id ), array( '%d' ) );
 	}
+
+	/**
+	 * List job items by status for audit/detail views.
+	 *
+	 * @param int    $job_id Job ID.
+	 * @param string $status Item status slug.
+	 * @param int    $limit  Max rows.
+	 * @return array<int, object>
+	 */
+	public static function list_by_status( $job_id, $status, $limit = 50 ) {
+		global $wpdb;
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM ' . self::table() . ' WHERE job_id = %d AND status = %s ORDER BY id ASC LIMIT %d',
+				(int) $job_id,
+				$status,
+				(int) $limit
+			)
+		);
+	}
 }

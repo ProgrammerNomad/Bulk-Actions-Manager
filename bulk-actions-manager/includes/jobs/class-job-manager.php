@@ -162,7 +162,51 @@ class Job_Manager {
 		if ( ! $job || 'paused' !== $job->status ) {
 			return new \WP_Error( 'bam_cannot_resume', __( 'Job cannot be resumed.', 'bulk-actions-manager' ) );
 		}
-		Job_Repository::update( $job_id, array( 'status' => 'running' ) );
+		Job_Repository::update(
+			$job_id,
+			array(
+				'status'        => 'running',
+				'error_message' => '',
+			)
+		);
+
+		if ( 'background' === $job->processing_mode ) {
+			Job_Queue::mark_for_processing( $job_id );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether a job status allows permanent removal from the jobs list.
+	 *
+	 * @param string $status Job status.
+	 * @return bool
+	 */
+	public static function is_terminal_status( $status ) {
+		return in_array( $status, array( 'completed', 'failed', 'cancelled' ), true );
+	}
+
+	/**
+	 * Delete a terminal job and its item rows.
+	 *
+	 * @param int $job_id Job ID.
+	 * @return true|\WP_Error
+	 */
+	public function delete_job( $job_id ) {
+		$job = Job_Repository::find( $job_id );
+		if ( ! $job ) {
+			return new \WP_Error( 'bam_job_not_found', __( 'Job not found.', 'bulk-actions-manager' ) );
+		}
+
+		if ( ! self::is_terminal_status( $job->status ) ) {
+			return new \WP_Error( 'bam_cannot_delete', __( 'Only completed, failed, or cancelled jobs can be deleted.', 'bulk-actions-manager' ) );
+		}
+
+		Job_Queue::unmark( $job_id );
+		Job_Item_Repository::delete_for_job( $job_id );
+		Job_Repository::delete( $job_id );
+
 		return true;
 	}
 

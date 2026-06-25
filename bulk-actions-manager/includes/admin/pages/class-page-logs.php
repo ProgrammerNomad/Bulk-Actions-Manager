@@ -7,7 +7,9 @@
 
 namespace BAM\Admin\Pages;
 
+use BAM\Admin\Admin_UI;
 use BAM\Admin\List_Tables\Logs_List_Table;
+use BAM\Database\Repositories\Job_Item_Repository;
 use BAM\Database\Repositories\Log_Repository;
 use BAM\Undo\Undo_Manager;
 use BAM\Utils\Capabilities;
@@ -136,7 +138,7 @@ class Page_Logs extends Page_Base {
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Action', 'bulk-actions-manager' ); ?></th>
-					<td><?php echo esc_html( $log->action_type ); ?></td>
+					<td><?php echo esc_html( Admin_UI::action_label( $log->action_type ) ); ?></td>
 				</tr>
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Affected Records', 'bulk-actions-manager' ); ?></th>
@@ -164,7 +166,47 @@ class Page_Logs extends Page_Base {
 				</a>
 			</p>
 		<?php endif; ?>
+
+		<?php
+		if ( ! empty( $log->job_id ) ) {
+			self::render_job_item_section(
+				Job_Item_Repository::list_by_status( (int) $log->job_id, 'failed', 50 ),
+				'bam-job-errors-list',
+				__( 'Errors', 'bulk-actions-manager' )
+			);
+			self::render_job_item_section(
+				Job_Item_Repository::list_by_status( (int) $log->job_id, 'skipped', 50 ),
+				'bam-job-skipped-list',
+				__( 'Skipped', 'bulk-actions-manager' )
+			);
+		}
+		?>
 		<?php
 		self::footer();
+	}
+
+	/**
+	 * Render a list of job item rows for log detail.
+	 *
+	 * @param array<int, object> $items Job item rows.
+	 * @param string             $class Wrapper CSS class.
+	 * @param string             $title Section title.
+	 */
+	private static function render_job_item_section( array $items, $class, $title ) {
+		if ( empty( $items ) ) {
+			return;
+		}
+
+		echo '<div class="' . esc_attr( $class ) . '">';
+		echo '<p class="bam-item-list-heading"><strong>' . esc_html( $title ) . '</strong></p>';
+		echo '<ul>';
+		foreach ( $items as $item ) {
+			printf(
+				'<li>#%d: %s</li>',
+				(int) $item->object_id,
+				esc_html( $item->error_message ?: '' )
+			);
+		}
+		echo '</ul></div>';
 	}
 }

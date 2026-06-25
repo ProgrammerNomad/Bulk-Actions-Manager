@@ -173,7 +173,7 @@ class Settings_Register {
 			'snapshot_retention_days'     => absint( $input['snapshot_retention_days'] ?? 30 ),
 			'enable_logs'                 => ! empty( $input['enable_logs'] ),
 			'log_retention_days'          => absint( $input['log_retention_days'] ?? 90 ),
-			'max_errors_before_pause'     => absint( $input['max_errors_before_pause'] ?? 10 ),
+			'max_errors_before_pause'     => min( 1000, absint( $input['max_errors_before_pause'] ?? 10 ) ),
 			'require_confirm_destructive' => true,
 		);
 
@@ -296,7 +296,8 @@ class Settings_Register {
 	public static function field_max_errors() {
 		$settings = self::values();
 		?>
-		<input type="number" name="<?php echo esc_attr( self::name( 'max_errors_before_pause' ) ); ?>" id="max_errors_before_pause" value="<?php echo esc_attr( (string) $settings['max_errors_before_pause'] ); ?>" min="1" max="100" class="small-text" />
+		<input type="number" name="<?php echo esc_attr( self::name( 'max_errors_before_pause' ) ); ?>" id="max_errors_before_pause" value="<?php echo esc_attr( (string) $settings['max_errors_before_pause'] ); ?>" min="0" max="1000" class="small-text" />
+		<p class="description"><?php esc_html_e( 'Automatically pause a job when a single processing batch reaches this many failures. Set to 0 to disable auto-pause.', 'bulk-actions-manager' ); ?></p>
 		<?php
 	}
 

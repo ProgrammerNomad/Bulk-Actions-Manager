@@ -173,6 +173,53 @@ class Jobs_List_Table extends List_Table_Base {
 	}
 
 	/**
+	 * Prime status view from the current request (for early bulk handling).
+	 */
+	public function prime_status_view_from_request() {
+		if ( $this->is_schedule_type() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$this->status_view = isset( $_REQUEST['status'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['status'] ) ) : '';
+	}
+
+	/**
+	 * Build redirect URL after a bulk action.
+	 *
+	 * @param string $action  Bulk action slug.
+	 * @param int    $updated Number of jobs updated.
+	 * @param int    $skipped Number of jobs skipped.
+	 * @return string
+	 */
+	private function get_bulk_redirect_url( $action, $updated, $skipped ) {
+		$args = array(
+			'page'            => 'bam-jobs',
+			'bam_bulk'        => 1,
+			'bam_bulk_action' => $action,
+			'bam_updated'     => $updated,
+			'bam_skipped'     => $skipped,
+		);
+
+		$status_map = array(
+			'resume' => 'running',
+			'pause'  => 'paused',
+			'cancel' => 'cancelled',
+		);
+
+		if ( isset( $status_map[ $action ] ) ) {
+			$args['status'] = $status_map[ $action ];
+		} elseif ( 'delete' === $action ) {
+			$terminal = array( 'completed', 'failed', 'cancelled' );
+			if ( in_array( $this->status_view, $terminal, true ) ) {
+				$args['status'] = $this->status_view;
+			}
+		}
+
+		return \add_query_arg( $args, \admin_url( 'admin.php' ) );
+	}
+
+	/**
 	 * Process bulk actions.
 	 */
 	public function process_bulk_action() {
@@ -221,19 +268,7 @@ class Jobs_List_Table extends List_Table_Base {
 			}
 		}
 
-		$redirect_args = array(
-			'page'            => 'bam-jobs',
-			'bam_bulk'        => 1,
-			'bam_bulk_action' => $action,
-			'bam_updated'     => $updated,
-			'bam_skipped'     => $skipped,
-		);
-
-		if ( $this->status_view ) {
-			$redirect_args['status'] = $this->status_view;
-		}
-
-		\wp_safe_redirect( \add_query_arg( $redirect_args, \admin_url( 'admin.php' ) ) );
+		\wp_safe_redirect( $this->get_bulk_redirect_url( $action, $updated, $skipped ) );
 		exit;
 	}
 
@@ -248,8 +283,6 @@ class Jobs_List_Table extends List_Table_Base {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->status_view = isset( $_REQUEST['status'] ) ? \sanitize_key( \wp_unslash( $_REQUEST['status'] ) ) : '';
-
-		$this->process_bulk_action();
 
 		$per_page     = $this->get_items_per_page_value();
 		$current_page = max( 1, $this->get_pagenum() );

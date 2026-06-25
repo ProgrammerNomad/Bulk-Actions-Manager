@@ -83,11 +83,24 @@ class Featured_Image_Action extends Abstract_Action {
 
 	/** @inheritDoc */
 	public function execute( $object_id, array $payload, $dry_run ) {
-		if ( ! $this->get_post( $object_id ) ) {
-			return new Action_Result( false, __( 'Post not found.', 'bulk-actions-manager' ) );
+		$post = $this->get_post( $object_id );
+		if ( ! $post ) {
+			return $this->post_not_found_result( $object_id );
 		}
+
+		if ( 'remove' === $this->mode && ! get_post_thumbnail_id( $object_id ) ) {
+			return Action_Result::skipped(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'Post #%d has no featured image.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'no_thumbnail'
+			);
+		}
+
 		if ( $dry_run ) {
-			return new Action_Result( true );
+			return Action_Result::success();
 		}
 
 		switch ( $this->mode ) {
@@ -109,7 +122,7 @@ class Featured_Image_Action extends Abstract_Action {
 				break;
 		}
 
-		return new Action_Result( true );
+		return Action_Result::success();
 	}
 
 	/** @inheritDoc */

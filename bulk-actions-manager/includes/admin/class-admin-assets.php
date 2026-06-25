@@ -67,6 +67,9 @@ class Admin_Assets {
 					'confirmDeleteTitle'   => __( 'Permanently delete items?', 'bulk-actions-manager' ),
 					'confirmDeleteMessage' => __( 'This will permanently delete the matching items. This action cannot be undone.', 'bulk-actions-manager' ),
 					'confirmDeleteOk'      => __( 'Delete permanently', 'bulk-actions-manager' ),
+					'confirmDeleteJobTitle'   => __( 'Delete selected jobs?', 'bulk-actions-manager' ),
+					'confirmDeleteJobMessage' => __( 'Remove the selected job records from the jobs list.', 'bulk-actions-manager' ),
+					'confirmDeleteJobDetail'  => __( 'Audit log entries are kept. This cannot be undone.', 'bulk-actions-manager' ),
 					'confirmCancelJob'   => __( 'Cancel this job?', 'bulk-actions-manager' ),
 					'confirmCancelJobMessage' => __( 'Processing will stop and the job will be marked as cancelled.', 'bulk-actions-manager' ),
 					'confirmRunTool'       => __( 'Run this tool?', 'bulk-actions-manager' ),
@@ -78,6 +81,14 @@ class Admin_Assets {
 					'completed'      => __( 'Completed', 'bulk-actions-manager' ),
 					'paused'         => __( 'Paused', 'bulk-actions-manager' ),
 					'cancelled'      => __( 'Cancelled', 'bulk-actions-manager' ),
+					'statusLabels'   => array(
+						'queued'    => __( 'Queued', 'bulk-actions-manager' ),
+						'running'   => __( 'Running', 'bulk-actions-manager' ),
+						'paused'    => __( 'Paused', 'bulk-actions-manager' ),
+						'completed' => __( 'Completed', 'bulk-actions-manager' ),
+						'failed'    => __( 'Failed', 'bulk-actions-manager' ),
+						'cancelled' => __( 'Cancelled', 'bulk-actions-manager' ),
+					),
 					'noValue'        => __( 'No value needed', 'bulk-actions-manager' ),
 					'downloadExport' => __( 'Download Export', 'bulk-actions-manager' ),
 					'undoSupported'  => __( 'Undo supported', 'bulk-actions-manager' ),
@@ -86,6 +97,9 @@ class Admin_Assets {
 					'noUndo'              => __( 'Undo not available', 'bulk-actions-manager' ),
 					'backgroundQueued'    => __( 'Job queued for background processing.', 'bulk-actions-manager' ),
 					'backgroundJobsLink'  => __( 'View job progress', 'bulk-actions-manager' ),
+					'handled'             => __( 'Processed', 'bulk-actions-manager' ),
+					'errorsHeading'       => __( 'Errors', 'bulk-actions-manager' ),
+					'skippedHeading'      => __( 'Skipped', 'bulk-actions-manager' ),
 				),
 			)
 		);
@@ -115,6 +129,16 @@ class Admin_Assets {
 				'bam-job-runner',
 				BAM_PLUGIN_URL . 'assets/js/job-runner.js',
 				array( 'bam-admin-common' ),
+				BAM_VERSION,
+				true
+			);
+		}
+
+		if ( 'bam-jobs' === $page && ! isset( $_GET['job_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_enqueue_script(
+				'bam-jobs-list',
+				BAM_PLUGIN_URL . 'assets/js/jobs-list.js',
+				array( 'bam-admin-common', 'jquery' ),
 				BAM_VERSION,
 				true
 			);

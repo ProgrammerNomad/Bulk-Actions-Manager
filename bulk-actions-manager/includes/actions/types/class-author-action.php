@@ -60,28 +60,42 @@ class Author_Action extends Abstract_Action {
 	public function execute( $object_id, array $payload, $dry_run ) {
 		$post = $this->get_post( $object_id );
 		if ( ! $post ) {
-			return new Action_Result( false, __( 'Post not found.', 'bulk-actions-manager' ) );
+			return $this->post_not_found_result( $object_id );
 		}
+
+		$author_id = absint( $payload['author_id'] );
+		if ( (int) $post->post_author === $author_id ) {
+			return Action_Result::skipped(
+				sprintf(
+					/* translators: %d: post ID */
+					__( 'Post #%d already has the selected author.', 'bulk-actions-manager' ),
+					(int) $object_id
+				),
+				'author_unchanged'
+			);
+		}
+
 		if ( $dry_run ) {
-			return new Action_Result( true );
+			return Action_Result::success();
 		}
+
 		$result = wp_update_post(
 			array(
 				'ID'          => $object_id,
-				'post_author' => absint( $payload['author_id'] ),
+				'post_author' => $author_id,
 			),
 			true
 		);
 		if ( is_wp_error( $result ) ) {
-			return new Action_Result( false, $result->get_error_message() );
+			return Action_Result::failed( $result->get_error_message(), 'wp_update_failed' );
 		}
-		return new Action_Result( true );
+		return Action_Result::success( '', 'author_changed' );
 	}
 
 	/** @inheritDoc */
 	public function undo( $object_id, array $snapshot ) {
 		if ( ! isset( $snapshot['post_author'] ) ) {
-			return new Action_Result( false, __( 'Invalid snapshot.', 'bulk-actions-manager' ) );
+			return Action_Result::failed( __( 'Invalid snapshot.', 'bulk-actions-manager' ), 'invalid_snapshot' );
 		}
 		$result = wp_update_post(
 			array(
@@ -91,8 +105,8 @@ class Author_Action extends Abstract_Action {
 			true
 		);
 		if ( is_wp_error( $result ) ) {
-			return new Action_Result( false, $result->get_error_message() );
+			return Action_Result::failed( $result->get_error_message(), 'wp_update_failed' );
 		}
-		return new Action_Result( true );
+		return Action_Result::success();
 	}
 }

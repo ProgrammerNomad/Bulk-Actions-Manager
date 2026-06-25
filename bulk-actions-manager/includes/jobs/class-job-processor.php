@@ -9,6 +9,7 @@ namespace BAM\Jobs;
 
 use BAM\Admin\Export_Download;
 use BAM\Actions\Action_Registry;
+use BAM\Actions\Action_Result;
 use BAM\Actions\Types\Export_Action;
 use BAM\Database\Repositories\Job_Repository;
 use BAM\Database\Repositories\Job_Item_Repository;
@@ -104,12 +105,14 @@ class Job_Processor {
 
 		if ( in_array( $job->status, array( 'paused', 'cancelled', 'completed', 'failed' ), true ) ) {
 			return array(
-				'status'    => $job->status,
-				'processed' => (int) $job->processed_items,
-				'total'     => (int) $job->total_items,
-				'percent'   => $job->total_items > 0 ? round( ( $job->processed_items / $job->total_items ) * 100, 1 ) : 100,
-				'errors'    => array(),
-				'message'   => __( 'Job is not running.', 'bulk-actions-manager' ),
+				'status'        => $job->status,
+				'processed'     => (int) $job->processed_items,
+				'total'         => (int) $job->total_items,
+				'percent'       => $job->total_items > 0 ? round( ( $job->processed_items / $job->total_items ) * 100, 1 ) : 100,
+				'errors'        => array(),
+				'skipped'       => array(),
+				'error_message' => $job->error_message ?: '',
+				'message'       => __( 'Job is not running.', 'bulk-actions-manager' ),
 			);
 		}
 
@@ -156,6 +159,7 @@ class Job_Processor {
 		$is_undo   = ! empty( $job->parent_job_id );
 		$batch     = Job_Item_Repository::claim_pending_batch( $job_id, (int) $job->batch_size );
 		$errors    = array();
+		$skipped   = array();
 		$processed = 0;
 		$failed    = 0;
 
@@ -189,11 +193,17 @@ class Job_Processor {
 			if ( $is_undo ) {
 				$snapshot_row = $this->snapshots->get_for_object( (int) $job->parent_job_id, $object_id );
 				if ( ! $snapshot_row ) {
-					Job_Item_Repository::update_status( $item->id, 'skipped', __( 'No snapshot.', 'bulk-actions-manager' ) );
+					$skip_msg = __( 'No snapshot.', 'bulk-actions-manager' );
+					Job_Item_Repository::update_status( $item->id, 'skipped', $skip_msg );
+					$processed++;
+					$skipped[] = array(
+						'object_id' => $object_id,
+						'message'   => $skip_msg,
+					);
 					continue;
 				}
 				$snapshot_data = Sanitizer::json_decode( $snapshot_row->snapshot_data );
-				$result = $action->undo( $object_id, $snapshot_data );
+				$result        = $action->undo( $object_id, $snapshot_data );
 			} else {
 				if ( ! $dry_run && Settings::get( 'enable_undo', true ) && $action->supports_undo() ) {
 					$this->snapshots->save( $job_id, $object_id, $job->action_type, $action->snapshot( $object_id, $payload ) );
@@ -201,23 +211,13 @@ class Job_Processor {
 				$result = $action->execute( $object_id, $payload, $dry_run );
 			}
 
-			if ( $result->success ) {
-				Job_Item_Repository::update_status( $item->id, 'done' );
-				$processed++;
+			$this->apply_item_result( $item, $object_id, $result, $processed, $failed, $errors, $skipped );
 
-				if ( 0 === strpos( $job->action_type, 'export.' ) ) {
-					if ( ! isset( self::$export_ids[ $job_id ] ) ) {
-						self::$export_ids[ $job_id ] = array();
-					}
-					self::$export_ids[ $job_id ][] = $object_id;
+			if ( Action_Result::STATUS_SUCCESS === $result->get_status() && 0 === strpos( $job->action_type, 'export.' ) ) {
+				if ( ! isset( self::$export_ids[ $job_id ] ) ) {
+					self::$export_ids[ $job_id ] = array();
 				}
-			} else {
-				Job_Item_Repository::update_status( $item->id, 'failed', $result->message );
-				$failed++;
-				$errors[] = array(
-					'object_id' => $object_id,
-					'message'   => $result->message,
-				);
+				self::$export_ids[ $job_id ][] = $object_id;
 			}
 		}
 
@@ -233,7 +233,7 @@ class Job_Processor {
 		);
 
 		$max_errors = (int) Settings::get( 'max_errors_before_pause', 10 );
-		if ( $new_failed >= $max_errors ) {
+		if ( $max_errors > 0 && $failed >= $max_errors ) {
 			Job_Repository::update(
 				$job_id,
 				array(
@@ -260,10 +260,51 @@ class Job_Processor {
 			'total'               => (int) $job->total_items,
 			'remaining'           => $remaining,
 			'percent'             => $percent,
-			'errors'              => $errors,
+			'errors'              => array_slice( $errors, 0, 20 ),
+			'skipped'             => array_slice( $skipped, 0, 20 ),
+			'error_message'       => $job->error_message ?: '',
 			'eta_seconds'         => Job_Estimator::estimate( $job ),
 			'export_download_url' => Export_Download::get_url( $job_id ),
 		);
+	}
+
+	/**
+	 * Apply a single item result to counters and message lists.
+	 *
+	 * @param object       $item      Job item row.
+	 * @param int          $object_id Object ID.
+	 * @param Action_Result $result   Action result.
+	 * @param int          $processed Processed counter (by ref).
+	 * @param int          $failed    Failed counter (by ref).
+	 * @param array        $errors    Errors list (by ref).
+	 * @param array        $skipped   Skipped list (by ref).
+	 */
+	private function apply_item_result( $item, $object_id, $result, &$processed, &$failed, array &$errors, array &$skipped ) {
+		switch ( $result->get_status() ) {
+			case Action_Result::STATUS_SUCCESS:
+				Job_Item_Repository::update_status( $item->id, 'done' );
+				$processed++;
+				break;
+
+			case Action_Result::STATUS_SKIPPED:
+				Job_Item_Repository::update_status( $item->id, 'skipped', $result->get_message() );
+				$processed++;
+				$skipped[] = array(
+					'object_id' => $object_id,
+					'message'   => $result->get_message(),
+				);
+				break;
+
+			case Action_Result::STATUS_FAILED:
+			default:
+				Job_Item_Repository::update_status( $item->id, 'failed', $result->get_message() );
+				$failed++;
+				$errors[] = array(
+					'object_id' => $object_id,
+					'message'   => $result->get_message(),
+				);
+				break;
+		}
 	}
 
 	/**

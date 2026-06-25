@@ -26,6 +26,23 @@ abstract class Abstract_Action implements Action_Interface {
 	}
 
 	/**
+	 * Standard failed result when a post row no longer exists.
+	 *
+	 * @param int $object_id Post ID.
+	 * @return Action_Result
+	 */
+	protected function post_not_found_result( $object_id ) {
+		return Action_Result::failed(
+			sprintf(
+				/* translators: %d: post ID */
+				__( 'Post #%1$d not found. It may have been deleted before this job ran.', 'bulk-actions-manager' ),
+				(int) $object_id
+			),
+			'post_not_found'
+		);
+	}
+
+	/**
 	 * Default payload validation.
 	 *
 	 * @param array<string, mixed> $payload Payload.

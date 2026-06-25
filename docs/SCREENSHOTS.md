@@ -108,7 +108,9 @@ Example curated jobs:
 - Export posts missing SEO title (Completed)
 - Find & Replace outdated name (Failed, optional)
 
-Hover a row before capture so **View / Edit / Clone** row actions are visible.
+Hover a row before capture so **View / Edit / Clone / Pause / Resume** row actions are visible (e.g. hover a **Paused** row for Resume, or a **Running** row for Pause).
+
+On the **Paused** filter, the bulk dropdown should show **Resume** and **Cancel** (not Delete). Use a mixed status set on the **All** or **Runs** tab for screenshot variety.
 
 ### Screenshot 7 (Logs)
 
