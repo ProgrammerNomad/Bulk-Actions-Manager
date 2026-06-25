@@ -17,6 +17,7 @@ use BAM\Actions\Types\Meta_Action;
 use BAM\Actions\Types\Featured_Image_Action;
 use BAM\Actions\Types\Content_Action;
 use BAM\Actions\Types\Export_Action;
+use BAM\Actions\Types\Tool_Action;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -81,6 +82,13 @@ class Action_Registry {
 		$this->register( new Export_Action( 'export.ids', 'ids', __( 'Export IDs', 'bulk-actions-manager' ) ) );
 		$this->register( new Export_Action( 'export.csv', 'csv', __( 'Export CSV', 'bulk-actions-manager' ) ) );
 		$this->register( new Export_Action( 'export.json', 'json', __( 'Export JSON', 'bulk-actions-manager' ) ) );
+
+		// Tool actions - used by tool-jobs created from the Tools page.
+		$this->register( new Tool_Action( 'empty_trash', __( 'Empty Trash', 'bulk-actions-manager' ) ) );
+		$this->register( new Tool_Action( 'remove_revisions', __( 'Remove Revisions', 'bulk-actions-manager' ) ) );
+		$this->register( new Tool_Action( 'remove_auto_drafts', __( 'Remove Auto Drafts', 'bulk-actions-manager' ) ) );
+		$this->register( new Tool_Action( 'orphan_attachments', __( 'Orphan Attachments', 'bulk-actions-manager' ) ) );
+		$this->register( new Tool_Action( 'orphan_metadata', __( 'Orphan Metadata', 'bulk-actions-manager' ) ) );
 	}
 
 	/**

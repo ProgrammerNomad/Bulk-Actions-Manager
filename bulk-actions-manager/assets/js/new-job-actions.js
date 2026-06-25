@@ -164,10 +164,25 @@
 					button.disabled = false;
 					return;
 				}
-				if (typeof bamJobRunner !== 'undefined') {
+
+				var isBackground = data.processing_mode === 'background';
+				if (!isBackground && typeof bamJobRunner !== 'undefined') {
 					var progressBox = document.getElementById('bam-job-progress');
 					if (progressBox) progressBox.classList.remove('bam-hidden');
 					bamJobRunner.start(result.job_id);
+				} else if (isBackground) {
+					// Show notice with a direct link to the job - do not start the live runner.
+					var jobUrl = (bamAdmin.jobsUrl || '') + '&job_id=' + result.job_id;
+					var backgroundNotice = document.getElementById('bam-background-notice');
+					if (backgroundNotice) {
+						var linkEl = backgroundNotice.querySelector('.bam-background-notice__link');
+						if (linkEl) linkEl.href = jobUrl;
+						backgroundNotice.classList.remove('bam-hidden');
+					} else {
+						bamAlert({
+							message: bamAdmin.i18n.backgroundQueued + ' <a href="' + jobUrl + '">' + (bamAdmin.i18n.backgroundJobsLink || 'View job') + '</a>'
+						});
+					}
 				}
 				button.disabled = false;
 			}).catch(function () {

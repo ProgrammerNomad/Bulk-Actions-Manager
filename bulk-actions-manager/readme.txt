@@ -4,7 +4,7 @@ Tags: bulk actions, bulk edit, content management, content cleanup, batch proces
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ Instead of making bulk changes blindly, it follows a safe workflow:
 
 Filter → Preview → Action → Process → Log → Undo
 
-Use it to update thousands of posts, clean up content, change authors, manage media, export records, or schedule recurring maintenance — with preview, logging, and undo where supported.
+Use it to update thousands of posts, clean up content, change authors, manage media, export records, or schedule recurring maintenance - with preview, logging, and undo where supported.
 
 = Built for safety =
 
@@ -70,11 +70,11 @@ Permanent deletes and media file deletions cannot be undone. Each action shows i
 
 = Batch processing =
 
-Jobs run in small batches (10–100 items per batch) to help avoid PHP timeouts, memory limits, and browser timeouts on shared hosting.
+Jobs run in small batches (10-100 items per batch) to help avoid PHP timeouts, memory limits, and browser timeouts on shared hosting.
 
-**AJAX mode** — live progress while an admin screen is open.
+**AJAX mode** - live progress while an admin screen is open.
 
-**Background mode** — WP Cron queue for large jobs.
+**Background mode** - WP Cron queue for large jobs.
 
 = Scheduled jobs =
 
@@ -139,6 +139,22 @@ No. SEO-related filters appear only when a supported SEO plugin is installed and
 9. Settings screen
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Sequential background queue: one active job processed at a time, eliminating concurrent conflicts
+* Background jobs now run as the original job owner via wp_set_current_user() - permanent delete and other capability-sensitive actions now work correctly in cron context
+* Schedule anti-flood: schedule runner skips a tick when the queue is busy and creates at most one job per tick when idle
+* Next-run timestamps use site local time instead of UTC
+* New Job is now the single editor for jobs and schedules - supports editing queued/paused jobs and editing/creating schedules from one page
+* Jobs page redesigned as operations dashboard - no more schedule builder form on that page; Edit Schedule links to New Job
+* Job editing with strict safety rules: filter, action, and payload locked once processing has started; only name, batch size, and mode are editable on partial jobs
+* Clone job support from job detail and list view (creates a new queued job with same configuration)
+* Job detail page shows mode, failed count, last error, and inline pause/resume/cancel controls
+* Destructive tools (empty trash, remove revisions, auto-drafts, orphan attachments, orphan metadata) now run as batched tool-jobs through the normal queue engine - no more timeouts, full audit trail and progress tracking
+* Export tools (export_jobs, export_logs) now trigger real browser JSON file downloads
+* Tool actions appear in the Logs page with Source column distinguishing Job vs Tool entries
+* Logs list table adds Source, Failed, and improved Job link columns
 
 = 1.2.2 =
 

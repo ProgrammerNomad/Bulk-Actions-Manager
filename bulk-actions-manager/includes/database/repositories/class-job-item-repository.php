@@ -191,4 +191,15 @@ class Job_Item_Repository {
 			)
 		);
 	}
+
+	/**
+	 * Delete all items for a job (used when re-building items on full edit).
+	 *
+	 * @param int $job_id Job ID.
+	 * @return bool
+	 */
+	public static function delete_for_job( $job_id ) {
+		global $wpdb;
+		return false !== $wpdb->delete( self::table(), array( 'job_id' => $job_id ), array( '%d' ) );
+	}
 }

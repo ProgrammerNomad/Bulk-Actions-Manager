@@ -72,6 +72,25 @@ class Logger {
 	}
 
 	/**
+	 * Create an immediate-tool audit log entry (export tools, etc.).
+	 *
+	 * @param string $tool_slug Tool slug.
+	 * @param int    $affected  Number of items affected.
+	 */
+	public static function create_for_tool( $tool_slug, $affected ) {
+		Log_Repository::create(
+			array(
+				'job_id'         => null,
+				'action_type'    => 'tool.' . $tool_slug,
+				'filter_payload' => array(),
+				'action_payload' => array( 'tool_slug' => $tool_slug ),
+				'affected_count' => $affected,
+				'undo_status'    => 'none',
+			)
+		);
+	}
+
+	/**
 	 * Delete old logs based on retention setting.
 	 */
 	public static function cleanup_old_logs() {

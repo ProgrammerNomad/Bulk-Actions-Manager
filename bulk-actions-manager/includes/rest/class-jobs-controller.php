@@ -76,6 +76,22 @@ class Jobs_Controller extends REST_Controller {
 				'callback'            => array( $this, 'cancel_job' ),
 			)
 		);
+
+		$this->register_route(
+			'/jobs/(?P<id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_job' ),
+			)
+		);
+
+		$this->register_route(
+			'/jobs/(?P<id>\d+)/clone',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'clone_job' ),
+			)
+		);
 	}
 
 	/**
@@ -190,5 +206,35 @@ class Jobs_Controller extends REST_Controller {
 			return $result;
 		}
 		return rest_ensure_response( array( 'success' => true ) );
+	}
+
+	/**
+	 * PUT /jobs/{id} - update an editable job with strict field rules.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function update_job( $request ) {
+		$manager = new Job_Manager();
+		$result  = $manager->update( absint( $request['id'] ), $request->get_json_params() ?: $request->get_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return rest_ensure_response( $result );
+	}
+
+	/**
+	 * POST /jobs/{id}/clone - clone a job config as a new queued job.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function clone_job( $request ) {
+		$manager = new Job_Manager();
+		$result  = $manager->clone_job( absint( $request['id'] ) );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+		return rest_ensure_response( $result );
 	}
 }

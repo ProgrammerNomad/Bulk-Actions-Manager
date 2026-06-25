@@ -16,7 +16,7 @@ Filter → Preview → Action → Process → Log → Undo
 
 Every operation can be reviewed before execution, processed in batches to avoid server timeouts, logged for auditing, and reversed when the action supports undo.
 
-**Current version:** 1.2.2 · **Requires:** WordPress 6.0+, PHP 7.4+
+**Current version:** 1.3.0 · **Requires:** WordPress 6.0+, PHP 7.4+
 
 ---
 

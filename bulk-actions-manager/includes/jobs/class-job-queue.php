@@ -7,10 +7,16 @@
 
 namespace BAM\Jobs;
 
+use BAM\Database\Repositories\Job_Repository;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class Job_Queue
+ *
+ * Sequential queue: one job is processed at a time. Each cron tick picks the
+ * oldest queued (or currently running) job and advances it through batches
+ * until it completes, pauses, fails, or hits the per-tick safety limit.
  */
 class Job_Queue {
 
@@ -19,7 +25,12 @@ class Job_Queue {
 	const LOCK_KEY = 'bam_queue_processing';
 
 	/**
-	 * Mark job for background processing.
+	 * Max batches to run in a single cron tick (avoids PHP timeout on shared hosting).
+	 */
+	const MAX_BATCHES_PER_TICK = 10;
+
+	/**
+	 * Mark job for background processing (append to FIFO queue).
 	 *
 	 * @param int $job_id Job ID.
 	 */
@@ -49,7 +60,7 @@ class Job_Queue {
 	}
 
 	/**
-	 * Get queued job IDs.
+	 * Get queued job IDs (FIFO order).
 	 *
 	 * @return array<int, int>
 	 */
@@ -59,7 +70,19 @@ class Job_Queue {
 	}
 
 	/**
-	 * Process all queued jobs (one batch each).
+	 * Whether any job is currently active (queued or running).
+	 *
+	 * @return bool
+	 */
+	public static function has_active_work() {
+		return Job_Repository::has_active_work();
+	}
+
+	/**
+	 * Process one job per cron tick (sequential queue).
+	 *
+	 * Finds the currently running job, or promotes the oldest queued job.
+	 * Runs batches on that single job until completion or the per-tick limit.
 	 */
 	public static function process_queue() {
 		if ( get_transient( self::LOCK_KEY ) ) {
@@ -69,19 +92,55 @@ class Job_Queue {
 		set_transient( self::LOCK_KEY, 1, 5 * MINUTE_IN_SECONDS );
 
 		try {
-			$processor = new Job_Processor();
-			foreach ( self::get_queue() as $job_id ) {
-				$result = $processor->process_batch( $job_id );
-				if ( is_wp_error( $result ) ) {
-					self::unmark( $job_id );
-					continue;
-				}
-				if ( in_array( $result['status'], array( 'completed', 'failed', 'cancelled' ), true ) ) {
-					self::unmark( $job_id );
-				}
-			}
+			self::process_one_job();
 		} finally {
 			delete_transient( self::LOCK_KEY );
 		}
+	}
+
+	/**
+	 * Find and advance a single active job.
+	 */
+	private static function process_one_job() {
+		$queue = self::get_queue();
+		if ( empty( $queue ) ) {
+			return;
+		}
+
+		// Prefer an already-running job so we don't skip over it.
+		$active_id = Job_Repository::get_running_job_id();
+		if ( ! $active_id ) {
+			// Promote oldest queued job.
+			$active_id = reset( $queue );
+		}
+
+		if ( ! $active_id || ! in_array( (int) $active_id, $queue, true ) ) {
+			return;
+		}
+
+		$processor    = new Job_Processor();
+		$batch_count  = 0;
+		$terminal     = array( 'completed', 'failed', 'cancelled' );
+
+		do {
+			$result = $processor->process_batch( $active_id );
+
+			if ( is_wp_error( $result ) ) {
+				self::unmark( $active_id );
+				return;
+			}
+
+			if ( in_array( $result['status'], $terminal, true ) ) {
+				self::unmark( $active_id );
+				return;
+			}
+
+			// Stop advancing if job paused (errors, manual pause via REST, etc.).
+			if ( 'paused' === $result['status'] ) {
+				return;
+			}
+
+			$batch_count++;
+		} while ( $batch_count < self::MAX_BATCHES_PER_TICK );
 	}
 }

@@ -16,10 +16,10 @@ For **Cannot load** admin errors, include the full URL from the browser address 
 ## Pull requests
 
 1. Fork the repository and create a feature branch from `main`.
-2. Keep changes focused — one fix or feature per PR when possible.
+2. Keep changes focused - one fix or feature per PR when possible.
 3. Match existing code style (WordPress coding standards, native admin UI patterns).
 4. Test on a local WordPress install (copy `bulk-actions-manager/` to `wp-content/plugins/`).
-5. Update [`CHANGELOG.md`](CHANGELOG.md) for user-visible changes.
+5. Update [`CHANGELOG.md`](/docs/CHANGELOG.md) for user-visible changes.
 6. Open a PR with a clear description and test notes.
 
 Please open an issue before large features or architectural changes so approach can be discussed first.

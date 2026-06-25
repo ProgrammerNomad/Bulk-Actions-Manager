@@ -117,6 +117,27 @@ class Job_Processor {
 			Job_Repository::update( $job_id, array( 'status' => 'running', 'started_at' => current_time( 'mysql' ) ) );
 		}
 
+		// Impersonate the job owner so capability checks pass in cron context.
+		$previous_user_id = get_current_user_id();
+		if ( ! empty( $job->user_id ) && (int) $job->user_id > 0 ) {
+			wp_set_current_user( (int) $job->user_id );
+		}
+
+		try {
+			return $this->process_batch_as_owner( $job_id, $job );
+		} finally {
+			wp_set_current_user( $previous_user_id );
+		}
+	}
+
+	/**
+	 * Inner batch processing with job owner as current user.
+	 *
+	 * @param int    $job_id Job ID.
+	 * @param object $job    Job row.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	private function process_batch_as_owner( $job_id, $job ) {
 		$action = $this->actions->get( $job->action_type );
 		if ( ! $action ) {
 			Job_Repository::update(
@@ -130,11 +151,11 @@ class Job_Processor {
 			return new \WP_Error( 'bam_unknown_action', __( 'Unknown action.', 'bulk-actions-manager' ) );
 		}
 
-		$payload  = Sanitizer::json_decode( $job->action_payload );
-		$dry_run  = (bool) $job->is_dry_run;
-		$is_undo  = ! empty( $job->parent_job_id );
-		$batch    = Job_Item_Repository::claim_pending_batch( $job_id, (int) $job->batch_size );
-		$errors   = array();
+		$payload   = Sanitizer::json_decode( $job->action_payload );
+		$dry_run   = (bool) $job->is_dry_run;
+		$is_undo   = ! empty( $job->parent_job_id );
+		$batch     = Job_Item_Repository::claim_pending_batch( $job_id, (int) $job->batch_size );
+		$errors    = array();
 		$processed = 0;
 		$failed    = 0;
 

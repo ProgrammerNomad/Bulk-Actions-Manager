@@ -58,6 +58,7 @@ class Admin_Assets {
 				'restNs'    => BAM_REST_NAMESPACE,
 				'nonce'     => wp_create_nonce( 'wp_rest' ),
 				'pluginUrl' => BAM_PLUGIN_URL,
+				'jobsUrl'   => admin_url( 'admin.php?page=bam-jobs' ),
 				'i18n'      => array(
 					'confirm'              => __( 'Are you sure?', 'bulk-actions-manager' ),
 					'confirmTitle'         => __( 'Please confirm', 'bulk-actions-manager' ),
@@ -82,7 +83,9 @@ class Admin_Assets {
 					'undoSupported'  => __( 'Undo supported', 'bulk-actions-manager' ),
 					'cannotUndo'     => __( 'Cannot be undone', 'bulk-actions-manager' ),
 					'recoverable'    => __( 'Recoverable', 'bulk-actions-manager' ),
-					'noUndo'         => __( 'Undo not available', 'bulk-actions-manager' ),
+					'noUndo'              => __( 'Undo not available', 'bulk-actions-manager' ),
+					'backgroundQueued'    => __( 'Job queued for background processing.', 'bulk-actions-manager' ),
+					'backgroundJobsLink'  => __( 'View job progress', 'bulk-actions-manager' ),
 				),
 			)
 		);

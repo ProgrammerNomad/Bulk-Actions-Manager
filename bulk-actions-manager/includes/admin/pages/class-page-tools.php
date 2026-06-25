@@ -113,16 +113,36 @@ class Page_Tools extends Page_Base {
 				btn.addEventListener('click', function() {
 					bamConfirm({
 						title: bamAdmin.i18n.confirmRunTool,
-						message: bamAdmin.i18n.confirmRunToolMessage
+						message: bamAdmin.i18n.confirmRunToolMessage,
+						destructive: true
 					}).then(function(confirmed) {
-						if ( !confirmed ) return;
+						if (!confirmed) return;
 						var tool = btn.dataset.tool;
 						var resultEl = document.getElementById('bam-tool-result-' + tool);
 						btn.disabled = true;
 						bamApi.post('tools/' + tool, {}).then(function(res) {
-							if ( resultEl ) resultEl.textContent = res.message || bamAdmin.i18n.completed;
+							// Export tools return downloadable data.
+							if (res.download && res.data) {
+								var blob = new Blob([res.data], { type: 'application/json' });
+								var url = URL.createObjectURL(blob);
+								var a = document.createElement('a');
+								a.href = url;
+								a.download = res.filename || (tool + '.json');
+								document.body.appendChild(a);
+								a.click();
+								setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 1000);
+							}
+							// Destructive tool-jobs return a job_id with a jobs_url.
+							if (res.job_id && res.jobs_url) {
+								if (resultEl) {
+									resultEl.innerHTML = (res.message || bamAdmin.i18n.completed) +
+										' <a href="' + res.jobs_url + '">' + (bamAdmin.i18n.backgroundJobsLink || 'View job') + '</a>';
+								}
+							} else {
+								if (resultEl) resultEl.textContent = res.message || bamAdmin.i18n.completed;
+							}
 						}).catch(function() {
-							if ( resultEl ) resultEl.textContent = bamAdmin.i18n.error;
+							if (resultEl) resultEl.textContent = bamAdmin.i18n.error;
 						}).finally(function() {
 							btn.disabled = false;
 						});

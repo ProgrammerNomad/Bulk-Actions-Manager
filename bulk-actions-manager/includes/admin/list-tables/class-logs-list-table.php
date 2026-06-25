@@ -31,13 +31,15 @@ class Logs_List_Table extends List_Table_Base {
 		return array(
 			'cb'             => '<input type="checkbox" />',
 			'id'             => __( 'Log ID', 'bulk-actions-manager' ),
-			'job_id'         => __( 'Job ID', 'bulk-actions-manager' ),
+			'source'         => __( 'Source', 'bulk-actions-manager' ),
+			'job_id'         => __( 'Job', 'bulk-actions-manager' ),
 			'user'           => __( 'User', 'bulk-actions-manager' ),
 			'action_type'    => __( 'Action', 'bulk-actions-manager' ),
 			'affected_count' => __( 'Affected', 'bulk-actions-manager' ),
+			'failed_count'   => __( 'Failed', 'bulk-actions-manager' ),
 			'created_at'     => __( 'Date', 'bulk-actions-manager' ),
-			'undo_status'    => __( 'Undo Status', 'bulk-actions-manager' ),
-			'undo'           => __( 'Undo', 'bulk-actions-manager' ),
+			'undo_status'    => __( 'Undo', 'bulk-actions-manager' ),
+			'undo'           => '',
 		);
 	}
 
@@ -192,12 +194,31 @@ class Logs_List_Table extends List_Table_Base {
 	}
 
 	/**
-	 * Job ID column.
+	 * Source column: Job vs Tool (immediate) vs Tool Job.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_source( $item ) {
+		if ( 0 === strpos( $item->action_type, 'tool.' ) ) {
+			if ( ! empty( $item->job_id ) ) {
+				return \esc_html__( 'Tool Job', 'bulk-actions-manager' );
+			}
+			return \esc_html__( 'Tool', 'bulk-actions-manager' );
+		}
+		return \esc_html__( 'Job', 'bulk-actions-manager' );
+	}
+
+	/**
+	 * Job ID column - links to job detail, or blank for immediate-tool entries.
 	 *
 	 * @param object $item Item.
 	 * @return string
 	 */
 	protected function column_job_id( $item ) {
+		if ( empty( $item->job_id ) ) {
+			return '-';
+		}
 		$url = \add_query_arg(
 			array(
 				'page'   => 'bam-jobs',
@@ -205,7 +226,17 @@ class Logs_List_Table extends List_Table_Base {
 			),
 			\admin_url( 'admin.php' )
 		);
-		return \sprintf( '<a href="%s">%d</a>', \esc_url( $url ), (int) $item->job_id );
+		return \sprintf( '<a href="%s">#%d</a>', \esc_url( $url ), (int) $item->job_id );
+	}
+
+	/**
+	 * Failed count column.
+	 *
+	 * @param object $item Item.
+	 * @return string
+	 */
+	protected function column_failed_count( $item ) {
+		return (string) (int) $item->failed_count;
 	}
 
 	/**

@@ -367,21 +367,41 @@ class Jobs_List_Table extends List_Table_Base {
 	}
 
 	/**
-	 * Job name column.
+	 * Job name column with View / Edit / Clone / Cancel row actions.
 	 *
 	 * @param object $item Item.
 	 * @return string
 	 */
 	private function column_name_job( $item ) {
-		$view_url = $this->page_url(
-			array(
-				'job_id' => (int) $item->id,
-			)
-		);
+		$view_url = $this->page_url( array( 'job_id' => (int) $item->id ) );
 
 		$actions = array(
 			'view' => \sprintf( '<a href="%s">%s</a>', \esc_url( $view_url ), \esc_html__( 'View', 'bulk-actions-manager' ) ),
 		);
+
+		// Edit: queued or paused jobs can be edited on the New Job page.
+		if ( \in_array( $item->status, array( 'queued', 'paused' ), true ) ) {
+			$edit_url = \add_query_arg(
+				array(
+					'page'   => 'bam-new-job',
+					'job_id' => (int) $item->id,
+				),
+				\admin_url( 'admin.php' )
+			);
+			$actions['edit'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $edit_url ), \esc_html__( 'Edit', 'bulk-actions-manager' ) );
+		}
+
+		// Clone: terminal jobs (completed/failed/cancelled) can be cloned.
+		if ( \in_array( $item->status, array( 'completed', 'failed', 'cancelled' ), true ) ) {
+			$clone_url = \add_query_arg(
+				array(
+					'page'         => 'bam-new-job',
+					'clone_job_id' => (int) $item->id,
+				),
+				\admin_url( 'admin.php' )
+			);
+			$actions['clone'] = \sprintf( '<a href="%s">%s</a>', \esc_url( $clone_url ), \esc_html__( 'Clone', 'bulk-actions-manager' ) );
+		}
 
 		if ( \in_array( $item->status, array( 'running', 'queued', 'paused' ), true ) ) {
 			$cancel_url = \wp_nonce_url(
@@ -406,16 +426,18 @@ class Jobs_List_Table extends List_Table_Base {
 
 	/**
 	 * Schedule name column.
+	 * Edit → New Job page with schedule_id prefilled.
 	 *
 	 * @param object $item Item.
 	 * @return string
 	 */
 	private function column_name_schedule( $item ) {
-		$edit_url = $this->page_url(
+		$edit_url = \add_query_arg(
 			array(
-				'type' => 'schedule',
-				'edit' => (int) $item->id,
-			)
+				'page'        => 'bam-new-job',
+				'schedule_id' => (int) $item->id,
+			),
+			\admin_url( 'admin.php' )
 		);
 
 		$delete_url = \wp_nonce_url(

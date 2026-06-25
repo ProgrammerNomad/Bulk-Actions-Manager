@@ -262,6 +262,39 @@ class Job_Repository {
 	}
 
 	/**
+	 * Return the ID of the currently running job, or 0 if none.
+	 *
+	 * @return int
+	 */
+	public static function get_running_job_id() {
+		global $wpdb;
+		$id = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT id FROM ' . self::table() . ' WHERE status = %s ORDER BY started_at ASC LIMIT 1',
+				'running'
+			)
+		);
+		return $id ? (int) $id : 0;
+	}
+
+	/**
+	 * Whether any job is active (queued or running).
+	 *
+	 * @return bool
+	 */
+	public static function has_active_work() {
+		global $wpdb;
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM ' . self::table() . ' WHERE status IN (%s, %s)',
+				'queued',
+				'running'
+			)
+		);
+		return $count > 0;
+	}
+
+	/**
 	 * List completed jobs with undo still available.
 	 *
 	 * @param int $limit Max rows.

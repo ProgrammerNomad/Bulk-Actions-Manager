@@ -7,6 +7,38 @@ Version numbers match the plugin header in `bulk-actions-manager/bulk-actions-ma
 
 ---
 
+## [1.3.0] - 2026-06-25 - Production Hardening Release
+
+### Added
+
+- **Sequential queue processing** - only one background job runs at a time. Each cron tick picks up the active or oldest queued job and advances it through up to 10 batches before stopping. No more concurrent conflicts.
+- **Job owner impersonation** - `Job_Processor` calls `wp_set_current_user()` with the original job owner before processing each batch. Permanent delete and other capability-sensitive operations now work correctly when triggered via cron.
+- **Schedule anti-flood** - `Schedule_Runner::run_due()` skips the tick entirely if the queue has active work, and creates at most one new job per tick when the queue is idle.
+- **Site-local next-run timestamps** - `calculate_next_run()` uses `current_time('timestamp')` instead of `gmdate()`, so daily/weekly schedules fire at the expected local wall-clock time.
+- **New Job as single workflow editor** - supports four URL modes: new job, edit schedule (`?schedule_id=`), edit queued/paused job (`?job_id=`), and clone prefill (`?clone_job_id=`). Schedule create/edit is now on this page.
+- **Save as Schedule on New Job** - the Execute step now includes a schedule form section with name, frequency, and active toggle, covering both create and edit cases.
+- **Job edit rules** - `PUT /jobs/{id}` enforces strict field restrictions: filter, action type, and action payload are locked once `processed_items > 0`; only name, batch size, and processing mode can change on partially processed jobs.
+- **Clone job** - `POST /jobs/{id}/clone` creates a new queued job with the same configuration but no progress or log copy. Accessible from job list and detail.
+- **Edit and Clone row actions** in the Runs list: Edit links to New Job for queued/paused jobs; Clone links to New Job prefill for terminal jobs.
+- **Improved job detail page** - shows mode, failed count, last error, created/finished timestamps, and inline pause/resume/cancel controls without needing the AJAX runner.
+- **Destructive tools become tool-jobs** - `empty_trash`, `remove_revisions`, `remove_auto_drafts`, `orphan_attachments`, and `orphan_metadata` now create `tool.*` jobs through the normal Job_Manager and queue engine. Full progress tracking, pause/resume/cancel, and audit logging. No more synchronous timeouts.
+- **Export tools trigger real browser downloads** - `export_jobs` and `export_logs` return JSON data with `download: true`; the Tools page JS creates a Blob URL and clicks a temporary link to initiate the download.
+- **Tool audit log entries** - immediate tool actions (exports) and tool-jobs both write to the logs table. Tool-jobs use `Logger::create_for_job()`; immediate tools use the new `Logger::create_for_tool()`.
+- **Logs page Source column** - distinguishes Job, Tool (immediate), and Tool Job entries. Failed count column added. Job ID column shows "-" for tool entries with no associated job.
+- **`Job_Queue::has_active_work()`** and **`Job_Repository::get_running_job_id()`** - helpers used by the sequential queue and schedule anti-flood.
+- **`Job_Item_Repository::delete_for_job()`** - used when a queued job's filter is fully replaced on edit.
+- **Background mode UX** - when processing mode is `background`, submitting a job from New Job no longer starts the live AJAX runner. A notice with a direct link to the job detail is shown instead.
+
+### Changed
+
+- `Schedule_Runner::run_due()` now processes a single due schedule per tick (was: all due schedules).
+- Jobs page schedule "Add Schedule" button now links to New Job instead of an on-page form. Schedule row "Edit" links to `?page=bam-new-job&schedule_id=`.
+- `Jobs_List_Table::column_name_schedule()` "Edit" link updated to New Job.
+- `Job_Manager::resume()` no longer immediately fires a batch - the cron queue picks it up on the next tick (avoids double-processing on manual resume from the REST API).
+- `Tool_Action` class registered in `Action_Registry` for all five destructive tool slugs. Tool actions do not appear in the New Job action selector (they are created programmatically).
+
+---
+
 ## [1.2.2] - 2026-06-16
 
 ### Fixed
